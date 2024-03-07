@@ -1,0 +1,32 @@
+---
+# 语言: None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
+Language: Cpp
+BasedOnStyle: LLVM
+
+UseTab: Never
+IndentWidth: 4
+TabWidth: 4
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+IndentCaseLabels: false
+ColumnLimit: 0
+AccessModifierOffset: -4
+ReferenceAlignment: Left
+PointerAlignment: Left
+SortIncludes: Never
+AlignTrailingComments: true
+FixNamespaceComments: true
+BreakConstructorInitializers: AfterColon
+AlignAfterOpenBracket: DontAlign
+#{}间插入空格
+Cpp11BracedListStyle: false
+#Lambda表达式
+LambdaBodyIndentation: Signature
+AllowShortLambdasOnASingleLine: Empty
+SpacesInLineCommentPrefix:
+  Minimum: 0
+  Maximum: 0
+NamespaceIndentation: Inner
+#强制结尾符号为回车换行
+LineEnding: CRLF
+...

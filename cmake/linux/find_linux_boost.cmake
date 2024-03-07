@@ -1,0 +1,16 @@
+
+# 添加boost
+find_package(Boost 1.51.0 MODULE COMPONENTS filesystem serialization system locale REQUIRED)
+if (Boost_FOUND)
+    link_directories(${Boost_LIBRARY_DIRS})
+    include_directories(${Boost_INCLUDE_DIRS})
+    message(STATUS "The Boost lib is found!")
+    message(STATUS "[cmake] Boost_LIBRARIES:             ${Boost_LIBRARIES}")
+    message(STATUS "[cmake] BOOST_INCLUDEDIR:            ${BOOST_INCLUDEDIR}")
+    message(STATUS "[cmake] Boost_INCLUDE_DIRS:          ${Boost_INCLUDE_DIRS}")
+    message(STATUS "[cmake] BOOST_LINK_STATIC:           ${BOOST_LINK_STATIC}")
+    message(STATUS "[cmake] Boost_LIBRARY_DIRS:          ${Boost_LIBRARY_DIRS}")
+    message(STATUS "[cmake] Boost_VERSION:               ${Boost_VERSION}")
+else ()
+    message(STATUS "The Boost lib is no found!")
+endif ()

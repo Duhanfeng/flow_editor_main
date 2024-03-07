@@ -1,0 +1,17 @@
+
+# 添加OpenCV
+find_package(OpenCV REQUIRED)
+if (OpenCV_FOUND)
+    message(STATUS "The OpenCV lib is found!")
+    message(STATUS "[cmake] OpenCV_LIBS:                     ${OpenCV_LIBS}")
+    message(STATUS "[cmake] OpenCV_INCLUDE_DIRS:             ${OpenCV_INCLUDE_DIRS}")
+    message(STATUS "[cmake] OpenCV_COMPUTE_CAPABILITIES:     ${OpenCV_COMPUTE_CAPABILITIES}")
+    message(STATUS "[cmake] OpenCV_ANDROID_NATIVE_API_LEVEL: ${OpenCV_ANDROID_NATIVE_API_LEVEL}")
+    message(STATUS "[cmake] OpenCV_VERSION:                  ${OpenCV_VERSION}")
+    message(STATUS "[cmake] OpenCV_SHARED:                   ${OpenCV_SHARED}")
+    message(STATUS "[cmake] OpenCV_INSTALL_PATH:             ${OpenCV_INSTALL_PATH}")
+    message(STATUS "[cmake] OpenCV_LIB_COMPONENTS:           ${OpenCV_LIB_COMPONENTS}")
+    message(STATUS "[cmake] OpenCV_USE_MANGLED_PATHS:        ${OpenCV_USE_MANGLED_PATHS}")
+else ()
+    message(STATUS "The OpenCV lib is no found!")
+endif ()

@@ -1,0 +1,49 @@
+﻿Checks: '-*,readability-identifier-naming,-google-default-arguments'
+CheckOptions:
+  # 名称空间
+  - { key: readability-identifier-naming.NamespaceCase,                   value: lower_case }
+  - { key: readability-identifier-naming.NamespaceIgnoredRegexp,          value: 'Ui' }
+  # 基础结构
+  - { key: readability-identifier-naming.FunctionCase,                    value: camelBack }
+  - { key: readability-identifier-naming.VariableCase,                    value: lower_case }
+  - { key: readability-identifier-naming.LocalVariableCase,               value: lower_case }
+  - { key: readability-identifier-naming.GlobalConstantCase,              value: CamelCase }
+  - { key: readability-identifier-naming.ConstantCase,                    value: lower_case }
+  - { key: readability-identifier-naming.ConstexprVariableCase,           value: lower_case }
+  - { key: readability-identifier-naming.ParameterCase,                   value: lower_case }
+  - { key: readability-identifier-naming.MacroDefinitionCase,             value: UPPER_CASE }
+  - { key: readability-identifier-naming.ParameterIgnoredRegexp,          value: '.*_' }
+  # 枚举
+  - { key: readability-identifier-naming.EnumCase,                        value: CamelCase }
+  - { key: readability-identifier-naming.EnumConstantCase,                value: Camel_Snake_Case }
+  # 类/结构
+  - { key: readability-identifier-naming.ClassCase,                       value: CamelCase }
+  - { key: readability-identifier-naming.StructCase,                      value: CamelCase }
+  # 类/结构成员函数
+  - { key: readability-identifier-naming.ClassMethodCase,                 value: camelBack }
+  - { key: readability-identifier-naming.StructMethodCase,                value: camelBack }
+  - { key: readability-identifier-naming.PrivateMethodCase,               value: camelBack }
+  - { key: readability-identifier-naming.ProtectedMethodCase,             value: camelBack }
+  - { key: readability-identifier-naming.PublicMethodCase,                value: camelBack }
+  - { key: readability-identifier-naming.ClassMethodIgnoredRegexp,        value: 'on_.*' }
+  - { key: readability-identifier-naming.PrivateMethodIgnoredRegexp,      value: 'on_.*' }
+  - { key: readability-identifier-naming.ProtectedMethodIgnoredRegexp,    value: 'on_.*' }
+  - { key: readability-identifier-naming.PublicMethodIgnoredRegexp,       value: 'on_.*' }
+  # 类成员(public/protected/private)
+  - { key: readability-identifier-naming.ClassMemberCase,                 value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberCase ,              value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberSuffix,             value: _ }
+  - { key: readability-identifier-naming.ProtectedMemberCase ,            value: lower_case }
+  - { key: readability-identifier-naming.ProtectedMemberSuffix,           value: _ }
+  - { key: readability-identifier-naming.PublicMemberCase ,               value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberIgnoredRegexp ,     value: 'ui' }
+  # 宏
+  - { key: readability-identifier-naming.MacroDefinitionCase,             value: UPPER_CASE } # 宏定义使用大写字母
+  - { key: readability-identifier-naming.MacroDefinitionIgnoredRegexp,    value: '.*__' } # 忽略以两个下划线结尾的宏
+  # 函数
+  - { key: readability-identifier-naming.FunctionCase,                    value: camelBack }
+  # 虚函数形参
+  - { key: readability-identifier-naming.VirtualMethodParameterCase,      value: lower_case }
+  # 忽略json文件的命名规则
+  - { key: readability-identifier-naming.FunctionIgnoredRegexp,           value: '.*_json*|SS_C_.*|to_string|to_char' }
+  - { key: readability-identifier-naming.ClassMethodIgnoredRegexp,        value: '.*_json*' }
