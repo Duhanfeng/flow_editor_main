@@ -16,7 +16,7 @@ public:
     NodeItem() = delete;
     NodeItem(const NodeData& data, const NodeSubGeometry& node_sub_geometry);
     void updateCache();
-    void initializePixmap();
+    void initializePixmap(double scale);
     static void paintTo(QPainter* painter, const NodeData& data, const NodeSubGeometry& node_sub_geometry);
 
     QRectF boundingRect() const override;
@@ -25,6 +25,7 @@ public:
 private:
     NodeData data_;
     NodeSubGeometry node_sub_geometry_;
+    NodeSubGeometry geometry_scale_;
     QPixmap pixmap_cache_;
     double scale_ = 1.0;
 };

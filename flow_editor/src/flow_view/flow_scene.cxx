@@ -3,8 +3,9 @@
 //
 
 #include <flow_editor/flow_view/flow_scene.hpp>
-#include <src/items/node_item.hpp>
 #include <src/node_sub_geometry/hor_geometry_compute.hpp>
+#include <src/items/node_item.hpp>
+#include <src/items/in_node_item.hpp>
 
 namespace fe
 {
@@ -39,6 +40,10 @@ void FlowScene::showNodes(const std::vector<NodeData>& nodes)
             if (node_data.node_type == NodeType::Node)
             {
                 addItem(new NodeItem(node_data, node_sub_geometry));
+            }
+            else if (node_data.node_type == NodeType::InNode)
+            {
+                addItem(new InNodeItem(node_data, node_sub_geometry));
             }
         }
     }

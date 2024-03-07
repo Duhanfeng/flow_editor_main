@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     //绘画对象
     std::vector<fe::NodeData> nodes;
     fe::NodeData data = {
-        fe::NodeType::Node,
+        fe::NodeType::InNode,
         u8"这是一段比较长的标题#1",
         QIcon(),
         { 100.0, 100.0 },
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     nodes.emplace_back(data2);
 
     //随机生成100个节点
-    const int count = 500;
+    const int count = 3;
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;

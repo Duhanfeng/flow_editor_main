@@ -6,6 +6,8 @@
 #include <flow_editor/flow_view/flow_scene.hpp>
 #include <QPainter>
 #include <QRectF>
+#include <QTimer>
+#include <QElapsedTimer>
 #include <QShowEvent>
 #include <QResizeEvent>
 #include <QCloseEvent>
@@ -14,12 +16,16 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QContextMenuEvent>
+#include <iostream>
 
 namespace fe
 {
 class FlowView::Data
 {
 public:
+    double fps = 0;
+    QElapsedTimer timer;
+
     double minimum_range = 0;
     double maximum_range = 0;
     QPointF click_pos;
@@ -43,6 +49,17 @@ fe::FlowView::FlowView(QWidget* parent) :
 
     int max_size = 32767;
     setSceneRect(-max_size, -max_size, (max_size * 2), (max_size * 2));
+
+    //启动测试
+    data_->timer.start();
+
+    //初始化定时器
+    auto* timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, [&]()
+        {
+            std::cout << "fps: " << data_->fps << "   time: " << 1000.0 / data_->fps << std::endl;
+        });
+    timer->start(1000);
 }
 FlowView::FlowView(FlowScene* scene, QWidget* parent) :
     FlowView(parent)
@@ -224,5 +241,25 @@ void FlowView::setupScale(double scale)
     setTransform(matrix, false);
 
     //Q_EMIT scaleChanged(scale);
+}
+void FlowView::paintEvent(QPaintEvent* event)
+{
+    QGraphicsView::paintEvent(event);
+
+    //测试代码,用于测试帧率
+    {
+        //FPS computation
+        static unsigned int fps_count = 0;
+        static const unsigned int max_count = 2;
+        if (++fps_count == max_count)
+        {
+            data_->fps = 1000.0 * max_count / static_cast<double>(data_->timer.restart());
+            if (std::isinf(data_->fps))
+            {
+                data_->fps = 0;
+            }
+            fps_count = 0;
+        }
+    }
 }
 } //namespace fe

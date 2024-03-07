@@ -16,13 +16,13 @@ class NodeSubGeometry
 public:
     QRectF bounding_rect;                   //边界区域
     QRectF node_rect;                       //节点区域
-    std::vector<QRectF> in_port_rect;       //输入端口位置
-    std::vector<QRectF> out_port_rect;      //输出端口位置
-    std::vector<QRectF> in_port_text_rect;  //输入端口文本位置
-    std::vector<QRectF> out_port_text_rect; //输出端口文本位置
     QRectF icon_rect;                       //图标位置区域
     QRectF caption_rect;                    //标题区域
     QRectF run_btn_rect;                    //运行标志区域
     QRectF message_box_rect;                //消息区域位置(若有)
+    std::vector<QRectF> in_port_rect;       //输入端口位置
+    std::vector<QRectF> in_port_text_rect;  //输入端口文本位置
+    std::vector<QRectF> out_port_rect;      //输出端口位置
+    std::vector<QRectF> out_port_text_rect; //输出端口文本位置
 };
 } //namespace fe
