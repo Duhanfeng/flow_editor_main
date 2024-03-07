@@ -6,12 +6,12 @@
 #include <src/items/node_item.hpp>
 #include <src/node_sub_geometry/hor_geometry_compute.hpp>
 
-namespace ss
+namespace fe
 {
 class FlowScene::Data
 {
 public:
-    NodeStyle node_style;
+    NodeStyle node_style = NodeStyle::Horizontal;
 };
 
 FlowScene::FlowScene(QObject* parent) :
@@ -58,4 +58,4 @@ void FlowScene::setNodeStyle(NodeStyle node_style)
 
     //更新样式
 }
-} //namespace ss
+} //namespace fe

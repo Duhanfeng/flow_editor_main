@@ -15,16 +15,17 @@
 #include <QMouseEvent>
 #include <QContextMenuEvent>
 
-namespace ss
+namespace fe
 {
 class FlowView::Data
 {
 public:
     double minimum_range = 0;
     double maximum_range = 0;
+    QPointF click_pos;
 };
 
-ss::FlowView::FlowView(QWidget* parent) :
+fe::FlowView::FlowView(QWidget* parent) :
     data_(new Data),
     QGraphicsView(parent)
 {
@@ -38,7 +39,7 @@ ss::FlowView::FlowView(QWidget* parent) :
     setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 
     data_->minimum_range = 0.15;
-    data_->maximum_range = 2;
+    data_->maximum_range = 5;
 
     int max_size = 32767;
     setSceneRect(-max_size, -max_size, (max_size * 2), (max_size * 2));
@@ -57,7 +58,7 @@ FlowView::~FlowView()
 void FlowView::drawBackground(QPainter* painter, const QRectF& r)
 {
     QGraphicsView::drawBackground(painter, r);
-    return;
+    //return;
     auto draw_grid = [&](double grid_step)
     {
         QRect window_rect = rect();
@@ -140,10 +141,23 @@ void FlowView::keyReleaseEvent(QKeyEvent* event)
 void FlowView::mousePressEvent(QMouseEvent* event)
 {
     QGraphicsView::mousePressEvent(event);
+    if (event->button() == Qt::LeftButton)
+    {
+        data_->click_pos = mapToScene(event->pos());
+    }
 }
 void FlowView::mouseMoveEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseMoveEvent(event);
+    if (scene()->mouseGrabberItem() == nullptr && event->buttons() == Qt::LeftButton)
+    {
+        //Make sure shift is not being pressed
+        if ((event->modifiers() & Qt::ShiftModifier) == 0)
+        {
+            QPointF difference = data_->click_pos - mapToScene(event->pos());
+            setSceneRect(sceneRect().translated(difference.x(), difference.y()));
+        }
+    }
 }
 void FlowView::mouseReleaseEvent(QMouseEvent* event)
 {
@@ -211,4 +225,4 @@ void FlowView::setupScale(double scale)
 
     //Q_EMIT scaleChanged(scale);
 }
-} //namespace ss
+} //namespace fe

@@ -8,7 +8,7 @@
 #include <flow_editor/data_def.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 
-namespace ss
+namespace fe
 {
 class NodeItem final : public QGraphicsItem
 {
@@ -16,6 +16,8 @@ public:
     NodeItem() = delete;
     NodeItem(const NodeData& data, const NodeSubGeometry& node_sub_geometry);
     void updateCache();
+    void initializePixmap();
+    static void paintTo(QPainter* painter, const NodeData& data, const NodeSubGeometry& node_sub_geometry);
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
@@ -23,7 +25,8 @@ public:
 private:
     NodeData data_;
     NodeSubGeometry node_sub_geometry_;
-    QRectF rect_cache_;
+    QPixmap pixmap_cache_;
+    double scale_ = 1.0;
 };
 
-} //namespace ss
+} //namespace fe

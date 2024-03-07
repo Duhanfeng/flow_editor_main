@@ -5,7 +5,7 @@
 #pragma once
 #include <QGraphicsView>
 
-namespace ss
+namespace fe
 {
 class FlowScene;
 class FlowView final : public QGraphicsView
@@ -40,4 +40,4 @@ private:
     Data* data_ = nullptr;
 };
 
-} //namespace ss
+} //namespace fe

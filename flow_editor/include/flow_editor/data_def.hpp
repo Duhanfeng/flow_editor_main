@@ -6,7 +6,7 @@
 #include <QColor>
 #include <QIcon>
 
-namespace ss
+namespace fe
 {
 class GraphicsViewStyle
 {
@@ -39,4 +39,4 @@ public:
     std::vector<PortData> out_port;
 };
 
-} //namespace ss
+} //namespace fe

@@ -6,7 +6,7 @@
 #include <QGraphicsScene>
 #include <flow_editor/data_def.hpp>
 
-namespace ss
+namespace fe
 {
 enum class NodeStyle
 {
@@ -32,4 +32,4 @@ private:
     Data* data_ = nullptr;
 };
 
-} //namespace ss
+} //namespace fe

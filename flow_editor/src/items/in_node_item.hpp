@@ -6,10 +6,10 @@
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 
-namespace ss
+namespace fe
 {
 class InNodeItem : public QGraphicsItem
 {
 };
 
-} //namespace ss
+} //namespace fe

@@ -6,12 +6,13 @@
 #include <flow_editor/data_def.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 
-namespace ss
+namespace fe
 {
 class HorGeometryCompute
 {
 public:
     static void compute(const NodeData& data, NodeSubGeometry& node_sub_geometry);
+
 };
 
-} //namespace ss
+} //namespace fe
