@@ -10,14 +10,14 @@
 
 namespace fe
 {
-class DynamicHorGeometry
+class DynamicHGeometry
 {
 public:
-    DynamicHorGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
+    DynamicHGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
     void update(double scale);
     void updateSimple(double scale);
     const NodeSubGeometry& geometry() const { return geometry_; }
-    const NodeSubGeometry& simpleGeometry() const { return simple_geometry_; }
+    const NodeSubGeometrySimple& simpleGeometry() const { return geometry_simple_; }
 
 private:
     //输入
@@ -25,11 +25,8 @@ private:
     std::shared_ptr<NodeStyle> node_style_;
     //输出
     NodeSubGeometry geometry_;
-    NodeSubGeometry simple_geometry_;
-
+    NodeSubGeometrySimple geometry_simple_;
     //缓存
-    bool is_inited_ = false;
-    QRect bast_size_;
     std::unique_ptr<QFontMetrics> font_metrics_;
     std::unique_ptr<QFontMetrics> bold_font_metrics_;
 };

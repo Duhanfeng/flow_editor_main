@@ -39,10 +39,10 @@ set(PROJECT_SOURCES
         src/items/out_node_item.hpp
         src/items/out_node_item.cxx
         src/node_sub_geometry/node_sub_geometry.hpp
-        src/node_sub_geometry/hor_geometry_compute.hpp
-        src/node_sub_geometry/hor_geometry_compute.cxx
-        src/node_sub_geometry/dynamic_hor_geometry.hpp
-        src/node_sub_geometry/dynamic_hor_geometry.cxx
+        src/node_sub_geometry/dynamic_h_geometry.hpp
+        src/node_sub_geometry/dynamic_h_geometry.cxx
+        src/node_sub_geometry/dynamic_h_port_geometry.hpp
+        src/node_sub_geometry/dynamic_h_port_geometry.cxx
 )
 # 添加rcc
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -107,13 +107,47 @@ int main(int argc, char** argv)
             { u8"输出端口4", QColor(200, 100, 100) } }
     };
 
+    fe::NodeData data5 = {
+        fe::NodeType::InNode,
+        u8"这是一段比较长的标题#1",
+        QIcon(),
+        { -800.0, 100.0 },
+        { { u8"输入端口1", QColor(100, 200, 100) },
+            { u8"输入端口2", QColor(100, 200, 100) },
+            { u8"输入端口3", QColor(100, 200, 100) } },
+        { { u8"输出端口1", QColor(200, 100, 100) },
+            { u8"输出端口2", QColor(200, 100, 100) },
+            { u8"输出端口3", QColor(200, 100, 100) },
+            { u8"输出端口4", QColor(200, 100, 100) } }
+    };
+    fe::NodeData data6 = {
+        fe::NodeType::InNode,
+        u8"节点2",
+        QIcon(),
+        { -800.0, 300.0 },
+        { { u8"输入端口1", QColor(100, 200, 100) },
+            { u8"输入端口2", QColor(100, 200, 100) },
+            { u8"输入端口2", QColor(100, 200, 100) },
+            { u8"输入端口2", QColor(100, 200, 100) },
+            { u8"输入端口2", QColor(100, 200, 100) },
+            { u8"输入端口2", QColor(100, 200, 100) },
+            { u8"输入端口2", QColor(100, 200, 100) },
+            { u8"this is long long port", QColor(100, 200, 100) } },
+        { { u8"输出端口1", QColor(200, 100, 100) },
+            { u8"输出端口2", QColor(200, 100, 100) },
+            { u8"输出端口3", QColor(200, 100, 100) },
+            { u8"输出端口4", QColor(200, 100, 100) } }
+    };
+
     nodes.emplace_back(data1);
     nodes.emplace_back(data2);
     nodes.emplace_back(data3);
     nodes.emplace_back(data4);
+    nodes.emplace_back(data5);
+    nodes.emplace_back(data6);
 
     //随机生成100个节点
-    const int count = 100;
+    const int count = 0;
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;

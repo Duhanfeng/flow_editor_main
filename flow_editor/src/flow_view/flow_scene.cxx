@@ -3,7 +3,6 @@
 //
 
 #include <flow_editor/flow_view/flow_scene.hpp>
-#include <src/node_sub_geometry/hor_geometry_compute.hpp>
 #include <src/items/node_item.hpp>
 #include <src/items/in_node_item.hpp>
 #include <src/items/out_node_item.hpp>

@@ -2,7 +2,7 @@
 // Created by cxc on 2024/3/8.
 //
 
-#include "dynamic_hor_geometry.hpp"
+#include "dynamic_h_geometry.hpp"
 
 namespace fe
 {
@@ -25,7 +25,7 @@ inline double textWidth(QFontMetrics* font_metrics, const QString& str)
 #endif
 }
 
-DynamicHorGeometry::DynamicHorGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style) :
+DynamicHGeometry::DynamicHGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style) :
     data_(data), node_style_(node_style)
 {
     QFont font = node_style_->font;
@@ -52,11 +52,9 @@ DynamicHorGeometry::DynamicHorGeometry(const NodeData& data, std::shared_ptr<Nod
         geometry_.out_port_text[i] = QStaticText(data_.out_port[i].port_name);
     }
 
-    simple_geometry_.in_port_rect.resize(1);
-    simple_geometry_.out_port_rect.resize(1);
-    simple_geometry_.node_name = QStaticText(data.node_name);
+    geometry_simple_.node_name = QStaticText(data.node_name);
 }
-void DynamicHorGeometry::update(double scale)
+void DynamicHGeometry::update(double scale)
 {
     //计算端口区域
     unsigned int port_spasing = 5;                    //端口字符之间的间隔
@@ -167,11 +165,9 @@ void DynamicHorGeometry::update(double scale)
     {
         rect += translate_offset;
     }
-
-    is_inited_ = true;
 }
 
-void DynamicHorGeometry::updateSimple(double scale)
+void DynamicHGeometry::updateSimple(double scale)
 {
     double port_point_size = node_style_->connection_point_diameter * 2; //连接点尺寸
     double half_point_size = port_point_size * 0.5;
@@ -195,33 +191,32 @@ void DynamicHorGeometry::updateSimple(double scale)
     if (caption_size.width() >= (icon_size.width() + port_point_size))
     {
         //标题比图标区域大的情况
-        simple_geometry_.icon_rect = { x_margin + x_offset, y_margin, icon_size.width(), icon_size.height() };
-        simple_geometry_.title_rect = { x_margin, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+        geometry_simple_.icon_rect = { x_margin + x_offset, y_margin, icon_size.width(), icon_size.height() };
+        geometry_simple_.caption_rect = { x_margin, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
     }
     else
     {
         //图标区域比标题大的情况
         x_margin += half_point_size;
-        simple_geometry_.icon_rect = { x_margin, y_margin, icon_size.width(), icon_size.height() };
-        simple_geometry_.title_rect = { x_margin + x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+        geometry_simple_.icon_rect = { x_margin, y_margin, icon_size.width(), icon_size.height() };
+        geometry_simple_.caption_rect = { x_margin + x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
     }
-    simple_geometry_.caption_rect = simple_geometry_.title_rect;
 
     //计算port区域
-    simple_geometry_.in_port_rect[0] = { simple_geometry_.icon_rect.left() - half_point_size, simple_geometry_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
-    simple_geometry_.out_port_rect[0] = { simple_geometry_.icon_rect.right() - half_point_size, simple_geometry_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
+    geometry_simple_.in_port_rect = { geometry_simple_.icon_rect.left() - half_point_size, geometry_simple_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
+    geometry_simple_.out_port_rect = { geometry_simple_.icon_rect.right() - half_point_size, geometry_simple_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
 
-    simple_geometry_.bounding_rect = { 0.0, 0.0, std::max(caption_size.width(), icon_size.width()) + 2 * x_margin, icon_size.height() + caption_size.height() + 2 * y_margin };
+    //计算对象的边界
+    geometry_simple_.bounding_rect = { 0.0, 0.0, std::max(caption_size.width(), icon_size.width()) + 2 * x_margin, icon_size.height() + caption_size.height() + 2 * y_margin };
 
     //-----平移区域
     //获取bounding_rect的中心点坐标
-    simple_geometry_.bounding_rect.moveCenter({ 0, 0 });
-    QPointF translate_offset = simple_geometry_.bounding_rect.topLeft();
+    geometry_simple_.bounding_rect.moveCenter({ 0, 0 });
+    QPointF translate_offset = geometry_simple_.bounding_rect.topLeft();
     //调整每个矩形的坐标，使其相对于bounding_rect的中心
-    simple_geometry_.icon_rect.translate(translate_offset);
-    simple_geometry_.title_rect.translate(translate_offset);
-    simple_geometry_.caption_rect.translate(translate_offset);
-    simple_geometry_.in_port_rect[0].translate(translate_offset);
-    simple_geometry_.out_port_rect[0].translate(translate_offset);
+    geometry_simple_.icon_rect.translate(translate_offset);
+    geometry_simple_.caption_rect.translate(translate_offset);
+    geometry_simple_.in_port_rect.translate(translate_offset);
+    geometry_simple_.out_port_rect.translate(translate_offset);
 }
 } //namespace fe

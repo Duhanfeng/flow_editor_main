@@ -8,7 +8,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <flow_editor/data_def.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
-#include <src/node_sub_geometry/dynamic_hor_geometry.hpp>
+#include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>
 
 namespace fe
 {
@@ -17,22 +17,19 @@ class OutNodeItem : public QGraphicsItem
 public:
     OutNodeItem() = delete;
     OutNodeItem(const NodeData& data, std::shared_ptr<NodeStyle> style);
-    QRectF boundingRect() const override;
+    QRectF boundingRect() const override { return dynamic_port_geometry_.geometry().bounding_rect; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
 private:
     //绘画相关
     void updateCache();
-    static void paintTo(QPainter* painter, double scale, const NodeData& data, const NodeSubGeometry& node_sub_geometry, std::shared_ptr<NodeStyle>& style);
-    static void paintSimpleTo(QPainter* painter, double scale, const NodeData& data, const NodeSubGeometry& node_sub_geometry, std::shared_ptr<NodeStyle>& style);
+    static void paintTo(QPainter* painter, const PortSubGeometry& geometry, double scale, std::shared_ptr<NodeStyle>& style);
 
 private:
     NodeData data_;
     std::shared_ptr<NodeStyle> style_;
-    DynamicHorGeometry dynamic_hor_geometry_;
+    DynamicHPortGeometry dynamic_port_geometry_;
     double scale_ = 1.0;
-    const QRectF* bounding_rect_ = nullptr;
-    int crt_model_ = 0; //0:正常显示  1:缩略图模式
 };
 
 } //namespace fe
