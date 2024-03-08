@@ -35,23 +35,24 @@ DynamicHorGeometry::DynamicHorGeometry(const NodeData& data, std::shared_ptr<Nod
     bold_font_metrics_ = std::make_unique<QFontMetrics>(blod_font);
 
     //初始化对象
-    node_sub_geometry_.in_port_rect.resize(data_.in_port.size());
-    node_sub_geometry_.in_port_text_rect.resize(data_.in_port.size());
-    node_sub_geometry_.out_port_rect.resize(data_.out_port.size());
-    node_sub_geometry_.out_port_text_rect.resize(data_.out_port.size());
-
+    geometry_.in_port_rect.resize(data_.in_port.size());
+    geometry_.in_port_text_rect.resize(data_.in_port.size());
+    geometry_.out_port_rect.resize(data_.out_port.size());
+    geometry_.out_port_text_rect.resize(data_.out_port.size());
     //初始化字体缓存
-    node_sub_geometry_.node_name = QStaticText(data.node_name);
-    node_sub_geometry_.in_port_text.resize(data_.in_port.size());
-    node_sub_geometry_.out_port_text.resize(data_.out_port.size());
+    geometry_.node_name = QStaticText(data.node_name);
+    geometry_.in_port_text.resize(data_.in_port.size());
+    geometry_.out_port_text.resize(data_.out_port.size());
     for (size_t i = 0; i < data_.in_port.size(); ++i)
     {
-        node_sub_geometry_.in_port_text[i] = QStaticText(data_.in_port[i].port_name);
+        geometry_.in_port_text[i] = QStaticText(data_.in_port[i].port_name);
     }
     for (size_t i = 0; i < data_.out_port.size(); ++i)
     {
-        node_sub_geometry_.out_port_text[i] = QStaticText(data_.out_port[i].port_name);
+        geometry_.out_port_text[i] = QStaticText(data_.out_port[i].port_name);
     }
+
+    simple_geometry_.node_name = QStaticText(data.node_name);
 }
 void DynamicHorGeometry::update(double scale)
 {
@@ -79,7 +80,7 @@ void DynamicHorGeometry::update(double scale)
     QSizeF caption_size = bold_font_metrics_->boundingRect(data_.node_name).size();
     if (scale < 1.0)
     {
-        //如果是缩小,则需要进行动态调整,以保证尺寸保持
+        //如果是缩小,则需要进行动态调整,以保证title尺寸保持不变
         caption_size /= scale;
     }
     constexpr double icon_scale = 1.6;
@@ -94,31 +95,31 @@ void DynamicHorGeometry::update(double scale)
     QSizeF node_size = { node_width, node_height };
 
     //计算主区域
-    double margin = 3.0; //3个像素的边界保留
+    constexpr double margin = 3.0; //3个像素的边界保留
     double x_margin = port_point_size * 0.5 + margin;
     double y_margin = margin;
-    node_sub_geometry_.bounding_rect = { 0, 0, node_size.width() + port_point_size + margin * 2, node_size.height() + margin * 2 };
-    node_sub_geometry_.node_rect = { { x_margin, y_margin }, node_size };
-    node_sub_geometry_.title_rect = { x_margin, y_margin, node_width, title_height };
-    node_sub_geometry_.port_rect = { x_margin, y_margin + title_height, node_width, port_height };
+    geometry_.bounding_rect = { 0, 0, node_size.width() + port_point_size + margin * 2, node_size.height() + margin * 2 };
+    geometry_.node_rect = { { x_margin, y_margin }, node_size };
+    geometry_.title_rect = { x_margin, y_margin, node_width, title_height };
+    geometry_.port_rect = { x_margin, y_margin + title_height, node_width, port_height };
 
     //开始反算各个组件的Rect(以原点在左上角为原点)
     double caption_offset = (icon_size.height() - caption_size.height()) * 0.5;
-    node_sub_geometry_.icon_rect = QRectF{ { x_margin, y_margin }, icon_size };
-    node_sub_geometry_.caption_rect = QRectF{ { x_margin + icon_size.width(), y_margin + caption_offset }, caption_size };
-    node_sub_geometry_.run_btn_rect = QRectF{ { x_margin + node_width - btn_size.width(), y_margin }, btn_size };
+    geometry_.icon_rect = QRectF{ { x_margin, y_margin }, icon_size };
+    geometry_.caption_rect = QRectF{ { x_margin + icon_size.width(), y_margin + caption_offset }, caption_size };
+    geometry_.run_btn_rect = QRectF{ { x_margin + node_width - btn_size.width(), y_margin }, btn_size };
     //计算运行按钮的区域
-    node_sub_geometry_.run_polygon[0] = (node_sub_geometry_.run_btn_rect.topLeft());
-    node_sub_geometry_.run_polygon[1] = QPointF{ node_sub_geometry_.run_btn_rect.right(), node_sub_geometry_.run_btn_rect.center().y() };
-    node_sub_geometry_.run_polygon[2] = (node_sub_geometry_.run_btn_rect.bottomLeft());
+    geometry_.run_polygon[0] = (geometry_.run_btn_rect.topLeft());
+    geometry_.run_polygon[1] = QPointF{ geometry_.run_btn_rect.right(), geometry_.run_btn_rect.center().y() };
+    geometry_.run_polygon[2] = (geometry_.run_btn_rect.bottomLeft());
 
     //计算端口交互点区域
     double point_offset = ((double)port_size - port_point_size) * 0.5;
     double total_port_height = title_height + port_spasing * 0.5;
     for (size_t i = 0; i < data_.in_port.size(); ++i)
     {
-        node_sub_geometry_.in_port_rect[i] = QRectF{ x_margin + -half_point_size, y_margin + total_port_height + point_offset, port_point_size, port_point_size };
-        node_sub_geometry_.in_port_text_rect[i] = QRectF{ x_margin + half_point_size, y_margin + total_port_height, in_width, (float)port_size };
+        geometry_.in_port_rect[i] = QRectF{ x_margin + -half_point_size, y_margin + total_port_height + point_offset, port_point_size, port_point_size };
+        geometry_.in_port_text_rect[i] = QRectF{ x_margin + half_point_size, y_margin + total_port_height, in_width, (float)port_size };
         total_port_height += (float)port_size + port_spasing;
     }
 
@@ -127,11 +128,43 @@ void DynamicHorGeometry::update(double scale)
     double output_point_offset = node_width - half_point_size;
     for (size_t i = 0; i < data_.out_port.size(); ++i)
     {
-        node_sub_geometry_.out_port_rect[i] = QRectF{ x_margin + output_point_offset, y_margin + total_port_height + point_offset, port_point_size, port_point_size };
-        node_sub_geometry_.out_port_text_rect[i] = QRectF{ x_margin + output_offset, y_margin + total_port_height, out_width, (float)port_size };
+        geometry_.out_port_rect[i] = QRectF{ x_margin + output_point_offset, y_margin + total_port_height + point_offset, port_point_size, port_point_size };
+        geometry_.out_port_text_rect[i] = QRectF{ x_margin + output_offset, y_margin + total_port_height, out_width, (float)port_size };
         total_port_height += (float)port_size + port_spasing;
     }
 
     is_inited_ = true;
+}
+
+void DynamicHorGeometry::updateSimple(double scale)
+{
+    //计算标题区域的尺寸
+    QSizeF caption_size = bold_font_metrics_->boundingRect(data_.node_name).size();
+    if (scale < 1.0)
+    {
+        //如果是缩小,则需要进行动态调整,以保证尺寸保持
+        caption_size /= scale;
+    }
+    constexpr double margin = 3.0; //3个像素的边界保留
+    double x_margin = margin;
+    double y_margin = margin;
+
+    //计算当前系数下的尺寸
+    QSizeF icon_size = { 100, 100 };
+    double icon_x_offset = (caption_size.width() - icon_size.width()) * 0.5;
+    icon_x_offset = std::max(icon_x_offset, 0.0);
+    simple_geometry_.icon_rect = { icon_x_offset + x_margin, y_margin, icon_size.width(), icon_size.height() };
+
+    if (caption_size.width() >= icon_size.width())
+    {
+        simple_geometry_.title_rect = { x_margin, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+    }
+    else
+    {
+        double title_x_offset = (icon_size.width() - caption_size.width()) * 0.5;
+        simple_geometry_.title_rect = { x_margin + title_x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+    }
+    simple_geometry_.caption_rect = simple_geometry_.title_rect;
+    simple_geometry_.bounding_rect = { 0.0, 0.0, std::max(caption_size.width(), icon_size.width()) + 2 * x_margin, icon_size.height() + caption_size.height() + 2 * y_margin };
 }
 } //namespace fe

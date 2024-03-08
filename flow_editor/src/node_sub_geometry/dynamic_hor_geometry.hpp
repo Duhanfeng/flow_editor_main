@@ -15,17 +15,21 @@ class DynamicHorGeometry
 public:
     DynamicHorGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
     void update(double scale);
-    const NodeSubGeometry& geometry() const { return node_sub_geometry_; }
+    void updateSimple(double scale);
+    const NodeSubGeometry& geometry() const { return geometry_; }
+    const NodeSubGeometry& simpleGeometry() const { return simple_geometry_; }
 
 private:
     //输入
     const NodeData& data_;
     std::shared_ptr<NodeStyle> node_style_;
     //输出
-    NodeSubGeometry node_sub_geometry_;
+    NodeSubGeometry geometry_;
+    NodeSubGeometry simple_geometry_;
 
     //缓存
     bool is_inited_ = false;
+    QRect bast_size_;
     std::unique_ptr<QFontMetrics> font_metrics_;
     std::unique_ptr<QFontMetrics> bold_font_metrics_;
 };

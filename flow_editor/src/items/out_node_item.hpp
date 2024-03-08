@@ -24,12 +24,15 @@ private:
     //绘画相关
     void updateCache();
     static void paintTo(QPainter* painter, double scale, const NodeData& data, const NodeSubGeometry& node_sub_geometry, std::shared_ptr<NodeStyle>& style);
+    static void paintSimpleTo(QPainter* painter, double scale, const NodeData& data, const NodeSubGeometry& node_sub_geometry, std::shared_ptr<NodeStyle>& style);
 
 private:
     NodeData data_;
     std::shared_ptr<NodeStyle> style_;
     DynamicHorGeometry dynamic_hor_geometry_;
     double scale_ = 1.0;
+    const QRectF* bounding_rect_ = nullptr;
+    int crt_model_ = 0; //0:正常显示  1:缩略图模式
 };
 
 } //namespace fe

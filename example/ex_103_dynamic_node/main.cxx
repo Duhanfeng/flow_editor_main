@@ -113,7 +113,7 @@ int main(int argc, char** argv)
     nodes.emplace_back(data4);
 
     //随机生成100个节点
-    const int count = 100;
+    const int count = 2;
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;
@@ -137,7 +137,6 @@ int main(int argc, char** argv)
             port.port_name = generateRandomString(2, 5);
             random_data.out_port.emplace_back(port);
         }
-
         nodes.emplace_back(random_data);
     }
 
