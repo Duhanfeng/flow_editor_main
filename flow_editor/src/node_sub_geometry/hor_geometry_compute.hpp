@@ -11,8 +11,8 @@ namespace fe
 class HorGeometryCompute
 {
 public:
-    static void compute(const NodeData& data, NodeSubGeometry& node_sub_geometry);
-
+    static void compute(const NodeData& data, std::shared_ptr<NodeStyle>& node_style, NodeSubGeometry& node_sub_geometry);
+    static void computeDynamic(const NodeData& data, NodeSubGeometry& node_sub_geometry);
 };
 
 } //namespace fe

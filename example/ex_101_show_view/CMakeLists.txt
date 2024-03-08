@@ -27,6 +27,14 @@ add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data")
 set(PROJECT_SOURCES
         main.cxx
 )
+# 添加rcc
+if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    message(qt6)
+    qt_add_resources(PROJECT_SOURCES ${CMAKE_SOURCE_DIR}/data/rcc/font.qrc)
+else ()
+    message(qt5)
+    qt5_add_resources(PROJECT_SOURCES ${CMAKE_SOURCE_DIR}/data/rcc/font.qrc)
+endif ()
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_link_libraries(
@@ -37,6 +45,11 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::OpenGL
         Qt${QT_VERSION_MAJOR}::OpenGLWidgets
+)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+        AUTOMOC ON
+        AUTORCC ON
+        AUTOUIC ON
 )
 
 ####################################################################################################

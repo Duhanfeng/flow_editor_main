@@ -36,13 +36,18 @@ fe::FlowView::FlowView(QWidget* parent) :
     QGraphicsView(parent)
 {
     setDragMode(QGraphicsView::ScrollHandDrag);
-    setRenderHint(QPainter::Antialiasing); //设置视图的渲染模式为反锯齿
-    setBackgroundBrush(QColor(50, 50, 50));
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    //setCacheMode(QGraphicsView::CacheBackground);
+    //setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+    setRenderHint(QPainter::Antialiasing, false);
+    setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    setCacheMode(QGraphicsView::CacheBackground);
-    setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+    //setRenderHint(QPainter::TextAntialiasing, true);
+    //setRenderHint(QPainter::VerticalSubpixelPositioning, true);
+    setBackgroundBrush(QColor(50, 50, 50));
 
     data_->minimum_range = 0.15;
     data_->maximum_range = 5;
@@ -250,7 +255,7 @@ void FlowView::paintEvent(QPaintEvent* event)
     {
         //FPS computation
         static unsigned int fps_count = 0;
-        static const unsigned int max_count = 2;
+        static const unsigned int max_count = 1;
         if (++fps_count == max_count)
         {
             data_->fps = 1000.0 * max_count / static_cast<double>(data_->timer.restart());

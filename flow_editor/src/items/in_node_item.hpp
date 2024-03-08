@@ -14,19 +14,19 @@ class InNodeItem final : public QGraphicsItem
 {
 public:
     InNodeItem() = delete;
-    InNodeItem(const NodeData& data, const NodeSubGeometry& node_sub_geometry);
-    void updateCache();
-    void initializePixmap(double scale);
-    static void paintTo(QPainter* painter, const NodeData& data, const NodeSubGeometry& node_sub_geometry);
-
+    InNodeItem(const NodeData& data, std::shared_ptr<NodeStyle> style);
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
 private:
+    void updateCache();
+    //void initializePixmap(double scale);
+    static void paintTo(QPainter* painter, const NodeData& data, const NodeSubGeometry& node_sub_geometry, std::shared_ptr<NodeStyle>& style);
+
+private:
     NodeData data_;
-    NodeSubGeometry node_sub_geometry_;
-    NodeSubGeometry geometry_scale_;
-    QPixmap pixmap_cache_;
+    std::shared_ptr<NodeStyle> style_;
+    NodeSubGeometry node_geometries_;
     double scale_ = 1.0;
 };
 

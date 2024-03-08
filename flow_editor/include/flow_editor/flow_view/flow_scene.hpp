@@ -8,11 +8,6 @@
 
 namespace fe
 {
-enum class NodeStyle
-{
-    Horizontal,
-    Vertical
-};
 class FlowScene : public QGraphicsScene
 {
 public:
@@ -24,8 +19,10 @@ public:
     void clearItem();
 
     //样式控制
-    NodeStyle nodeStyle() const;
-    void setNodeStyle(NodeStyle node_style);
+    NodeLayoutStyle nodeLayoutStyle() const;
+    void setNodeLayoutStyle(NodeLayoutStyle node_style);
+    std::shared_ptr<NodeStyle> nodeStyle() const;
+    void setNodeStyle();
 
 private:
     class Data;
