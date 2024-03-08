@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         fe::NodeType::OutNode,
         u8"这是一段比较长的标题#1",
         QIcon(),
-        { 400.0, 100.0 },
+        { 800.0, 100.0 },
         { { u8"输入端口1", QColor(100, 200, 100) },
             { u8"输入端口2", QColor(100, 200, 100) },
             { u8"输入端口3", QColor(100, 200, 100) } },
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
         fe::NodeType::OutNode,
         u8"节点2",
         QIcon(),
-        { 400.0, 300.0 },
+        { 800.0, 300.0 },
         { { u8"输入端口1", QColor(100, 200, 100) },
             { u8"输入端口2", QColor(100, 200, 100) },
             { u8"输入端口2", QColor(100, 200, 100) },
@@ -113,14 +113,14 @@ int main(int argc, char** argv)
     nodes.emplace_back(data4);
 
     //随机生成100个节点
-    const int count = 0;
+    const int count = 100;
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;
         random_data.node_type = fe::NodeType::OutNode;
         random_data.node_name = generateRandomString(2, 10);
-        random_data.position.setX((double)QRandomGenerator::global()->bounded(-500, 500));
-        random_data.position.setY((double)QRandomGenerator::global()->bounded(-500, 500));
+        random_data.position.setX((double)QRandomGenerator::global()->bounded(-2000, 2000));
+        random_data.position.setY((double)QRandomGenerator::global()->bounded(-2000, 2000));
 
         int in_count = QRandomGenerator::global()->bounded(1, 5);
         for (int j = 0; j < in_count; ++j)
