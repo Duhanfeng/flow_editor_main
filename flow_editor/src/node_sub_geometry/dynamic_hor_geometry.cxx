@@ -52,6 +52,8 @@ DynamicHorGeometry::DynamicHorGeometry(const NodeData& data, std::shared_ptr<Nod
         geometry_.out_port_text[i] = QStaticText(data_.out_port[i].port_name);
     }
 
+    simple_geometry_.in_port_rect.resize(1);
+    simple_geometry_.out_port_rect.resize(1);
     simple_geometry_.node_name = QStaticText(data.node_name);
 }
 void DynamicHorGeometry::update(double scale)
@@ -138,6 +140,10 @@ void DynamicHorGeometry::update(double scale)
 
 void DynamicHorGeometry::updateSimple(double scale)
 {
+
+    double port_point_size = node_style_->connection_point_diameter * 2; //连接点尺寸
+    double half_point_size = port_point_size * 0.5;
+
     //计算标题区域的尺寸
     QSizeF caption_size = bold_font_metrics_->boundingRect(data_.node_name).size();
     if (scale < 1.0)
@@ -145,26 +151,34 @@ void DynamicHorGeometry::updateSimple(double scale)
         //如果是缩小,则需要进行动态调整,以保证尺寸保持
         caption_size /= scale;
     }
+
+    //计算icon区域
+    QSizeF icon_size = { 100, 100 };
+    double x_offset = std::abs(caption_size.width() - icon_size.width()) * 0.5;
+
+    //计算标题区域
     constexpr double margin = 3.0; //3个像素的边界保留
     double x_margin = margin;
     double y_margin = margin;
-
-    //计算当前系数下的尺寸
-    QSizeF icon_size = { 100, 100 };
-    double icon_x_offset = (caption_size.width() - icon_size.width()) * 0.5;
-    icon_x_offset = std::max(icon_x_offset, 0.0);
-    simple_geometry_.icon_rect = { icon_x_offset + x_margin, y_margin, icon_size.width(), icon_size.height() };
-
-    if (caption_size.width() >= icon_size.width())
+    if (caption_size.width() >= (icon_size.width() + port_point_size))
     {
+        //标题比图标区域大的情况
+        simple_geometry_.icon_rect = { x_margin + x_offset, y_margin, icon_size.width(), icon_size.height() };
         simple_geometry_.title_rect = { x_margin, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
     }
     else
     {
-        double title_x_offset = (icon_size.width() - caption_size.width()) * 0.5;
-        simple_geometry_.title_rect = { x_margin + title_x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+        //图标区域比标题大的情况
+        x_margin += half_point_size;
+        simple_geometry_.icon_rect = { x_margin, y_margin, icon_size.width(), icon_size.height() };
+        simple_geometry_.title_rect = { x_margin + x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
     }
     simple_geometry_.caption_rect = simple_geometry_.title_rect;
+
+    //计算port区域
+    simple_geometry_.in_port_rect[0] = { simple_geometry_.icon_rect.left() - half_point_size, simple_geometry_.icon_rect.center().y(), port_point_size, port_point_size };
+    simple_geometry_.out_port_rect[0] = { simple_geometry_.icon_rect.right() - half_point_size, simple_geometry_.icon_rect.center().y(), port_point_size, port_point_size };
+
     simple_geometry_.bounding_rect = { 0.0, 0.0, std::max(caption_size.width(), icon_size.width()) + 2 * x_margin, icon_size.height() + caption_size.height() + 2 * y_margin };
 }
 } //namespace fe

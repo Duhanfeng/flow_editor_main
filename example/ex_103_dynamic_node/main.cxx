@@ -113,7 +113,7 @@ int main(int argc, char** argv)
     nodes.emplace_back(data4);
 
     //随机生成100个节点
-    const int count = 2;
+    const int count = 0;
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;

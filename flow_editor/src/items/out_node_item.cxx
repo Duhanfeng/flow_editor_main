@@ -71,6 +71,7 @@ void OutNodeItem::updateCache()
 void OutNodeItem::paintTo(QPainter* painter, double scale, const NodeData& data, const NodeSubGeometry& node_sub_geometry, std::shared_ptr<NodeStyle>& style)
 {
     QPen pen = painter->pen();
+    QBrush brush = painter->brush();
     QFont font = style->font;
     painter->setFont(font);
 
@@ -142,6 +143,7 @@ void OutNodeItem::paintTo(QPainter* painter, double scale, const NodeData& data,
 
     //绘画输入输出端口操作点
     painter->setPen(pen);
+    painter->setBrush(QColor(255, 0, 0));
     for (size_t i = 0; i < node_sub_geometry.in_port_rect.size(); ++i)
     {
         painter->drawEllipse(node_sub_geometry.in_port_rect[i]);
@@ -150,13 +152,16 @@ void OutNodeItem::paintTo(QPainter* painter, double scale, const NodeData& data,
     {
         painter->drawEllipse(node_sub_geometry.out_port_rect[i]);
     }
+    painter->setBrush(brush);
 
     //绘画运行按钮
     painter->drawPolygon(node_sub_geometry.run_polygon.data(), (int)node_sub_geometry.run_polygon.size());
 }
 void OutNodeItem::paintSimpleTo(QPainter* painter, double scale, const NodeData& data, const NodeSubGeometry& node_sub_geometry, std::shared_ptr<NodeStyle>& style)
 {
+    //保存状态
     QPen pen = painter->pen();
+    QBrush brush = painter->brush();
     QFont font = style->font;
     painter->setFont(font);
 
@@ -201,6 +206,7 @@ void OutNodeItem::paintSimpleTo(QPainter* painter, double scale, const NodeData&
 
     //绘画输入输出端口操作点
     painter->setPen(pen);
+    painter->setBrush(QColor(255, 0, 0));
     for (size_t i = 0; i < node_sub_geometry.in_port_rect.size(); ++i)
     {
         painter->drawEllipse(node_sub_geometry.in_port_rect[i]);
@@ -209,5 +215,6 @@ void OutNodeItem::paintSimpleTo(QPainter* painter, double scale, const NodeData&
     {
         painter->drawEllipse(node_sub_geometry.out_port_rect[i]);
     }
+    painter->setBrush(brush);
 }
 } //namespace fe
