@@ -32,17 +32,19 @@ set(PROJECT_SOURCES
         ${PROJECT_INCLUDE}
         src/flow_view/flow_view.cxx
         src/flow_view/flow_scene.cxx
+        src/node_sub_geometry/node_sub_geometry.hpp
+        src/node_sub_geometry/dynamic_h_geometry.hpp
+        src/node_sub_geometry/dynamic_h_geometry.cxx
+        src/node_sub_geometry/dynamic_h_port_geometry.hpp
+        src/node_sub_geometry/dynamic_h_port_geometry.cxx
         src/items/node_item.hpp
         src/items/node_item.cxx
         src/items/in_node_item.hpp
         src/items/in_node_item.cxx
         src/items/out_node_item.hpp
         src/items/out_node_item.cxx
-        src/node_sub_geometry/node_sub_geometry.hpp
-        src/node_sub_geometry/dynamic_h_geometry.hpp
-        src/node_sub_geometry/dynamic_h_geometry.cxx
-        src/node_sub_geometry/dynamic_h_port_geometry.hpp
-        src/node_sub_geometry/dynamic_h_port_geometry.cxx
+        src/items/connection_item.cxx
+        src/items/connection_item.hpp
 )
 # 添加rcc
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

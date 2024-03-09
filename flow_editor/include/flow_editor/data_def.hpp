@@ -6,6 +6,7 @@
 #include <QColor>
 #include <QIcon>
 #include <QFont>
+#include <map>
 
 namespace fe
 {
@@ -37,12 +38,31 @@ public:
 class NodeData
 {
 public:
-    NodeType node_type = NodeType::Node;
     QString node_name;
     QIcon node_icon;
     QPointF position;
     std::vector<PortData> in_port;
     std::vector<PortData> out_port;
+};
+
+using guid16 = std::array<unsigned char, 16>;
+using guid18 = std::array<unsigned char, 18>;
+
+class Connection
+{
+public:
+    guid16 out;
+    unsigned int out_port = 0;
+    guid16 in;
+    unsigned int in_port = 0;
+};
+class Flow
+{
+public:
+    std::map<guid16, NodeData> nodes;
+    std::map<guid16, NodeData> in_nodes;
+    std::map<guid16, NodeData> out_nodes;
+    std::map<guid18, Connection> connection;
 };
 
 class NodeStyle

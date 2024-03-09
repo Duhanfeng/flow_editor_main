@@ -16,19 +16,20 @@ class OutNodeItem : public QGraphicsItem
 {
 public:
     OutNodeItem() = delete;
-    OutNodeItem(const NodeData& data, std::shared_ptr<NodeStyle> style);
-    QRectF boundingRect() const override { return dynamic_port_geometry_.geometry().bounding_rect; }
+    OutNodeItem(NodeData& data, DynamicHPortGeometry& geometry, std::shared_ptr<NodeStyle> style, double z_value);
+    QRectF boundingRect() const override { return geometry_.components().bounding_rect; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
 private:
     //绘画相关
     void updateCache();
-    static void paintTo(QPainter* painter, const PortSubGeometry& geometry, double scale, std::shared_ptr<NodeStyle>& style);
+    static void paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style);
 
 private:
-    NodeData data_;
+    NodeData& data_;
+    DynamicHPortGeometry& geometry_;
     std::shared_ptr<NodeStyle> style_;
-    DynamicHPortGeometry dynamic_port_geometry_;
+    double z_value_ = 0.0;
     double scale_ = 1.0;
 };
 

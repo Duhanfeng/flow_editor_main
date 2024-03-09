@@ -12,7 +12,7 @@
 namespace fe
 {
 //NodeItem里面每个组件的尺寸,用于渲染时绘画,坐标原点(0,0)为边界区域的中心
-class NodeSubGeometry
+class NodeUIComponents
 {
 public:
     //子组件区域
@@ -35,8 +35,8 @@ public:
     std::vector<QStaticText> in_port_text;
     std::vector<QStaticText> out_port_text;
 };
-//NodeSubGeometry的简略图实现
-class NodeSubGeometrySimple
+//简略图实现
+class NodeUISimpleComponents
 {
 public:
     //子组件区域
@@ -49,7 +49,7 @@ public:
     QStaticText node_name;
 };
 //端口
-class PortSubGeometry
+class PortUIComponents
 {
 public:
     //子组件区域

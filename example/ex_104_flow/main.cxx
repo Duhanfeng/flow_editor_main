@@ -41,9 +41,9 @@ int main(int argc, char** argv)
 
     fe::FlowScene* scene = new fe::FlowScene();
     fe::FlowView* flow_view = new fe::FlowView(scene);
+    std::shared_ptr<fe::Flow> flow = std::make_shared<fe::Flow>();
 
     //绘画对象
-    std::vector<fe::NodeData> nodes;
     fe::NodeData data1 = {
         //fe::NodeType::Node,
         u8"这是一段比较长的标题#1",
@@ -139,45 +139,23 @@ int main(int argc, char** argv)
             { u8"输出端口4", QColor(200, 100, 100) } }
     };
 
-    nodes.emplace_back(data1);
-    nodes.emplace_back(data2);
-    nodes.emplace_back(data3);
-    nodes.emplace_back(data4);
-    nodes.emplace_back(data5);
-    nodes.emplace_back(data6);
-
-    //随机生成100个节点
-    const int count = 2;
-    for (int i = 0; i < count; ++i)
-    {
-        fe::NodeData random_data;
-        //random_data.node_type = fe::NodeType::Node;
-        random_data.node_name = generateRandomString(2, 10);
-        random_data.position.setX((double)QRandomGenerator::global()->bounded(-2000, 2000));
-        random_data.position.setY((double)QRandomGenerator::global()->bounded(-2000, 2000));
-
-        int in_count = QRandomGenerator::global()->bounded(1, 5);
-        for (int j = 0; j < in_count; ++j)
-        {
-            fe::PortData port;
-            port.port_name = generateRandomString(2, 5);
-            random_data.in_port.emplace_back(port);
-        }
-
-        int out_count = QRandomGenerator::global()->bounded(1, 5);
-        for (int j = 0; j < out_count; ++j)
-        {
-            fe::PortData port;
-            port.port_name = generateRandomString(2, 5);
-            random_data.out_port.emplace_back(port);
-        }
-        nodes.emplace_back(random_data);
-    }
+    std::array<unsigned char, 16> guid1 = { 01 };
+    std::array<unsigned char, 16> guid2 = { 02 };
+    std::array<unsigned char, 16> guid3 = { 03 };
+    std::array<unsigned char, 16> guid4 = { 04 };
+    std::array<unsigned char, 16> guid5 = { 05 };
+    std::array<unsigned char, 16> guid6 = { 06 };
+    flow->nodes.emplace(guid1, data1);
+    flow->nodes.emplace(guid2, data2);
+    flow->out_nodes.emplace(guid3, data3);
+    flow->out_nodes.emplace(guid4, data4);
+    flow->in_nodes.emplace(guid5, data5);
+    flow->in_nodes.emplace(guid6, data6);
 
     flow_view->resize(1200, 800);
     flow_view->show();
 
-    scene->showNodes(nodes);
+    scene->showFlow(flow);
 
     app.exec();
     return 0;

@@ -62,7 +62,7 @@ fe::FlowView::FlowView(QWidget* parent) :
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [&]()
         {
-            std::cout << "fps: " << data_->fps << "   time: " << 1000.0 / data_->fps << std::endl;
+            std::cout << "fps: " << data_->fps << "   time: " << 1000.0 / data_->fps << "ms" << std::endl;
         });
     timer->start(1000);
 }
@@ -249,22 +249,24 @@ void FlowView::setupScale(double scale)
 }
 void FlowView::paintEvent(QPaintEvent* event)
 {
-    QGraphicsView::paintEvent(event);
+    static long long time = 0;
+    static unsigned int fps_count = 0;
+    static const unsigned int max_count = 10;
 
-    //测试代码,用于测试帧率
+    data_->timer.start();
+    QGraphicsView::paintEvent(event);
+    time += data_->timer.elapsed();
+
+    //FPS computation
+    if (++fps_count == max_count)
     {
-        //FPS computation
-        static unsigned int fps_count = 0;
-        static const unsigned int max_count = 1;
-        if (++fps_count == max_count)
+        data_->fps = 1000.0 * max_count / time;
+        if (std::isinf(data_->fps))
         {
-            data_->fps = 1000.0 * max_count / static_cast<double>(data_->timer.restart());
-            if (std::isinf(data_->fps))
-            {
-                data_->fps = 0;
-            }
-            fps_count = 0;
+            data_->fps = 0;
         }
+        fps_count = 0;
+        time = 0;
     }
 }
 } //namespace fe

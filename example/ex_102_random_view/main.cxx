@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     //绘画对象
     std::vector<fe::NodeData> nodes;
     fe::NodeData data1 = {
-        fe::NodeType::Node,
+        //fe::NodeType::Node,
         u8"这是一段比较长的标题#1",
         QIcon(),
         { 100.0, 100.0 },
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
             { u8"输出端口4", QColor(200, 100, 100) } }
     };
     fe::NodeData data2 = {
-        fe::NodeType::Node,
+        //fe::NodeType::Node,
         u8"节点2",
         QIcon(),
         { 100.0, 300.0 },
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
             { u8"输出端口4", QColor(200, 100, 100) } }
     };
     fe::NodeData data3 = {
-        fe::NodeType::InNode,
+        //fe::NodeType::InNode,
         u8"这是一段比较长的标题#1",
         QIcon(),
         { 400.0, 100.0 },
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
             { u8"输出端口4", QColor(200, 100, 100) } }
     };
     fe::NodeData data4 = {
-        fe::NodeType::InNode,
+        //fe::NodeType::InNode,
         u8"节点2",
         QIcon(),
         { 400.0, 300.0 },
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;
-        random_data.node_type = fe::NodeType::Node;
+        //random_data.node_type = fe::NodeType::Node;
         random_data.node_name = generateRandomString(2, 10);
         random_data.position.setX((double)QRandomGenerator::global()->bounded(-500, 500));
         random_data.position.setY((double)QRandomGenerator::global()->bounded(-500, 500));

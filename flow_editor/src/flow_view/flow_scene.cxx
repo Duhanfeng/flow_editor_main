@@ -6,17 +6,47 @@
 #include <src/items/node_item.hpp>
 #include <src/items/in_node_item.hpp>
 #include <src/items/out_node_item.hpp>
+#include <src/items/connection_item.hpp>
 #include <QFontDatabase>
 #include <iostream>
+#include <unordered_map>
 
 namespace fe
 {
+class NodeItemData
+{
+public:
+    NodeData data;
+    std::unique_ptr<DynamicHGeometry> geometry;
+    NodeItem* draw_item = nullptr;
+};
+class InPortItemData
+{
+public:
+    NodeData data;
+    std::unique_ptr<DynamicHPortGeometry> geometry;
+    InNodeItem* draw_item = nullptr;
+};
+class OutPortItemData
+{
+public:
+    NodeData data;
+    std::unique_ptr<DynamicHPortGeometry> geometry;
+    OutNodeItem* draw_item = nullptr;
+};
+
 class FlowScene::Data
 {
 public:
     NodeLayoutStyle node_layout_style = NodeLayoutStyle::Horizontal;
     std::shared_ptr<NodeStyle> node_style;
-    QFont def_font;
+
+    //子组件管理
+    std::shared_ptr<Flow> flow;
+    std::map<guid16, std::unique_ptr<NodeItemData>> node_items;
+    std::map<guid16, std::unique_ptr<InPortItemData>> in_node_items;
+    std::map<guid16, std::unique_ptr<OutPortItemData>> out_node_items;
+    std::map<guid18, ConnectionItem*> connection_items;
 };
 
 namespace
@@ -63,14 +93,74 @@ FlowScene::FlowScene(QObject* parent) :
     //加载默认字体
     //QFontDatabase::addApplicationFont(":/MiSans-Normal.ttf");
     //data_->node_style->font_name = u8"SimSun";
-    data_->def_font = QFont(data_->node_style->font_name);
 }
 FlowScene::~FlowScene()
 {
     delete data_;
     data_ = nullptr;
 }
+void FlowScene::showFlow(std::shared_ptr<Flow> flow)
+{
+    //清空资源
+    clearItem();
 
+    data_->flow = flow;
+    if (data_->flow == nullptr)
+    {
+        return;
+    }
+
+    //根据flow内容显示对象
+    double crt_z_value = 0;
+    for (const auto& node : data_->flow->nodes)
+    {
+        const auto& guid = node.first;
+        const auto& data = node.second;
+        std::unique_ptr<NodeItemData> node_item_data = std::make_unique<NodeItemData>();
+        node_item_data->data = data; //直接拷贝NodeData数据
+        //构造geometry对象
+        node_item_data->geometry = std::make_unique<DynamicHGeometry>(node_item_data->data, data_->node_style);
+        //构造item对象
+        node_item_data->draw_item = new NodeItem(node_item_data->data, *node_item_data->geometry.get(), data_->node_style, crt_z_value);
+        //显示
+        addItem(node_item_data->draw_item);
+        //保存数据
+        data_->node_items.emplace(guid, std::move(node_item_data));
+        crt_z_value++;
+    }
+    for (const auto& node : data_->flow->in_nodes)
+    {
+        const auto& guid = node.first;
+        const auto& data = node.second;
+        std::unique_ptr<InPortItemData> node_item_data = std::make_unique<InPortItemData>();
+        node_item_data->data = data; //直接拷贝NodeData数据
+        //构造geometry对象
+        node_item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::InNode, node_item_data->data, data_->node_style);
+        //构造item对象
+        node_item_data->draw_item = new InNodeItem(node_item_data->data, *node_item_data->geometry.get(), data_->node_style, crt_z_value);
+        //显示
+        addItem(node_item_data->draw_item);
+        //保存数据
+        data_->in_node_items.emplace(guid, std::move(node_item_data));
+        crt_z_value++;
+    }
+    for (const auto& node : data_->flow->out_nodes)
+    {
+        const auto& guid = node.first;
+        const auto& data = node.second;
+        std::unique_ptr<OutPortItemData> node_item_data = std::make_unique<OutPortItemData>();
+        node_item_data->data = data; //直接拷贝NodeData数据
+        //构造geometry对象
+        node_item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::OutNode, node_item_data->data, data_->node_style);
+        //构造item对象
+        node_item_data->draw_item = new OutNodeItem(node_item_data->data, *node_item_data->geometry.get(), data_->node_style, crt_z_value);
+        //显示
+        addItem(node_item_data->draw_item);
+        //保存数据
+        data_->out_node_items.emplace(guid, std::move(node_item_data));
+        crt_z_value++;
+    }
+}
 void FlowScene::showNodes(const std::vector<NodeData>& nodes)
 {
     clearItem();
@@ -79,30 +169,34 @@ void FlowScene::showNodes(const std::vector<NodeData>& nodes)
         for (size_t i = 0; i < nodes.size(); ++i)
         {
             const auto& node_data = nodes[i];
-            if (node_data.node_type == NodeType::Node)
-            {
-                auto item = new NodeItem(node_data, data_->node_style);
-                item->setZValue(i);
-                addItem(item);
-            }
-            else if (node_data.node_type == NodeType::InNode)
-            {
-                auto item = new InNodeItem(node_data, data_->node_style);
-                item->setZValue(i);
-                addItem(item);
-            }
-            else if (node_data.node_type == NodeType::OutNode)
-            {
-                auto item = new OutNodeItem(node_data, data_->node_style);
-                item->setZValue(i);
-                addItem(item);
-            }
+            //if (node_data.node_type == NodeType::Node)
+            //{
+            //    //auto item = new NodeItem(node_data, data_->node_style);
+            //    //item->setZValue(i);
+            //    //addItem(item);
+            //}
+            //else if (node_data.node_type == NodeType::InNode)
+            //{
+            //    auto item = new InNodeItem(node_data, data_->node_style);
+            //    item->setZValue(i);
+            //    addItem(item);
+            //}
+            //else if (node_data.node_type == NodeType::OutNode)
+            //{
+            //    auto item = new OutNodeItem(node_data, data_->node_style);
+            //    item->setZValue(i);
+            //    addItem(item);
+            //}
         }
     }
 }
 void FlowScene::clearItem()
 {
     clear();
+    data_->node_items.clear();
+    data_->in_node_items.clear();
+    data_->out_node_items.clear();
+    data_->connection_items.clear();
 }
 
 NodeLayoutStyle FlowScene::nodeLayoutStyle() const
@@ -122,4 +216,5 @@ std::shared_ptr<NodeStyle> FlowScene::nodeStyle() const
 void FlowScene::setNodeStyle()
 {
 }
+
 } //namespace fe

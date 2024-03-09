@@ -5,6 +5,7 @@
 #pragma once
 #include <QGraphicsScene>
 #include <flow_editor/data_def.hpp>
+#include <memory>
 
 namespace fe
 {
@@ -16,6 +17,7 @@ public:
 
     //渲染控制
     void showNodes(const std::vector<NodeData>& node_data);
+    void showFlow(std::shared_ptr<Flow> flow);
     void clearItem();
 
     //样式控制

@@ -14,14 +14,19 @@
 
 namespace fe
 {
-NodeItem::NodeItem(const NodeData& data, std::shared_ptr<NodeStyle> style) :
+NodeItem::NodeItem(NodeData& data, DynamicHGeometry& geometry, std::shared_ptr<NodeStyle> style, double z_value) :
     data_(data),
+    geometry_(geometry),
     style_(style),
-    dynamic_hor_geometry_(data_, style_)
+    z_value_(z_value)
 {
     setPos(data_.position);
-    dynamic_hor_geometry_.update(scale_);
+    setZValue(z_value_);
+
+    geometry_.update(scale_);
     updateCache();
+
+    setFlags(ItemIsSelectable | ItemIsMovable);
 }
 void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget)
 {
@@ -34,28 +39,28 @@ void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QW
 
     if (crt_model_ == 0)
     {
-        paintTo(painter, dynamic_hor_geometry_.geometry(), 1.0, style_);
+        paintTo(painter, geometry_.components(), 1.0, style_);
     }
     else
     {
-        paintSimpleTo(painter, dynamic_hor_geometry_.simpleGeometry(), scale_, style_);
+        paintSimpleTo(painter, geometry_.simpleComponents(), scale_, style_);
     }
 }
 void NodeItem::updateCache()
 {
     if (scale_ < 0.5)
     {
-        dynamic_hor_geometry_.updateSimple(scale_);
-        bounding_rect_ = &dynamic_hor_geometry_.simpleGeometry().bounding_rect;
+        geometry_.updateSimple(scale_);
+        bounding_rect_ = &geometry_.simpleComponents().bounding_rect;
         crt_model_ = 1;
     }
     else
     {
-        bounding_rect_ = &dynamic_hor_geometry_.geometry().bounding_rect;
+        bounding_rect_ = &geometry_.components().bounding_rect;
         crt_model_ = 0;
     }
 }
-void NodeItem::paintTo(QPainter* painter, const NodeSubGeometry& geometry, double scale, std::shared_ptr<NodeStyle>& style)
+void NodeItem::paintTo(QPainter* painter, const NodeUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style)
 {
     QPen pen = painter->pen();
     QBrush brush = painter->brush();
@@ -64,39 +69,39 @@ void NodeItem::paintTo(QPainter* painter, const NodeSubGeometry& geometry, doubl
 
     //画各个区域(调试用)
     painter->setPen(pen);
-    painter->drawRect(geometry.bounding_rect);
-    painter->drawRect(geometry.node_rect);
-    painter->drawRect(geometry.title_rect);
-    painter->drawRect(geometry.icon_rect);
-    painter->drawRect(geometry.caption_rect);
-    painter->drawRect(geometry.run_btn_rect);
-    painter->drawRect(geometry.port_rect);
-    for (size_t i = 0; i < geometry.in_port_rect.size(); ++i)
+    //painter->drawRect(geometry.bounding_rect);
+    painter->drawRect(components.node_rect);
+    painter->drawRect(components.title_rect);
+    painter->drawRect(components.icon_rect);
+    painter->drawRect(components.caption_rect);
+    painter->drawRect(components.run_btn_rect);
+    painter->drawRect(components.port_rect);
+    for (size_t i = 0; i < components.in_port_rect.size(); ++i)
     {
-        painter->drawRect(geometry.in_port_rect[i]);
+        painter->drawRect(components.in_port_rect[i]);
     }
-    for (size_t i = 0; i < geometry.out_port_rect.size(); ++i)
+    for (size_t i = 0; i < components.out_port_rect.size(); ++i)
     {
-        painter->drawRect(geometry.out_port_rect[i]);
+        painter->drawRect(components.out_port_rect[i]);
     }
-    for (size_t i = 0; i < geometry.in_port_text_rect.size(); ++i)
+    for (size_t i = 0; i < components.in_port_text_rect.size(); ++i)
     {
-        painter->drawRect(geometry.in_port_text_rect[i]);
+        painter->drawRect(components.in_port_text_rect[i]);
     }
-    for (size_t i = 0; i < geometry.out_port_text_rect.size(); ++i)
+    for (size_t i = 0; i < components.out_port_text_rect.size(); ++i)
     {
-        painter->drawRect(geometry.out_port_text_rect[i]);
+        painter->drawRect(components.out_port_text_rect[i]);
     }
 
     //画主体
     //QBrush b = painter->brush();
     //painter->setBrush(QColor(0x606060));
     const double radius = 3.0;
-    painter->drawRoundedRect(geometry.node_rect, radius, radius);
+    painter->drawRoundedRect(components.node_rect, radius, radius);
     //painter->setBrush(b);
 
     //画图标
-    painter->fillRect(geometry.icon_rect, 0xC0C0C0);
+    painter->fillRect(components.icon_rect, 0xC0C0C0);
 
     //绘画标题
     QFont f = painter->font();
@@ -107,44 +112,46 @@ void NodeItem::paintTo(QPainter* painter, const NodeSubGeometry& geometry, doubl
     {
         painter->save();
         painter->scale(1.0 / scale, 1.0 / scale);
-        painter->drawStaticText(geometry.caption_rect.topLeft() * scale, geometry.node_name);
+        painter->drawStaticText(components.caption_rect.topLeft() * scale, components.node_name);
         painter->restore();
     }
     else
     {
-        painter->drawStaticText(geometry.caption_rect.topLeft(), geometry.node_name);
+        painter->drawStaticText(components.caption_rect.topLeft(), components.node_name);
     }
 
     //绘画输入输出名
     f.setBold(false);
     painter->setFont(f);
-    for (size_t i = 0; i < geometry.in_port_text_rect.size(); ++i)
+    for (size_t i = 0; i < components.in_port_text_rect.size(); ++i)
     {
-        painter->drawStaticText(geometry.in_port_text_rect[i].topLeft(), geometry.in_port_text[i]);
+        painter->drawStaticText(components.in_port_text_rect[i].topLeft(), components.in_port_text[i]);
     }
     painter->setFont(font);
-    for (size_t i = 0; i < geometry.out_port_text_rect.size(); ++i)
+    for (size_t i = 0; i < components.out_port_text_rect.size(); ++i)
     {
-        painter->drawStaticText(geometry.out_port_text_rect[i].topLeft(), geometry.out_port_text[i]);
+        painter->drawStaticText(components.out_port_text_rect[i].topLeft(), components.out_port_text[i]);
     }
 
     //绘画输入输出端口操作点
     painter->setPen(pen);
     painter->setBrush(QColor(255, 0, 0));
-    for (size_t i = 0; i < geometry.in_port_rect.size(); ++i)
+    for (size_t i = 0; i < components.in_port_rect.size(); ++i)
     {
-        painter->drawEllipse(geometry.in_port_rect[i]);
+        painter->drawEllipse(components.in_port_rect[i]);
     }
-    for (size_t i = 0; i < geometry.out_port_rect.size(); ++i)
+    for (size_t i = 0; i < components.out_port_rect.size(); ++i)
     {
-        painter->drawEllipse(geometry.out_port_rect[i]);
+        painter->drawEllipse(components.out_port_rect[i]);
     }
     painter->setBrush(brush);
 
     //绘画运行按钮
-    painter->drawPolygon(geometry.run_polygon.data(), (int)geometry.run_polygon.size());
+    painter->setBrush(QColor(0, 255, 0));
+    painter->drawPolygon(components.run_polygon.data(), (int)components.run_polygon.size());
+    painter->setBrush(brush);
 }
-void NodeItem::paintSimpleTo(QPainter* painter, const NodeSubGeometrySimple& geometry_simple, double scale, std::shared_ptr<NodeStyle>& style)
+void NodeItem::paintSimpleTo(QPainter* painter, const NodeUISimpleComponents& simple_components, double scale, std::shared_ptr<NodeStyle>& style)
 {
     //保存状态
     QPen pen = painter->pen();
@@ -154,14 +161,14 @@ void NodeItem::paintSimpleTo(QPainter* painter, const NodeSubGeometrySimple& geo
 
     //画各个区域(调试用)
     painter->setPen(pen);
-    painter->drawRect(geometry_simple.bounding_rect);
-    painter->drawRect(geometry_simple.icon_rect);
-    painter->drawRect(geometry_simple.caption_rect);
-    painter->drawRect(geometry_simple.in_port_rect);
-    painter->drawRect(geometry_simple.out_port_rect);
+    //painter->drawRect(geometry_simple.bounding_rect);
+    painter->drawRect(simple_components.icon_rect);
+    painter->drawRect(simple_components.caption_rect);
+    painter->drawRect(simple_components.in_port_rect);
+    painter->drawRect(simple_components.out_port_rect);
 
     //画图标
-    painter->fillRect(geometry_simple.icon_rect, 0xC0C0C0);
+    painter->fillRect(simple_components.icon_rect, 0xC0C0C0);
 
     //绘画标题
     QFont f = painter->font();
@@ -172,19 +179,19 @@ void NodeItem::paintSimpleTo(QPainter* painter, const NodeSubGeometrySimple& geo
     {
         painter->save();
         painter->scale(1.0 / scale, 1.0 / scale);
-        painter->drawStaticText(geometry_simple.caption_rect.topLeft() * scale, geometry_simple.node_name);
+        painter->drawStaticText(simple_components.caption_rect.topLeft() * scale, simple_components.node_name);
         painter->restore();
     }
     else
     {
-        painter->drawStaticText(geometry_simple.caption_rect.topLeft(), geometry_simple.node_name);
+        painter->drawStaticText(simple_components.caption_rect.topLeft(), simple_components.node_name);
     }
 
     //绘画输入输出端口操作点
     painter->setPen(pen);
     painter->setBrush(QColor(255, 0, 0));
-    painter->drawEllipse(geometry_simple.in_port_rect);
-    painter->drawEllipse(geometry_simple.out_port_rect);
+    painter->drawEllipse(simple_components.in_port_rect);
+    painter->drawEllipse(simple_components.out_port_rect);
     painter->setBrush(brush);
 }
 } //namespace fe

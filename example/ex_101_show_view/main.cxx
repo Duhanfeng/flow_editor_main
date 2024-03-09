@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     //绘画对象
     std::vector<fe::NodeData> nodes;
     fe::NodeData data = {
-        fe::NodeType::Node,
+        //fe::NodeType::Node,
         u8"这是一段比较长的标题#1",
         QIcon(),
         { 100.0, 100.0 },
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
             { u8"输出端口4", QColor(200, 100, 100) } }
     };
     fe::NodeData data2 = {
-        fe::NodeType::Node,
+        //fe::NodeType::Node,
         u8"节点2",
         QIcon(),
         { 100.0, 300.0 },

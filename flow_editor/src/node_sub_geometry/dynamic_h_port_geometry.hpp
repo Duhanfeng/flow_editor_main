@@ -13,16 +13,17 @@ namespace fe
 class DynamicHPortGeometry
 {
 public:
-    DynamicHPortGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
+    DynamicHPortGeometry(NodeType node_type, const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
     void update(double scale);
-    const PortSubGeometry& geometry() const { return geometry_; }
+    const PortUIComponents& components() const { return components_; }
 
 private:
     //输入
+    NodeType node_type_;
     const NodeData& data_;
     std::shared_ptr<NodeStyle> node_style_;
     //输出
-    PortSubGeometry geometry_;
+    PortUIComponents components_;
     //缓存
     double last_scale_ = 0;
     std::unique_ptr<QFontMetrics> bold_font_metrics_;

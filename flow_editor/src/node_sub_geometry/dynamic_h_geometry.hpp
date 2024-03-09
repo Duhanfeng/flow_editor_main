@@ -16,16 +16,16 @@ public:
     DynamicHGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
     void update(double scale);
     void updateSimple(double scale);
-    const NodeSubGeometry& geometry() const { return geometry_; }
-    const NodeSubGeometrySimple& simpleGeometry() const { return geometry_simple_; }
+    const NodeUIComponents& components() const { return components_; }
+    const NodeUISimpleComponents& simpleComponents() const { return simple_components_; }
 
 private:
     //输入
     const NodeData& data_;
     std::shared_ptr<NodeStyle> node_style_;
     //输出
-    NodeSubGeometry geometry_;
-    NodeSubGeometrySimple geometry_simple_;
+    NodeUIComponents components_;
+    NodeUISimpleComponents simple_components_;
     //缓存
     std::unique_ptr<QFontMetrics> font_metrics_;
     std::unique_ptr<QFontMetrics> bold_font_metrics_;
