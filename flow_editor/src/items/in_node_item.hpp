@@ -12,17 +12,30 @@
 
 namespace fe
 {
-class InNodeItem : public QGraphicsItem
+class ConnectionItem;
+class InNodeItem final : public QGraphicsItem
 {
 public:
     InNodeItem() = delete;
     InNodeItem(NodeData& data, DynamicHPortGeometry& geometry, std::shared_ptr<NodeStyle> style, double z_value);
+
+    //连接绑定
+    void setConnection(ConnectionItem* item);
+
+    //绘画接口
     QRectF boundingRect() const override { return geometry_.components().bounding_rect; }
+    QPainterPath shape() const override { return shape_; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
 
 private:
     //绘画相关
-    void updateCache();
+    void updateCache(double scale);
     static void paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style);
 
 private:
@@ -30,7 +43,10 @@ private:
     DynamicHPortGeometry& geometry_;
     std::shared_ptr<NodeStyle> style_;
     double z_value_ = 0.0;
-    double scale_ = 1.0;
+    double scale_ = 0.0;
+    ConnectionItem* connect_item_ = nullptr;
+    QPainterPath shape_;
+    //bool is_moving_ = false;
 };
 
 } //namespace fe

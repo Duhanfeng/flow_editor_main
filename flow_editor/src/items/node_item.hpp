@@ -20,6 +20,9 @@ public:
     QRectF boundingRect() const override { return *bounding_rect_; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
+protected:
+    void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
+
 private:
     //绘画相关
     void updateCache();

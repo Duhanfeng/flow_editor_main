@@ -34,6 +34,11 @@ public:
     std::unique_ptr<DynamicHPortGeometry> geometry;
     OutNodeItem* draw_item = nullptr;
 };
+class ConnectionItemData
+{
+public:
+    ConnectionItem* draw_item = nullptr;
+};
 
 class FlowScene::Data
 {
@@ -46,7 +51,7 @@ public:
     std::map<guid16, std::unique_ptr<NodeItemData>> node_items;
     std::map<guid16, std::unique_ptr<InPortItemData>> in_node_items;
     std::map<guid16, std::unique_ptr<OutPortItemData>> out_node_items;
-    std::map<guid18, ConnectionItem*> connection_items;
+    std::map<guid18, std::unique_ptr<ConnectionItemData>> connection_items;
 };
 
 namespace
@@ -111,7 +116,7 @@ void FlowScene::showFlow(std::shared_ptr<Flow> flow)
     }
 
     //根据flow内容显示对象
-    double crt_z_value = 0;
+    double crt_z_value = 100;
     for (const auto& node : data_->flow->nodes)
     {
         const auto& guid = node.first;
@@ -159,6 +164,41 @@ void FlowScene::showFlow(std::shared_ptr<Flow> flow)
         //保存数据
         data_->out_node_items.emplace(guid, std::move(node_item_data));
         crt_z_value++;
+    }
+
+    crt_z_value = 0;
+    for (const auto& connection : data_->flow->connections)
+    {
+        const auto& out = connection.second.out;
+        unsigned int out_port_index = connection.second.out_port;
+        const auto& in = connection.second.in;
+        unsigned int in_port_index = connection.second.in_port;
+
+        ConnectionItem* draw_item = nullptr;
+
+        auto iter_nodes1 = data_->node_items.find(out);
+        auto iter_port1 = data_->in_node_items.find(out);
+        auto iter_nodes2 = data_->node_items.find(in);
+        auto iter_port2 = data_->out_node_items.find(in);
+
+        if (iter_port1 != data_->in_node_items.end() &&
+            iter_port2 != data_->out_node_items.end())
+        {
+            draw_item = new ConnectionItem(crt_z_value);
+            iter_port1->second->draw_item->setConnection(draw_item);
+            iter_port2->second->draw_item->setConnection(draw_item);
+        }
+
+        if (draw_item != nullptr)
+        {
+            std::unique_ptr<ConnectionItemData> item_data = std::make_unique<ConnectionItemData>();
+            item_data->draw_item = draw_item;
+            //显示
+            addItem(item_data->draw_item);
+            //保存数据
+            data_->connection_items.emplace(connection.first, std::move(item_data));
+            crt_z_value++;
+        }
     }
 }
 void FlowScene::showNodes(const std::vector<NodeData>& nodes)

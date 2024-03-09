@@ -25,8 +25,8 @@ NodeItem::NodeItem(NodeData& data, DynamicHGeometry& geometry, std::shared_ptr<N
 
     geometry_.update(scale_);
     updateCache();
-
-    setFlags(ItemIsSelectable | ItemIsMovable);
+    setAcceptHoverEvents(true);
+    setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
 }
 void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget)
 {
@@ -193,5 +193,10 @@ void NodeItem::paintSimpleTo(QPainter* painter, const NodeUISimpleComponents& si
     painter->drawEllipse(simple_components.in_port_rect);
     painter->drawEllipse(simple_components.out_port_rect);
     painter->setBrush(brush);
+}
+void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
+{
+    setCursor(Qt::ArrowCursor);
+    QGraphicsItem::hoverMoveEvent(event);
 }
 } //namespace fe

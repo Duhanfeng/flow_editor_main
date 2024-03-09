@@ -39,14 +39,12 @@ fe::FlowView::FlowView(QWidget* parent) :
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    //setCacheMode(QGraphicsView::CacheBackground);
-    //setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+    setCacheMode(QGraphicsView::CacheBackground);
+    setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
     setRenderHint(QPainter::Antialiasing, false);
     setOptimizationFlags(QGraphicsView::DontSavePainterState);
     setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    //setRenderHint(QPainter::TextAntialiasing, true);
-    //setRenderHint(QPainter::VerticalSubpixelPositioning, true);
     setBackgroundBrush(QColor(50, 50, 50));
 
     data_->minimum_range = 0.15;

@@ -53,11 +53,11 @@ class PortUIComponents
 {
 public:
     //子组件区域
-    QRectF bounding_rect;                //边界区域
-    QRectF icon_rect;                    //图标位置区域
-    QRectF caption_rect;                 //标题区域
-    QRectF port_rect;                    //端口位置
-    std::array<QPointF, 3> node_polygon; //node多边形
+    QRectF bounding_rect;   //边界区域
+    QRectF icon_rect;       //图标位置区域
+    QRectF caption_rect;    //标题区域
+    QRectF port_rect;       //端口位置
+    QPolygonF node_polygon; //node多边形
     //字符缓存
     QStaticText port_name;
 };

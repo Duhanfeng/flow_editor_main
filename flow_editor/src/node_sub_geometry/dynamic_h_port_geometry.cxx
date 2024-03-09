@@ -78,6 +78,7 @@ void DynamicHPortGeometry::update(double scale)
     components_.caption_rect.translate(translate_offset);
     components_.port_rect.translate(translate_offset);
 
+    components_.node_polygon.resize(3);
     if (node_type_ == NodeType::InNode)
     {
         components_.node_polygon[0] = (components_.icon_rect.topLeft());

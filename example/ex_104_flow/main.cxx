@@ -151,6 +151,8 @@ int main(int argc, char** argv)
     flow->out_nodes.emplace(guid4, data4);
     flow->in_nodes.emplace(guid5, data5);
     flow->in_nodes.emplace(guid6, data6);
+    std::array<unsigned char, 18> c_guid1 = { 01 };
+    flow->connections.emplace(c_guid1, fe::Connection{ guid5, 0, guid3, 0 });
 
     flow_view->resize(1200, 800);
     flow_view->show();

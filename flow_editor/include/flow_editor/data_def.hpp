@@ -62,7 +62,7 @@ public:
     std::map<guid16, NodeData> nodes;
     std::map<guid16, NodeData> in_nodes;
     std::map<guid16, NodeData> out_nodes;
-    std::map<guid18, Connection> connection;
+    std::map<guid18, Connection> connections;
 };
 
 class NodeStyle

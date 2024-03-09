@@ -3,14 +3,15 @@
 //
 
 #include "in_node_item.hpp"
+#include <iostream>
 #include <QPainter>
 #include <QPen>
 #include <QStaticText>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QStyleOptionGraphicsItem>
-#include <iostream>
 #include <QElapsedTimer>
+#include "connection_item.hpp"
 
 namespace fe
 {
@@ -23,21 +24,32 @@ InNodeItem::InNodeItem(NodeData& data, DynamicHPortGeometry& geometry, std::shar
     setPos(data_.position);
     setZValue(z_value_);
 
-    geometry_.update(scale_);
-    updateCache();
+    updateCache(1.0);
+    setAcceptHoverEvents(true);
+    setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
 }
 void InNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget)
 {
     double lod = item->levelOfDetailFromTransform(painter->worldTransform());
-    if (scale_ != lod)
-    {
-        scale_ = lod;
-        geometry_.update(lod);
-    }
+    updateCache(lod);
     paintTo(painter, geometry_.components(), scale_, style_);
 }
-void InNodeItem::updateCache()
+void InNodeItem::updateCache(double scale)
 {
+    if (scale_ != scale)
+    {
+        scale_ = scale;
+        geometry_.update(scale);
+        if (connect_item_)
+        {
+            QPointF port_position = pos() + geometry_.components().port_rect.center();
+            connect_item_->updateStart(port_position.toPoint());
+        }
+        shape_.clear();
+        shape_.addPolygon(geometry_.components().node_polygon);
+        shape_.addRect(geometry_.components().port_rect);
+        prepareGeometryChange();
+    }
 }
 void InNodeItem::paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style)
 {
@@ -49,14 +61,14 @@ void InNodeItem::paintTo(QPainter* painter, const PortUIComponents& components, 
 
     //画各个区域(调试用)
     painter->setPen(pen);
-    painter->drawRect(components.bounding_rect);
+    //painter->drawRect(components.bounding_rect);
     //painter->drawRect(geometry.icon_rect);
     painter->drawRect(components.caption_rect);
     painter->drawRect(components.port_rect);
 
     //画主区域
     painter->setBrush(QColor(0x654321));
-    painter->drawPolygon(components.node_polygon.data(), (int)components.node_polygon.size());
+    painter->drawPolygon(components.node_polygon);
     painter->setBrush(brush);
 
     //绘画标题
@@ -81,5 +93,37 @@ void InNodeItem::paintTo(QPainter* painter, const PortUIComponents& components, 
     painter->setBrush(QColor(255, 0, 0));
     painter->drawEllipse(components.port_rect);
     painter->setBrush(brush);
+}
+void InNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mousePressEvent(event);
+}
+void InNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mouseMoveEvent(event);
+    if (connect_item_)
+    {
+        QPointF port_position = pos() + geometry_.components().port_rect.center();
+        connect_item_->updateStart(port_position.toPoint());
+    }
+}
+void InNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mouseReleaseEvent(event);
+}
+void InNodeItem::setConnection(ConnectionItem* item)
+{
+    connect_item_ = item;
+    if (connect_item_)
+    {
+        QPointF port_position = pos() + geometry_.components().port_rect.center();
+        connect_item_->updateStart(port_position.toPoint());
+    }
+}
+void InNodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
+{
+    //改变鼠标样式
+    setCursor(Qt::ArrowCursor);
+    QGraphicsItem::hoverMoveEvent(event);
 }
 } //namespace fe
