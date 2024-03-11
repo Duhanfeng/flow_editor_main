@@ -152,10 +152,26 @@ void FlowView::wheelEvent(QWheelEvent* event)
 }
 void FlowView::keyPressEvent(QKeyEvent* event)
 {
+    switch (event->key())
+    {
+    case Qt::Key_Shift:
+        setDragMode(QGraphicsView::RubberBandDrag);
+        break;
+    default:
+        break;
+    }
     QGraphicsView::keyPressEvent(event);
 }
 void FlowView::keyReleaseEvent(QKeyEvent* event)
 {
+    switch (event->key())
+    {
+    case Qt::Key_Shift:
+        setDragMode(QGraphicsView::ScrollHandDrag);
+        break;
+    default:
+        break;
+    }
     QGraphicsView::keyReleaseEvent(event);
 }
 void FlowView::mousePressEvent(QMouseEvent* event)

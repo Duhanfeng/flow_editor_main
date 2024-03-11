@@ -9,21 +9,22 @@
 #include <flow_editor/data_def.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>
+#include <src/items/abs_node_item.hpp>
 
 namespace fe
 {
 class ConnectionItem;
-class OutNodeItem : public QGraphicsItem
+class OutNodeItem : public AbsNodeItem
 {
 public:
     OutNodeItem() = delete;
-    OutNodeItem(NodeData& data, DynamicHPortGeometry& geometry, std::shared_ptr<NodeStyle> style, double z_value);
+    OutNodeItem(FlowScene& scene, const guid16& id);
 
     //连接绑定
     void setConnection(ConnectionItem* item);
 
     //绘画接口
-    QRectF boundingRect() const override { return geometry_.components().bounding_rect; }
+    QRectF boundingRect() const override { return geometry_->components().bounding_rect; }
     QPainterPath shape() const override { return shape_; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
@@ -39,9 +40,9 @@ private:
     static void paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style);
 
 private:
-    NodeData& data_;
-    DynamicHPortGeometry& geometry_;
-    std::shared_ptr<NodeStyle> style_;
+    NodeData* data_ = nullptr;
+    DynamicHPortGeometry* geometry_ = nullptr;
+    std::shared_ptr<NodeStyle> style_ = nullptr;
     double z_value_ = 0.0;
     double scale_ = 0.0;
     ConnectionItem* connect_item_ = nullptr;

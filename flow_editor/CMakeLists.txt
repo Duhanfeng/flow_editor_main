@@ -15,6 +15,7 @@ project(flow_editor)
 #################################################################################
 
 set(BUILD_RS_SHARED_LIBS OFF)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 #################################################################################
@@ -37,14 +38,19 @@ set(PROJECT_SOURCES
         src/node_sub_geometry/dynamic_h_geometry.cxx
         src/node_sub_geometry/dynamic_h_port_geometry.hpp
         src/node_sub_geometry/dynamic_h_port_geometry.cxx
+        src/items/abs_node_item.hpp
         src/items/node_item.hpp
         src/items/node_item.cxx
         src/items/in_node_item.hpp
         src/items/in_node_item.cxx
         src/items/out_node_item.hpp
         src/items/out_node_item.cxx
-        src/items/connection_item.cxx
-        src/items/connection_item.hpp
+        src/items/connection/connection_item.cxx
+        src/items/connection/connection_item.hpp
+        src/items/connection/connection_state.hpp
+        src/items/connection/connection_state.cxx
+        src/flow_view/flow_scene_data.cxx
+        src/flow_view/flow_scene_data.hpp
 )
 # 添加rcc
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

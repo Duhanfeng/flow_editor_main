@@ -9,6 +9,9 @@
 
 namespace fe
 {
+class AbsNodeItem;
+class ConnectionItem;
+class FlowSceneData;
 class FlowScene : public QGraphicsScene
 {
 public:
@@ -16,8 +19,8 @@ public:
     ~FlowScene();
 
     //渲染控制
-    void showNodes(const std::vector<NodeData>& node_data);
     void showFlow(std::shared_ptr<Flow> flow);
+    std::shared_ptr<Flow>& flow();
     void clearItem();
 
     //样式控制
@@ -25,6 +28,12 @@ public:
     void setNodeLayoutStyle(NodeLayoutStyle node_style);
     std::shared_ptr<NodeStyle> nodeStyle() const;
     void setNodeStyle();
+
+    //查询接口
+    FlowSceneData* flowSceneData();
+    AbsNodeItem* absNodeItem(const guid16& id);                        //返回当前id对应的AbsNodeItem
+    ConnectionItem* connectionItem(const guid18& id);                  //返回当前id对应的ConnectionItem
+    std::vector<ConnectionItem*> allConnectionItems(const guid16& id); //返回当前node id所涉及的所有ConnectionItem
 
 private:
     class Data;

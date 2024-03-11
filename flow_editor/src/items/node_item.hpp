@@ -9,14 +9,15 @@
 #include <flow_editor/data_def.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_geometry.hpp>
+#include <src/items/abs_node_item.hpp>
 
 namespace fe
 {
-class NodeItem : public QGraphicsItem
+class NodeItem : public AbsNodeItem
 {
 public:
     NodeItem() = delete;
-    NodeItem(NodeData& data, DynamicHGeometry& geometry, std::shared_ptr<NodeStyle> style, double z_value);
+    NodeItem(FlowScene& scene, const guid16& id);
     QRectF boundingRect() const override { return *bounding_rect_; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
@@ -30,9 +31,9 @@ private:
     static void paintSimpleTo(QPainter* painter, const NodeUISimpleComponents& simple_components, double scale, std::shared_ptr<NodeStyle>& style);
 
 private:
-    NodeData& data_;
-    DynamicHGeometry& geometry_;
-    std::shared_ptr<NodeStyle> style_;
+    NodeData* data_ = nullptr;
+    DynamicHGeometry* geometry_ = nullptr;
+    std::shared_ptr<NodeStyle> style_ = nullptr;
     double z_value_ = 0.0;
     double scale_ = 1.0;
     const QRectF* bounding_rect_ = nullptr;

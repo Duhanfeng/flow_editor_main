@@ -10,18 +10,17 @@
 
 namespace fe
 {
-class GraphicsViewStyle
-{
-public:
-    QColor background_color;
-    QColor fine_grid_color;
-    QColor coarse_grid_color;
-};
 
 enum class NodeLayoutStyle
 {
     Horizontal,
     Vertical
+};
+enum class PortType
+{
+    In = 0,  ///<Input node port (from the left).
+    Out = 1, ///<Output node port (from the right).
+    None = 2
 };
 enum class NodeType
 {
@@ -47,6 +46,18 @@ public:
 
 using guid16 = std::array<unsigned char, 16>;
 using guid18 = std::array<unsigned char, 18>;
+template <size_t _Size>
+inline bool isInvalid(const std::array<unsigned char, _Size>& id)
+{
+    for (size_t i = 0; i < _Size; ++i)
+    {
+        if (id[i] != 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
 class Connection
 {
@@ -59,12 +70,27 @@ public:
 class Flow
 {
 public:
+    virtual ~Flow() = default;
+
+public:
     std::map<guid16, NodeData> nodes;
     std::map<guid16, NodeData> in_nodes;
     std::map<guid16, NodeData> out_nodes;
     std::map<guid18, Connection> connections;
+
+    virtual guid18 tryConnect(const Connection& connection)
+    {
+        return { 0 };
+    }
 };
 
+class GraphicsViewStyle
+{
+public:
+    QColor background_color;
+    QColor fine_grid_color;
+    QColor coarse_grid_color;
+};
 class NodeStyle
 {
 public:
@@ -88,6 +114,25 @@ public:
     QString font_name;                      //默认字体名
     int font_size = 9;                      //默认字体大小
     QFont font;                             //默认字体
+};
+class ConnectionStyle
+{
+public:
+    //基础颜色
+    QColor construction_color;  //用于构造时的颜色
+    QColor normal_color;        //正常状态下的颜色
+    QColor selected_color;      //被选中时的颜色
+    QColor selected_halo_color; //被选中时光晕的颜色
+    QColor hovered_color;       //鼠标悬停时的颜色
+
+    //定义线条和点的尺寸
+    float line_width;              //线条宽度
+    float construction_line_width; //构造时线条宽度
+    float point_diameter;          //点的直径
+
+    //自定义颜色
+    bool use_data_defined_colors;             //是否使用数据定义的颜色
+    std::map<QString, QColor> type_color_map; //类型与颜色映射字典
 };
 
 } //namespace fe

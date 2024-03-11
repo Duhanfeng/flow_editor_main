@@ -11,44 +11,57 @@
 #include <QStyleOptionGraphicsItem>
 #include <iostream>
 #include <QElapsedTimer>
-#include "connection_item.hpp"
+#include <src/flow_view/flow_scene_data.hpp>
+//#include "connection_item.hpp"
 
 namespace fe
 {
-OutNodeItem::OutNodeItem(NodeData& data, DynamicHPortGeometry& geometry, std::shared_ptr<NodeStyle> style, double z_value) :
-    data_(data),
-    geometry_(geometry),
-    style_(style),
-    z_value_(z_value)
+OutNodeItem::OutNodeItem(FlowScene& scene, const guid16& id) :
+    AbsNodeItem(scene, id)
 {
-    setPos(data_.position);
+    //查询配置属性
+    FlowSceneData* flow_data = scene.flowSceneData();
+    auto itr = flow_data->out_node_items.find(id);
+    if (itr == flow_data->out_node_items.end())
+    {
+        setEnabled(false);
+        return;
+    }
+    data_ = &itr->second->data;
+    geometry_ = itr->second->geometry.get();
+    style_ = itr->second->node_style;
+    z_value_ = itr->second->z_value;
+    
+    //初始化
+    setPos(data_->position);
     setZValue(z_value_);
-
-    updateCache(1.0);
     setAcceptHoverEvents(true);
     setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
+
+    updateCache(1.0);
+
+    //添加显示对象
+    itr->second->draw_item = this;
+    scene.addItem(this);
 }
 void OutNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget)
 {
     double lod = item->levelOfDetailFromTransform(painter->worldTransform());
     updateCache(lod);
-    paintTo(painter, geometry_.components(), scale_, style_);
+    paintTo(painter, geometry_->components(), scale_, style_);
 }
 void OutNodeItem::updateCache(double scale)
 {
     if (scale_ != scale)
     {
         scale_ = scale;
-        geometry_.update(scale);
-        if (connect_item_)
-        {
-            QPointF port_position = pos() + geometry_.components().port_rect.center();
-            connect_item_->updateEnd(port_position.toPoint());
-        }
+        geometry_->update(scale);
         shape_.clear();
-        shape_.addPolygon(geometry_.components().node_polygon);
-        shape_.addRect(geometry_.components().port_rect);
+        shape_.addPolygon(geometry_->components().node_polygon);
+        shape_.addRect(geometry_->components().port_rect);
         prepareGeometryChange();
+        moveConnections();
     }
 }
 void OutNodeItem::paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style)
@@ -101,11 +114,6 @@ void OutNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void OutNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
-    if (connect_item_)
-    {
-        QPointF port_position = pos() + geometry_.components().port_rect.center();
-        connect_item_->updateEnd(port_position.toPoint());
-    }
 }
 void OutNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -114,11 +122,6 @@ void OutNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void OutNodeItem::setConnection(ConnectionItem* item)
 {
     connect_item_ = item;
-    if (connect_item_)
-    {
-        QPointF port_position = pos() + geometry_.components().port_rect.center();
-        connect_item_->updateEnd(port_position.toPoint());
-    }
 }
 void OutNodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {

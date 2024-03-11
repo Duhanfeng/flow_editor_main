@@ -11,22 +11,39 @@
 #include <QStyleOptionGraphicsItem>
 #include <iostream>
 #include <QElapsedTimer>
+#include <src/flow_view/flow_scene_data.hpp>
 
 namespace fe
 {
-NodeItem::NodeItem(NodeData& data, DynamicHGeometry& geometry, std::shared_ptr<NodeStyle> style, double z_value) :
-    data_(data),
-    geometry_(geometry),
-    style_(style),
-    z_value_(z_value)
+NodeItem::NodeItem(FlowScene& scene, const guid16& id) :
+    AbsNodeItem(scene, id)
 {
-    setPos(data_.position);
-    setZValue(z_value_);
+    //查询配置属性
+    FlowSceneData* flow_data = scene.flowSceneData();
+    auto itr = flow_data->node_items.find(id);
+    if (itr == flow_data->node_items.end())
+    {
+        setEnabled(false);
+        return;
+    }
+    data_ = &itr->second->data;
+    geometry_ = itr->second->geometry.get();
+    style_ = itr->second->node_style;
+    z_value_ = itr->second->z_value;
 
-    geometry_.update(scale_);
-    updateCache();
+    //初始化
+    setPos(data_->position);
+    setZValue(z_value_);
     setAcceptHoverEvents(true);
     setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
+
+    geometry_->update(scale_);
+    updateCache();
+
+    //添加显示对象
+    itr->second->draw_item = this;
+    scene.addItem(this);
 }
 void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget)
 {
@@ -39,26 +56,27 @@ void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QW
 
     if (crt_model_ == 0)
     {
-        paintTo(painter, geometry_.components(), 1.0, style_);
+        paintTo(painter, geometry_->components(), 1.0, style_);
     }
     else
     {
-        paintSimpleTo(painter, geometry_.simpleComponents(), scale_, style_);
+        paintSimpleTo(painter, geometry_->simpleComponents(), scale_, style_);
     }
 }
 void NodeItem::updateCache()
 {
     if (scale_ < 0.5)
     {
-        geometry_.updateSimple(scale_);
-        bounding_rect_ = &geometry_.simpleComponents().bounding_rect;
+        geometry_->updateSimple(scale_);
+        bounding_rect_ = &geometry_->simpleComponents().bounding_rect;
         crt_model_ = 1;
     }
     else
     {
-        bounding_rect_ = &geometry_.components().bounding_rect;
+        bounding_rect_ = &geometry_->components().bounding_rect;
         crt_model_ = 0;
     }
+    moveConnections();
 }
 void NodeItem::paintTo(QPainter* painter, const NodeUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style)
 {
