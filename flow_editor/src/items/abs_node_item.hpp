@@ -5,16 +5,18 @@
 #pragma once
 #include <QGraphicsItem>
 #include <flow_editor/flow_view/flow_scene.hpp>
+#include <src/flow_view/flow_scene_data.hpp>
 #include <src/items/connection/connection_item.hpp>
+#include <src/items/connection/draft_connection_item.hpp>
 
 namespace fe
 {
-class DraftConnectionItem;
 class AbsNodeItem : public QGraphicsItem
 {
 public:
     AbsNodeItem(FlowScene& scene, const guid16& id) :
         scene_(scene), id_(id) {}
+    virtual ~AbsNodeItem() = default;
 
     const guid16& id() const { return id_; }
 
@@ -23,10 +25,13 @@ public:
     void storeConnectionForReaction(DraftConnectionItem const* item) { draft_connection_item_ = item; }
     void resetConnectionForReaction() { draft_connection_item_ = nullptr; }
 
+    //获取当前位置对应的端口索引(大于等于0: 有效 -1:无效)
+    virtual int getPortIndex(PortType required_port, const QPoint& pos) const = 0;
+
 protected:
-    void moveConnections() const
+    void moveConnections()
     {
-        std::vector<ConnectionItem*> items = scene_.allConnectionItems(id_);
+        std::vector<ConnectionItem*> items = scene_.flowSceneData()->allConnectionItems(id_);
         for (const auto& item : items)
         {
             item->move();

@@ -31,7 +31,7 @@ OutNodeItem::OutNodeItem(FlowScene& scene, const guid16& id) :
     geometry_ = itr->second->geometry.get();
     style_ = itr->second->node_style;
     z_value_ = itr->second->z_value;
-    
+
     //初始化
     setPos(data_->position);
     setZValue(z_value_);
@@ -49,7 +49,9 @@ void OutNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item,
 {
     double lod = item->levelOfDetailFromTransform(painter->worldTransform());
     updateCache(lod);
-    paintTo(painter, geometry_->components(), scale_, style_);
+    painter->save();
+    paintTo(painter);
+    painter->restore();
 }
 void OutNodeItem::updateCache(double scale)
 {
@@ -64,10 +66,12 @@ void OutNodeItem::updateCache(double scale)
         moveConnections();
     }
 }
-void OutNodeItem::paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style)
+void OutNodeItem::paintTo(QPainter* painter)
 {
-    painter->save();
-    //保存状态
+    double scale = scale_;
+    const auto& components = geometry_->components();
+    auto& style = style_;
+
     QPen pen = painter->pen();
     QBrush brush = painter->brush();
     QFont font = style->font;
@@ -107,13 +111,48 @@ void OutNodeItem::paintTo(QPainter* painter, const PortUIComponents& components,
     //painter->setBrush(QColor(255, 0, 0));
     //painter->drawEllipse(components.port_rect);
     //painter->setBrush(brush);
-    painter->restore();
+
+    //画交互端口
+    if (draft_connection_item_)
+    {
+        //std::cout << "draft_connection_item_" << std::endl;
+        PortType port_type = draft_connection_item_->requiredPort();
+        if (port_type == PortType::Out)
+        {
+            return;
+        }
+
+        QPointF p = components.port_rect.center();
+
+        auto cp = draft_connection_item_->sceneTransform().map(draft_connection_item_->endPoint(port_type));
+        cp = draft_connection_item_->sceneTransform().inverted().map(cp);
+
+        auto diff = cp - p;
+        double dist = std::sqrt(QPointF::dotProduct(diff, diff));
+
+        double r = 1.0;
+        bool possible = false;
+        if (possible)
+        {
+            double const thres = 20;
+            r = (dist < thres) ? (2.0 - dist / thres) : 1.0;
+        }
+        else
+        {
+            double const thres = 20;
+            r = (dist < thres) ? (dist / thres) : 1.0;
+        }
+
+        painter->setBrush(style->connection_point_color);
+        painter->drawEllipse(p, style->connection_point_diameter * r, style->connection_point_diameter * r);
+        resetConnectionForReaction();
+    }
 }
 void OutNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if (geometry_->components().port_rect.contains(event->pos()))
     {
-        scene_.makeDraftConnection(PortType::Out, id_, 0);
+        scene_.flowSceneData()->makeDraftConnection(PortType::Out, id_, 0);
     }
     else
     {
@@ -128,14 +167,26 @@ void OutNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
 }
-void OutNodeItem::setConnection(ConnectionItem* item)
-{
-    connect_item_ = item;
-}
 void OutNodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
     //改变鼠标样式
     setCursor(Qt::ArrowCursor);
     QGraphicsItem::hoverMoveEvent(event);
+}
+int OutNodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
+{
+    if (required_port != PortType::In)
+    {
+        return -1;
+    }
+
+    QPointF p1 = geometry_->components().port_rect.center();
+    QLineF line(p1, pos);
+    if (line.length() < style_->connection_point_diameter)
+    {
+        return 0;
+    }
+
+    return -1;
 }
 } //namespace fe

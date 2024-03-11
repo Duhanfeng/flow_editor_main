@@ -11,7 +11,6 @@
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>
-#include "connection_state.hpp"
 
 namespace fe
 {
@@ -46,7 +45,7 @@ private:
 
 private:
     FlowScene& scene_;
-    const guid18& id_;
+    guid18 id_;
     Connection* connection_ = nullptr;
     std::shared_ptr<ConnectionStyle> style_ = nullptr;
     double z_value_ = 0.0;

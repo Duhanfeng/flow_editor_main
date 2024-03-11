@@ -33,6 +33,9 @@ set(PROJECT_SOURCES
         ${PROJECT_INCLUDE}
         src/flow_view/flow_view.cxx
         src/flow_view/flow_scene.cxx
+        src/flow_view/flow_scene_data.cxx
+        src/flow_view/flow_scene_data.hpp
+        src/flow_view/default_style.hpp
         src/node_sub_geometry/node_sub_geometry.hpp
         src/node_sub_geometry/dynamic_h_geometry.hpp
         src/node_sub_geometry/dynamic_h_geometry.cxx
@@ -47,10 +50,6 @@ set(PROJECT_SOURCES
         src/items/out_node_item.cxx
         src/items/connection/connection_item.cxx
         src/items/connection/connection_item.hpp
-        src/items/connection/connection_state.hpp
-        src/items/connection/connection_state.cxx
-        src/flow_view/flow_scene_data.cxx
-        src/flow_view/flow_scene_data.hpp
         src/items/connection/draft_connection_item.cxx
         src/items/connection/draft_connection_item.hpp
 )

@@ -4,9 +4,9 @@
 
 #pragma once
 #include <memory>
+#include <QFontMetrics>
 #include <flow_editor/data_def.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
-#include <QFontMetrics>
 
 namespace fe
 {

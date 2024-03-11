@@ -11,7 +11,6 @@
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>
-#include "connection_state.hpp"
 
 namespace fe
 {
@@ -22,6 +21,12 @@ public:
     DraftConnectionItem() = delete;
     DraftConnectionItem(FlowScene& scene, PortType required_port, const guid16& id, unsigned int port_index, std::shared_ptr<DraftConnectionStyle> style);
     DraftConnectionItem(FlowScene& scene, PortType required_port, const guid16& id, unsigned int port_index, std::shared_ptr<DraftConnectionStyle> style, ConnectionItem* original_item);
+
+    //查询接口
+    PortType requiredPort() const { return required_port_; }
+    const QPoint& out() const { return out_; }
+    const QPoint& in() const { return in_; }
+    const QPoint& endPoint(PortType port_type) const { return (port_type == PortType::Out ? out_ : in_); }
 
     //绘画接口
     QRectF boundingRect() const override { return bounding_rect_; }
@@ -38,14 +43,11 @@ private:
 
 private:
     FlowScene& scene_;
-    PortType required_port_ = PortType::None; //所需要的端口
-    const guid16& id_;
+    PortType required_port_ = PortType::None; //所需要连接的端口
+    guid16 id_;
     unsigned int port_index_;
     std::shared_ptr<DraftConnectionStyle> style_;
     ConnectionItem* original_item_ = nullptr;
-
-    friend ConnectionState;
-    ConnectionState connection_state_;
 
     //缓存
     QPoint out_;
@@ -53,6 +55,7 @@ private:
     QRectF bounding_rect_;
     QPainterPath cubic_;
     QPainterPath shape_;
+    guid16 last_hovered_node_ = { 0 }; //最后的悬停节点
 };
 
 } //namespace fe

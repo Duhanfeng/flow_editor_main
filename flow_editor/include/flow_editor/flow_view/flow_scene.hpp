@@ -20,24 +20,17 @@ public:
 
     //渲染控制
     void showFlow(std::shared_ptr<Flow> flow);
-    std::shared_ptr<Flow>& flow();
+    std::shared_ptr<Flow> flow();
     void clearItem();
 
     //样式控制
     NodeLayoutStyle nodeLayoutStyle() const;
     void setNodeLayoutStyle(NodeLayoutStyle node_style);
     std::shared_ptr<NodeStyle> nodeStyle() const;
-    void setNodeStyle();
+    void setNodeStyle(std::shared_ptr<NodeStyle> style);
 
     //查询接口
     FlowSceneData* flowSceneData();
-    AbsNodeItem* absNodeItem(const guid16& id);                        //返回当前id对应的AbsNodeItem
-    ConnectionItem* connectionItem(const guid18& id);                  //返回当前id对应的ConnectionItem
-    std::vector<ConnectionItem*> allConnectionItems(const guid16& id); //返回当前node id所涉及的所有ConnectionItem
-
-    //其他
-    void makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index);
-    void resetDraftConnection();
 
 private:
     class Data;

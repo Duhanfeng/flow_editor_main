@@ -219,4 +219,16 @@ void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
     setCursor(Qt::ArrowCursor);
     QGraphicsItem::hoverMoveEvent(event);
 }
+int NodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
+{
+    if (required_port == PortType::Out)
+    {
+        
+    }
+    else if (required_port == PortType::In)
+    {
+    }
+
+    return 0;
+}
 } //namespace fe

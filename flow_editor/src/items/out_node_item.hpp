@@ -20,8 +20,7 @@ public:
     OutNodeItem() = delete;
     OutNodeItem(FlowScene& scene, const guid16& id);
 
-    //连接绑定
-    void setConnection(ConnectionItem* item);
+    int getPortIndex(PortType required_port, const QPoint& pos) const override;
 
     //绘画接口
     QRectF boundingRect() const override { return geometry_->components().bounding_rect; }
@@ -37,7 +36,7 @@ protected:
 private:
     //绘画相关
     void updateCache(double scale);
-    static void paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style);
+    void paintTo(QPainter* painter);
 
 private:
     NodeData* data_ = nullptr;
@@ -45,9 +44,7 @@ private:
     std::shared_ptr<NodeStyle> style_ = nullptr;
     double z_value_ = 0.0;
     double scale_ = 0.0;
-    ConnectionItem* connect_item_ = nullptr;
     QPainterPath shape_;
-    //bool is_moving_ = false;
 };
 
 } //namespace fe

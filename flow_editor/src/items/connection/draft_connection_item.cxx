@@ -3,6 +3,7 @@
 //
 
 #include "draft_connection_item.hpp"
+#include <iostream>
 #include <QPainter>
 #include <QPen>
 #include <QStaticText>
@@ -10,7 +11,7 @@
 #include <QGraphicsView>
 #include <QStyleOptionGraphicsItem>
 #include <src/flow_view/flow_scene_data.hpp>
-#include <iostream>
+#include <src/items/abs_node_item.hpp>
 
 namespace
 {
@@ -54,7 +55,7 @@ fe::AbsNodeItem* locateNodeAt(QPointF scene_point,
         {
             //使用 qgraphicsitem_cast 尝试将项转换为 AbsNodeItem*。
             //如果转换成功（即不为 nullptr），则返回 true，该项将被添加到 filtered_items 中。
-            return (qgraphicsitem_cast<fe::AbsNodeItem*>(item) != nullptr);
+            return (dynamic_cast<fe::AbsNodeItem*>(item) != nullptr);
         });
     fe::AbsNodeItem* node = nullptr;
     //如果过滤后的列表不为空，
@@ -78,8 +79,7 @@ DraftConnectionItem::DraftConnectionItem(FlowScene& scene, PortType required_por
     required_port_(required_port),
     id_(id),
     port_index_(port_index),
-    style_(style),
-    connection_state_(*this)
+    style_(style)
 {
     setZValue(500);
     setFlags(ItemIsSelectable | ItemIsFocusable);
@@ -191,85 +191,126 @@ void DraftConnectionItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
 }
 void DraftConnectionItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    setEndPoint(required_port_, event->pos());
+    QPointF end_point = event->pos();
+    setEndPoint(required_port_, end_point);
+    //更新图形
+    event->accept();
+    updateCache();
+
+    if (required_port_ == PortType::In)
+    {
+        QLineF line(out_, end_point);
+        if (line.length() < 50)
+        {
+            return;
+        }
+    }
+    else if (required_port_ == PortType::Out)
+    {
+        QLineF line(in_, end_point);
+        if (line.length() < 50)
+        {
+            return;
+        }
+    }
+
+    //std::cout << "event->pos" << event->pos().x() << "," << event->pos().y() << std::endl;
+    //std::cout << "event->scenePos" << event->scenePos().x() << "," << event->scenePos().y() << std::endl;
 
     //将事件中的 widget 强制转换为 QGraphicsView 类型，以便获取视图信息。
     auto view = static_cast<QGraphicsView*>(event->widget());
     //在视图中的特定位置定位节点，这里的 locateNodeAt 是一个自定义函数。
-    auto ngo = locateNodeAt(event->scenePos(), scene_, view->transform());
+    auto ngo = locateNodeAt(end_point, scene_, view->transform());
     //如果找到了节点（ngo 非空），则让节点响应连接(用于实现连接有效/无效的动画)
     if (ngo)
     {
+        //std::cout << "ngo->storeConnectionForReaction" << std::endl;
         ngo->storeConnectionForReaction(this);
         ngo->update();
         //设置连接状态中的最后一个悬停节点 ID。
-        connection_state_.setLastHoveredNode(ngo->id());
+        last_hovered_node_ = ngo->id();
     }
     else
     {
         //如果没有找到节点，则重置最后一个悬停节点 ID。
-        connection_state_.resetLastHoveredNode();
+        last_hovered_node_ = { 0 };
     }
-
-    //更新图形
-    event->accept();
-    updateCache();
 }
 void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    //告诉系统此 item 不再捕获鼠标事件。
-    ungrabMouse();
-    //标记事件已被正确处理。
-    event->accept();
-
-    //标记事件已被正确处理。
-    event->accept();
-
-    //查询当前位置的
+    //查询当前位置的AbsNodeItem对象
     auto view = static_cast<QGraphicsView*>(event->widget());
     auto ngo = locateNodeAt(event->scenePos(), scene_, view->transform());
     if (ngo)
     {
-        Connection connection;
-        if (required_port_ == PortType::In)
+        int port_index = ngo->getPortIndex(required_port_, mapToItem(ngo, event->scenePos()).toPoint());
+        if (port_index >= 0)
         {
-            connection.out = id_;
-            connection.out_port = port_index_;
-            connection.in = ngo->id();
-            connection.in_port = 0; //这里需要实现查询鼠标位置
-        }
-        else
-        {
-            connection.in = id_;
-            connection.in_port = port_index_;
-            connection.out = ngo->id();
-            connection.out_port = 0; //这里需要实现查询鼠标位置
-        }
-
-        //如果连接和原本的一致,则显示原有的对象
-        if (original_item_)
-        {
-            if (connection.out == original_item_->connection()->out &&
-                connection.out_port == original_item_->connection()->out_port &&
-                connection.in == original_item_->connection()->in &&
-                connection.in_port == original_item_->connection()->in_port)
+            Connection connection;
+            if (required_port_ == PortType::In)
             {
-                original_item_->setVisible(true);
+                connection.out = id_;
+                connection.out_port = port_index_;
+                connection.in = ngo->id();
+                connection.in_port = port_index;
             }
             else
             {
+                connection.in = id_;
+                connection.in_port = port_index_;
+                connection.out = ngo->id();
+                connection.out_port = port_index;
+            }
+
+            //如果连接和原本的一致,则显示原有的对象
+            if (original_item_)
+            {
+                if (connection.out == original_item_->connection()->out &&
+                    connection.out_port == original_item_->connection()->out_port &&
+                    connection.in == original_item_->connection()->in &&
+                    connection.in_port == original_item_->connection()->in_port)
+                {
+                    original_item_->setVisible(true);
+                }
+                else
+                {
+                    if (scene_.flow()->tryDisconnect(original_item_->id()))
+                    {
+                        //尝试断开旧链接
+                        scene_.flowSceneData()->removeConnection(original_item_->id());
+
+                        //尝试连接
+                        guid18 connection_id = scene_.flow()->tryConnect(connection);
+                        if (!isInvalid(connection_id))
+                        {
+                            //内部添加新添加的连接对象
+                            scene_.flowSceneData()->addConnection(connection_id, connection);
+                        }
+                    }
+                    else
+                    {
+                        original_item_->setVisible(true);
+                    }
+                }
+            }
+            else
+            {
+                //尝试连接
+                guid18 connection_id = scene_.flow()->tryConnect(connection);
+                if (!isInvalid(connection_id))
+                {
+                    //内部添加新添加的连接对象
+                    scene_.flowSceneData()->addConnection(connection_id, connection);
+                }
+            }
+        }
+        else
+        {
+            if (original_item_)
+            {
                 if (scene_.flow()->tryDisconnect(original_item_->id()))
                 {
-                    //尝试断开旧链接
                     scene_.flowSceneData()->removeConnection(original_item_->id());
-
-                    //尝试连接
-                    guid18 connection_id = scene_.flow()->tryConnect(connection);
-                    if (!isInvalid(connection_id))
-                    {
-                        //内部添加新添加的连接对象
-                        scene_.flowSceneData()->addConnection(connection_id, connection);
-                    }
                 }
                 else
                 {
@@ -284,6 +325,7 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         {
             if (scene_.flow()->tryDisconnect(original_item_->id()))
             {
+                std::cout << "scene_.flowSceneData()->removeConnection" << std::endl;
                 scene_.flowSceneData()->removeConnection(original_item_->id());
             }
             else
@@ -293,7 +335,9 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         }
     }
 
-    //重置对象
-    scene_.resetDraftConnection();
+    //退出
+    ungrabMouse();                                  //不再捕获鼠标事件。
+    event->accept();                                //标记事件已被正确处理。
+    scene_.flowSceneData()->resetDraftConnection(); //重置对象
 }
 } //namespace fe

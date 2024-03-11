@@ -24,6 +24,7 @@ class FlowView::Data
 {
 public:
     double fps = 0;
+    double time = 0;
     QElapsedTimer timer;
 
     double minimum_range = 0;
@@ -60,7 +61,7 @@ fe::FlowView::FlowView(QWidget* parent) :
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [&]()
         {
-            std::cout << "fps: " << data_->fps << "   time: " << 1000.0 / data_->fps << "ms" << std::endl;
+            std::cout << "fps: " << data_->fps << "   time: " << data_->time << " ms" << std::endl;
         });
     timer->start(1000);
 }
@@ -274,6 +275,7 @@ void FlowView::paintEvent(QPaintEvent* event)
     //FPS computation
     if (++fps_count == max_count)
     {
+        data_->time = time / max_count;
         data_->fps = 1000.0 * max_count / time;
         if (std::isinf(data_->fps))
         {

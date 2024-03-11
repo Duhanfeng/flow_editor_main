@@ -18,6 +18,10 @@ class NodeItem : public AbsNodeItem
 public:
     NodeItem() = delete;
     NodeItem(FlowScene& scene, const guid16& id);
+
+    int getPortIndex(PortType required_port, const QPoint& pos) const override;
+
+    //绘画接口
     QRectF boundingRect() const override { return *bounding_rect_; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 

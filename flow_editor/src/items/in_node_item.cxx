@@ -113,7 +113,7 @@ void InNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if (geometry_->components().port_rect.contains(event->pos()))
     {
-        scene_.makeDraftConnection(PortType::In, id_, 0);
+        scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, 0);
     }
     else
     {
@@ -128,14 +128,26 @@ void InNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
 }
-void InNodeItem::setConnection(ConnectionItem* item)
-{
-    connect_item_ = item;
-}
 void InNodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
     //改变鼠标样式
     setCursor(Qt::ArrowCursor);
     QGraphicsItem::hoverMoveEvent(event);
+}
+int InNodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
+{
+    if (required_port != PortType::Out)
+    {
+        return -1;
+    }
+
+    QPointF p1 = geometry_->components().port_rect.center();
+    QLineF line(p1, pos);
+    if (line.length() < style_->connection_point_diameter)
+    {
+        return 0;
+    }
+
+    return -1;
 }
 } //namespace fe

@@ -16,6 +16,57 @@
 #include <flow_editor/flow_view/flow_scene.hpp>
 #include <QRandomGenerator>
 
+fe::guid16 createGuid16()
+{
+    fe::guid16 guid;
+    for (size_t i = 0; i < guid.size(); ++i)
+    {
+        guid[i] = QRandomGenerator::global()->bounded(0, 0xFF);
+    }
+    return guid;
+}
+fe::guid18 createGuid18()
+{
+    fe::guid18 guid;
+    for (size_t i = 0; i < guid.size(); ++i)
+    {
+        guid[i] = QRandomGenerator::global()->bounded(0, 0xFF);
+    }
+    return guid;
+}
+
+class FLow2 : public fe::Flow
+{
+public:
+    bool tryDeleteNode(const fe::guid16& id) override
+    {
+        auto iter = nodes.find(id);
+        if (iter != nodes.end())
+        {
+            nodes.erase(iter);
+            return true;
+        }
+        return false;
+    }
+    bool tryDisconnect(const fe::guid18& id) override
+    {
+        auto iter = connections.find(id);
+        if (iter != connections.end())
+        {
+            std::cout << "connections.erase(iter)" << std::endl;
+            connections.erase(iter);
+            return true;
+        }
+        return false;
+    }
+    fe::guid18 tryConnect(const fe::Connection& connection) override
+    {
+        auto id = createGuid18();
+        connections[id] = connection;
+        return id;
+    }
+};
+
 //产生随机字符串
 QString generateRandomString(int min_length, int max_length)
 {
@@ -41,7 +92,7 @@ int main(int argc, char** argv)
 
     fe::FlowScene* scene = new fe::FlowScene();
     fe::FlowView* flow_view = new fe::FlowView(scene);
-    std::shared_ptr<fe::Flow> flow = std::make_shared<fe::Flow>();
+    std::shared_ptr<FLow2> flow = std::make_shared<FLow2>();
 
     //绘画对象
     fe::NodeData data1 = {
