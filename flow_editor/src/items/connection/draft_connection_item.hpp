@@ -1,5 +1,5 @@
 ﻿//
-// Created by cxc on 2024/3/9.
+// Created by cxc on 2024/3/11.
 //
 
 #pragma once
@@ -15,19 +15,13 @@
 
 namespace fe
 {
-class ConnectionItem : public QGraphicsItem
+//连接草稿,用于显示未有效的连接,从out->in
+class DraftConnectionItem : public QGraphicsItem
 {
 public:
-    ConnectionItem() = delete;
-    ConnectionItem(FlowScene& scene, const guid18& id);
-
-    //配置接口
-    void updateStart(const QPoint& value);
-    void updateEnd(const QPoint& value);
-    void updateCache(const QPoint& start, const QPoint& end);
-    void move();
-    Connection* connection() { return connection_; }
-    const guid18& id() const { return id_; }
+    DraftConnectionItem() = delete;
+    DraftConnectionItem(FlowScene& scene, PortType required_port, const guid16& id, unsigned int port_index, std::shared_ptr<DraftConnectionStyle> style);
+    DraftConnectionItem(FlowScene& scene, PortType required_port, const guid16& id, unsigned int port_index, std::shared_ptr<DraftConnectionStyle> style, ConnectionItem* original_item);
 
     //绘画接口
     QRectF boundingRect() const override { return bounding_rect_; }
@@ -37,24 +31,25 @@ public:
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
-    void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
 
 private:
+    void setEndPoint(PortType port_type, QPointF const& point);
     void updateCache();
 
 private:
     FlowScene& scene_;
-    const guid18& id_;
-    Connection* connection_ = nullptr;
-    std::shared_ptr<ConnectionStyle> style_ = nullptr;
-    double z_value_ = 0.0;
-    bool hovered_; //悬停标志
+    PortType required_port_ = PortType::None; //所需要的端口
+    const guid16& id_;
+    unsigned int port_index_;
+    std::shared_ptr<DraftConnectionStyle> style_;
+    ConnectionItem* original_item_ = nullptr;
+
+    friend ConnectionState;
+    ConnectionState connection_state_;
 
     //缓存
-    QPoint start_;
-    QPoint end_;
+    QPoint out_;
+    QPoint in_;
     QRectF bounding_rect_;
     QPainterPath cubic_;
     QPainterPath shape_;

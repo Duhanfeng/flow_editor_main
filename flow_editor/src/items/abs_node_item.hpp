@@ -9,11 +9,19 @@
 
 namespace fe
 {
+class DraftConnectionItem;
 class AbsNodeItem : public QGraphicsItem
 {
 public:
     AbsNodeItem(FlowScene& scene, const guid16& id) :
         scene_(scene), id_(id) {}
+
+    const guid16& id() const { return id_; }
+
+    //DraftConnectionItem交互
+    DraftConnectionItem const* connectionForReaction() const { return draft_connection_item_; }
+    void storeConnectionForReaction(DraftConnectionItem const* item) { draft_connection_item_ = item; }
+    void resetConnectionForReaction() { draft_connection_item_ = nullptr; }
 
 protected:
     void moveConnections() const
@@ -36,5 +44,6 @@ protected:
 protected:
     FlowScene& scene_;
     guid16 id_;
+    const DraftConnectionItem* draft_connection_item_ = nullptr;
 };
 } //namespace fe

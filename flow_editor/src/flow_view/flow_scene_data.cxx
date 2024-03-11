@@ -48,4 +48,10 @@ bool FlowSceneData::getNodePortPosition(const guid16 id, PortType type, unsigned
 
     return false;
 }
+void FlowSceneData::removeConnection(const guid18& id)
+{
+}
+void FlowSceneData::addConnection(const guid18& id, const Connection& connection)
+{
+}
 } //namespace fe

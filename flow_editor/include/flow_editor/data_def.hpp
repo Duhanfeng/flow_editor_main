@@ -78,6 +78,10 @@ public:
     std::map<guid16, NodeData> out_nodes;
     std::map<guid18, Connection> connections;
 
+    virtual bool tryDisconnect(const guid18& id)
+    {
+        return false;
+    }
     virtual guid18 tryConnect(const Connection& connection)
     {
         return { 0 };
@@ -133,6 +137,15 @@ public:
     //自定义颜色
     bool use_data_defined_colors;             //是否使用数据定义的颜色
     std::map<QString, QColor> type_color_map; //类型与颜色映射字典
+};
+
+class DraftConnectionStyle
+{
+public:
+    QColor construction_color;     //用于构造时的颜色
+    float line_width;              //线条宽度
+    float construction_line_width; //构造时线条宽度
+    float point_diameter;          //点的直径
 };
 
 } //namespace fe

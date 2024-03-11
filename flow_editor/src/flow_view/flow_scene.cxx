@@ -7,6 +7,7 @@
 #include <src/items/in_node_item.hpp>
 #include <src/items/out_node_item.hpp>
 #include <src/items/connection/connection_item.hpp>
+#include <src/items/connection/draft_connection_item.hpp>
 #include <QFontDatabase>
 #include <iostream>
 #include <unordered_map>
@@ -57,6 +58,17 @@ void initDefaultStyle(std::shared_ptr<fe::ConnectionStyle>& connection_style)
     connection_style->point_diameter = 10.0f;
     connection_style->use_data_defined_colors = false;
 }
+void initDefaultStyle(std::shared_ptr<fe::DraftConnectionStyle>& draft_connection_style)
+{
+    if (draft_connection_style == nullptr)
+    {
+        draft_connection_style = std::make_shared<fe::DraftConnectionStyle>();
+    }
+    draft_connection_style->construction_color = QColor("gray");
+    draft_connection_style->line_width = 3.0f;
+    draft_connection_style->construction_line_width = 2.0f;
+    draft_connection_style->point_diameter = 10.0f;
+}
 } //namespace
 
 namespace fe
@@ -68,6 +80,7 @@ public:
     NodeLayoutStyle node_layout_style = NodeLayoutStyle::Horizontal;
     std::shared_ptr<NodeStyle> node_style;
     std::shared_ptr<ConnectionStyle> connection_style;
+    std::shared_ptr<DraftConnectionStyle> draft_connection_style;
 
     //深度管理
     double node_z_value = 100;
@@ -76,6 +89,7 @@ public:
     //子组件管理
     std::shared_ptr<Flow> flow;
     std::unique_ptr<FlowSceneData> flow_scene_data; //flow所配套的UI数据
+    std::unique_ptr<DraftConnectionItem> draft_connection;
 };
 
 FlowScene::FlowScene(QObject* parent) :
@@ -88,6 +102,7 @@ FlowScene::FlowScene(QObject* parent) :
     //初始化默认样式
     initDefaultStyle(data_->node_style);
     initDefaultStyle(data_->connection_style);
+    initDefaultStyle(data_->draft_connection_style);
 
     //加载默认字体
     //QFontDatabase::addApplicationFont(":/MiSans-Normal.ttf");
@@ -257,6 +272,41 @@ std::vector<ConnectionItem*> FlowScene::allConnectionItems(const guid16& id)
     }
 
     return items;
+}
+void FlowScene::makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index)
+{
+    resetDraftConnection();
+    if (required_port == PortType::None)
+    {
+        return;
+    }
+
+    //如果需要连接到Out端口,并且已存在对应连接, 则转为: 将为当前连接查找输入端口
+    if (required_port == PortType::Out)
+    {
+        const auto& connections = data_->flow->connections;
+        for (const auto& connection : connections)
+        {
+            if (connection.second.in == id && connection.second.in_port == port_index)
+            {
+                auto draw_item = data_->flow_scene_data->connection_items[connection.first]->draw_item;
+                data_->draft_connection = std::make_unique<DraftConnectionItem>(*this, PortType::In, connection.second.out, connection.second.out_port, data_->draft_connection_style, draw_item);
+                data_->draft_connection->grabMouse();
+                return;
+            }
+        }
+    }
+
+    data_->draft_connection = std::make_unique<DraftConnectionItem>(*this, required_port, id, port_index, data_->draft_connection_style);
+    data_->draft_connection->grabMouse();
+}
+void FlowScene::resetDraftConnection()
+{
+    if (data_->draft_connection)
+    {
+        removeItem(data_->draft_connection.get());
+        data_->draft_connection = nullptr;
+    }
 }
 
 } //namespace fe

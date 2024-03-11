@@ -56,6 +56,10 @@ public:
     std::map<guid16, std::unique_ptr<OutPortItemData>> out_node_items;
     std::map<guid18, std::unique_ptr<ConnectionItemData>> connection_items;
 
+    //控制接口
+    void removeConnection(const guid18& id);
+    void addConnection(const guid18& id, const Connection& connection);
+
     //查询接口
     bool getNodePortPosition(const guid16 id, PortType type, unsigned int port_index, QPointF& position);
 

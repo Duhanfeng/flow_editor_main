@@ -38,7 +38,7 @@ namespace fe
 {
 ConnectionItem::ConnectionItem(FlowScene& scene, const guid18& id) :
     scene_(scene),
-    connection_state_(*this)
+    id_(id)
 {
     //查询配置属性
     FlowSceneData* flow_data = scene.flowSceneData();
@@ -55,7 +55,7 @@ ConnectionItem::ConnectionItem(FlowScene& scene, const guid18& id) :
 
     setZValue(z_value_);
     setAcceptHoverEvents(true);
-    setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
+    setFlags(ItemIsSelectable | ItemIsFocusable);
     //setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
 
     move();
@@ -111,15 +111,44 @@ void ConnectionItem::updateCache()
 }
 void ConnectionItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget)
 {
-    painter->save();
-    QPen pen;
-    pen.setWidth(2.0);
-    pen.setColor(0x125513);
-    pen.setStyle(Qt::DashLine);
-    painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
+    const bool hovered = hovered_;
+    const bool selected = isSelected();
 
-    painter->drawPath(cubic_);
+    painter->save();
+    if (hovered || selected)
+    {
+        double const line_width = style_->line_width;
+        QPen pen;
+        pen.setWidth(2 * line_width);
+        pen.setColor(selected ? style_->selected_color : style_->hovered_color);
+        painter->setPen(pen);
+        painter->setBrush(Qt::NoBrush);
+        painter->drawPath(cubic_);
+    }
+
+    //drawNormalLine
+    {
+        double const line_width = style_->line_width;
+        QPen p;
+        p.setWidth(line_width);
+        p.setColor(style_->normal_color);
+        if (selected)
+        {
+            p.setColor(style_->selected_halo_color);
+        }
+        painter->setPen(p);
+        painter->setBrush(Qt::NoBrush);
+        painter->drawPath(cubic_);
+    }
+
+    //draw end points
+    const double point_diameter = style_->point_diameter;
+    painter->setPen(style_->construction_color);
+    painter->setBrush(style_->construction_color);
+    double const point_radius = point_diameter / 2.0;
+    painter->drawEllipse(start_.toPointF(), point_radius, point_radius);
+    painter->drawEllipse(end_.toPointF(), point_radius, point_radius);
+
     painter->restore();
 }
 void ConnectionItem::updateStart(const QPoint& value)
@@ -171,21 +200,18 @@ void ConnectionItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
     //改变鼠标样式
     setCursor(Qt::ArrowCursor);
-    //QGraphicsItem::hoverMoveEvent(event);
 }
 void ConnectionItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-    connection_state_.setHovered(true);
+    hovered_ = true;
     update();
     event->accept();
-    //QGraphicsItem::hoverEnterEvent(event);
 }
 void ConnectionItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
-    connection_state_.setHovered(false);
+    hovered_ = false;
     update();
     event->accept();
-    //QGraphicsItem::hoverLeaveEvent(event);
 }
 
 } //namespace fe

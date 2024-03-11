@@ -66,6 +66,7 @@ void OutNodeItem::updateCache(double scale)
 }
 void OutNodeItem::paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style)
 {
+    painter->save();
     //保存状态
     QPen pen = painter->pen();
     QBrush brush = painter->brush();
@@ -102,14 +103,22 @@ void OutNodeItem::paintTo(QPainter* painter, const PortUIComponents& components,
     }
 
     //绘画输入输出端口操作点
-    painter->setPen(pen);
-    painter->setBrush(QColor(255, 0, 0));
-    painter->drawEllipse(components.port_rect);
-    painter->setBrush(brush);
+    //painter->setPen(pen);
+    //painter->setBrush(QColor(255, 0, 0));
+    //painter->drawEllipse(components.port_rect);
+    //painter->setBrush(brush);
+    painter->restore();
 }
 void OutNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mousePressEvent(event);
+    if (geometry_->components().port_rect.contains(event->pos()))
+    {
+        scene_.makeDraftConnection(PortType::Out, id_, 0);
+    }
+    else
+    {
+        QGraphicsItem::mousePressEvent(event);
+    }
 }
 void OutNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {

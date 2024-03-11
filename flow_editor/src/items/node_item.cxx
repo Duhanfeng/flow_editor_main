@@ -54,6 +54,7 @@ void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QW
         updateCache();
     }
 
+    painter->save();
     if (crt_model_ == 0)
     {
         paintTo(painter, geometry_->components(), 1.0, style_);
@@ -62,6 +63,7 @@ void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QW
     {
         paintSimpleTo(painter, geometry_->simpleComponents(), scale_, style_);
     }
+    painter->restore();
 }
 void NodeItem::updateCache()
 {

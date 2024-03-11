@@ -8,7 +8,7 @@ class QPointF;
 namespace fe
 {
 
-class ConnectionItem;
+class DraftConnectionItem;
 
 ///Stores currently draggind end.
 ///Remembers last hovered Node.
@@ -24,14 +24,13 @@ public:
     };
 
 public:
-    ConnectionState(ConnectionItem& cgo) :
+    ConnectionState(DraftConnectionItem& cgo) :
         cgo_(cgo), hovered_(false)
     {
     }
 
     ConnectionState(ConnectionState const&) = delete;
     ConnectionState(ConnectionState&&) = delete;
-
     ConnectionState& operator=(ConnectionState const&) = delete;
     ConnectionState& operator=(ConnectionState&&) = delete;
 
@@ -44,13 +43,13 @@ public:
     void setHovered(bool hovered);
 
 public:
-    ///Caches guid16 for further interaction.
+    //连接时最后的悬停节点
     void setLastHoveredNode(guid16 const node_id);
     const guid16& lastHoveredNode() const;
     void resetLastHoveredNode();
 
 private:
-    ConnectionItem& cgo_;
+    DraftConnectionItem& cgo_;
 
     bool hovered_; //悬停标志
     guid16 last_hovered_node_ = { 0 };//最后的悬停节点

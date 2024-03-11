@@ -51,6 +51,8 @@ set(PROJECT_SOURCES
         src/items/connection/connection_state.cxx
         src/flow_view/flow_scene_data.cxx
         src/flow_view/flow_scene_data.hpp
+        src/items/connection/draft_connection_item.cxx
+        src/items/connection/draft_connection_item.hpp
 )
 # 添加rcc
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
