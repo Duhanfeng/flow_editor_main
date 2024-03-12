@@ -52,6 +52,12 @@ set(PROJECT_SOURCES
         src/items/connection/connection_item.hpp
         src/items/connection/draft_connection_item.cxx
         src/items/connection/draft_connection_item.hpp
+        src/items/painter/node_painter.hpp
+        src/items/painter/node_painter.cxx
+        src/items/painter/in_node_painter.hpp
+        src/items/painter/in_node_painter.cxx
+        src/items/painter/out_node_painter.hpp
+        src/items/painter/out_node_painter.cxx
 )
 # 添加rcc
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

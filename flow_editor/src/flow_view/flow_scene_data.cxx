@@ -115,6 +115,7 @@ void FlowSceneData::makeDraftConnection(PortType required_port, const guid16& id
             {
                 auto draw_item = connection_item.second->draw_item;
                 draft_connection = std::make_unique<DraftConnectionItem>(*scene, PortType::In, connection.out, connection.out_port, draft_connection_style, draw_item);
+                //draft_connection->setEndPoint(PortType::In, );
                 draft_connection->grabMouse();
                 return;
             }
@@ -123,6 +124,36 @@ void FlowSceneData::makeDraftConnection(PortType required_port, const guid16& id
     draft_connection = std::make_unique<DraftConnectionItem>(*scene, required_port, id, port_index, draft_connection_style);
     draft_connection->grabMouse();
 }
+void FlowSceneData::makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index, QPointF end_point, const guid16& last_hovered_node)
+{
+    resetDraftConnection();
+    if (required_port == PortType::None)
+    {
+        return;
+    }
+
+    //如果需要连接到Out端口,并且已存在对应连接, 则转为: 将为当前连接查找输入端口
+    if (required_port == PortType::Out)
+    {
+        for (const auto& connection_item : connection_items)
+        {
+            const auto& connection = connection_item.second->connection;
+            if (connection.in == id && connection.in_port == port_index)
+            {
+                auto draw_item = connection_item.second->draw_item;
+                draft_connection = std::make_unique<DraftConnectionItem>(*scene, PortType::In, connection.out, connection.out_port, draft_connection_style, draw_item);
+                draft_connection->setEndPoint(PortType::In, end_point);
+                draft_connection->setLastHoveredNode(last_hovered_node);
+                draft_connection->grabMouse();
+                draft_connection->update();
+                return;
+            }
+        }
+    }
+    draft_connection = std::make_unique<DraftConnectionItem>(*scene, required_port, id, port_index, draft_connection_style);
+    draft_connection->grabMouse();
+}
+
 void FlowSceneData::resetDraftConnection()
 {
     if (draft_connection)

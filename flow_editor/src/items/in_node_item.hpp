@@ -28,24 +28,23 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
 protected:
+    //事件重载
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
 
-private:
-    //绘画相关
+    //更新缓存
     void updateCache(double scale);
-    static void paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style);
 
 private:
+    friend class InNodePainter;
     NodeData* data_ = nullptr;
     DynamicHPortGeometry* geometry_ = nullptr;
     std::shared_ptr<NodeStyle> style_ = nullptr;
     double z_value_ = 0.0;
     double scale_ = 0.0;
     QPainterPath shape_;
-    //bool is_moving_ = false;
 };
 
 } //namespace fe

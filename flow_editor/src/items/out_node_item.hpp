@@ -14,7 +14,7 @@
 namespace fe
 {
 class ConnectionItem;
-class OutNodeItem : public AbsNodeItem
+class OutNodeItem final : public AbsNodeItem
 {
 public:
     OutNodeItem() = delete;
@@ -28,17 +28,17 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QWidget* widget) override;
 
 protected:
+    //事件重载
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
 
-private:
-    //绘画相关
+    //更新缓存
     void updateCache(double scale);
-    void paintTo(QPainter* painter);
 
 private:
+    friend class OutNodePainter;
     NodeData* data_ = nullptr;
     DynamicHPortGeometry* geometry_ = nullptr;
     std::shared_ptr<NodeStyle> style_ = nullptr;

@@ -49,7 +49,7 @@ private:
     Connection* connection_ = nullptr;
     std::shared_ptr<ConnectionStyle> style_ = nullptr;
     double z_value_ = 0.0;
-    bool hovered_; //悬停标志
+    bool hovered_ = false; //悬停标志
 
     //缓存
     QPoint start_;

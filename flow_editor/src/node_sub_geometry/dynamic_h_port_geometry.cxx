@@ -23,7 +23,7 @@ void DynamicHPortGeometry::update(double scale)
     }
     last_scale_ = scale;
 
-    double port_point_size = node_style_->connection_point_diameter * 2; //连接点尺寸
+    double port_point_size = node_style_->connection_point_diameter * 4; //连接点尺寸
     double half_point_size = port_point_size * 0.5;
 
     //计算标题区域的尺寸
@@ -59,11 +59,11 @@ void DynamicHPortGeometry::update(double scale)
     //计算port区域
     if (node_type_ == NodeType::InNode)
     {
-        components_.port_rect = { components_.icon_rect.right() - half_point_size, components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
+        components_.port_rect2 = { components_.icon_rect.right() - half_point_size, components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
     }
     else
     {
-        components_.port_rect = { components_.icon_rect.left() - half_point_size, components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
+        components_.port_rect2 = { components_.icon_rect.left() - half_point_size, components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
     }
 
     //计算对象的边界
@@ -76,7 +76,9 @@ void DynamicHPortGeometry::update(double scale)
     //调整每个矩形的坐标，使其相对于bounding_rect的中心
     components_.icon_rect.translate(translate_offset);
     components_.caption_rect.translate(translate_offset);
-    components_.port_rect.translate(translate_offset);
+    components_.port_rect2.translate(translate_offset);
+    components_.port_rect = { 0, 0, half_point_size, half_point_size };
+    components_.port_rect.moveCenter(components_.port_rect2.center());
 
     components_.node_polygon.resize(3);
     if (node_type_ == NodeType::InNode)

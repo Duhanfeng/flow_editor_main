@@ -100,62 +100,62 @@ int main(int argc, char** argv)
         u8"这是一段比较长的标题#1",
         QIcon(),
         { 100.0, 100.0 },
-        { { u8"输入端口1", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口3", QColor(100, 200, 100) } },
-        { { u8"输出端口1", QColor(200, 100, 100) },
-            { u8"输出端口2", QColor(200, 100, 100) },
-            { u8"输出端口3", QColor(200, 100, 100) },
-            { u8"输出端口4", QColor(200, 100, 100) } }
+        { { u8"输入端口1", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口3", u8"" } },
+        { { u8"输出端口1", u8"" },
+            { u8"输出端口2", u8"" },
+            { u8"输出端口3", u8"" },
+            { u8"输出端口4", u8"" } }
     };
     fe::NodeData data2 = {
         //fe::NodeType::Node,
         u8"节点2",
         QIcon(),
         { 100.0, 300.0 },
-        { { u8"输入端口1", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"this is long long port", QColor(100, 200, 100) } },
-        { { u8"输出端口1", QColor(200, 100, 100) },
-            { u8"输出端口2", QColor(200, 100, 100) },
-            { u8"输出端口3", QColor(200, 100, 100) },
-            { u8"输出端口4", QColor(200, 100, 100) } }
+        { { u8"输入端口1", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"this is long long port", u8"" } },
+        { { u8"输出端口1", u8"" },
+            { u8"输出端口2", u8"" },
+            { u8"输出端口3", u8"" },
+            { u8"输出端口4", u8"" } }
     };
     fe::NodeData data3 = {
         //fe::NodeType::OutNode,
         u8"这是一段比较长的标题#1",
         QIcon(),
         { 800.0, 100.0 },
-        { { u8"输入端口1", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口3", QColor(100, 200, 100) } },
-        { { u8"输出端口1", QColor(200, 100, 100) },
-            { u8"输出端口2", QColor(200, 100, 100) },
-            { u8"输出端口3", QColor(200, 100, 100) },
-            { u8"输出端口4", QColor(200, 100, 100) } }
+        { { u8"输入端口1", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口3", u8"" } },
+        { { u8"输出端口1", u8"" },
+            { u8"输出端口2", u8"" },
+            { u8"输出端口3", u8"" },
+            { u8"输出端口4", u8"" } }
     };
     fe::NodeData data4 = {
         //fe::NodeType::OutNode,
         u8"节点2",
         QIcon(),
         { 800.0, 300.0 },
-        { { u8"输入端口1", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"this is long long port", QColor(100, 200, 100) } },
-        { { u8"输出端口1", QColor(200, 100, 100) },
-            { u8"输出端口2", QColor(200, 100, 100) },
-            { u8"输出端口3", QColor(200, 100, 100) },
-            { u8"输出端口4", QColor(200, 100, 100) } }
+        { { u8"输入端口1", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"this is long long port", u8"" } },
+        { { u8"输出端口1", u8"" },
+            { u8"输出端口2", u8"" },
+            { u8"输出端口3", u8"" },
+            { u8"输出端口4", u8"" } }
     };
 
     fe::NodeData data5 = {
@@ -163,31 +163,31 @@ int main(int argc, char** argv)
         u8"这是一段比较长的标题#1",
         QIcon(),
         { -800.0, 100.0 },
-        { { u8"输入端口1", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口3", QColor(100, 200, 100) } },
-        { { u8"输出端口1", QColor(200, 100, 100) },
-            { u8"输出端口2", QColor(200, 100, 100) },
-            { u8"输出端口3", QColor(200, 100, 100) },
-            { u8"输出端口4", QColor(200, 100, 100) } }
+        { { u8"输入端口1", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口3", u8"" } },
+        { { u8"输出端口1", u8"" },
+            { u8"输出端口2", u8"" },
+            { u8"输出端口3", u8"" },
+            { u8"输出端口4", u8"" } }
     };
     fe::NodeData data6 = {
         //fe::NodeType::InNode,
         u8"节点2",
         QIcon(),
         { -800.0, 300.0 },
-        { { u8"输入端口1", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"输入端口2", QColor(100, 200, 100) },
-            { u8"this is long long port", QColor(100, 200, 100) } },
-        { { u8"输出端口1", QColor(200, 100, 100) },
-            { u8"输出端口2", QColor(200, 100, 100) },
-            { u8"输出端口3", QColor(200, 100, 100) },
-            { u8"输出端口4", QColor(200, 100, 100) } }
+        { { u8"输入端口1", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"" },
+            { u8"this is long long port", u8"" } },
+        { { u8"输出端口1", u8"" },
+            { u8"输出端口2", u8"" },
+            { u8"输出端口3", u8"" },
+            { u8"输出端口4", u8"" } }
     };
 
     std::array<unsigned char, 16> guid1 = { 01 };
@@ -204,6 +204,35 @@ int main(int argc, char** argv)
     flow->in_nodes.emplace(guid6, data6);
     std::array<unsigned char, 18> c_guid1 = { 01 };
     flow->connections.emplace(c_guid1, fe::Connection{ guid5, 0, guid3, 0 });
+
+
+    //随机生成100个节点
+    const int count = 0;
+    for (int i = 0; i < count; ++i)
+    {
+        fe::NodeData random_data;
+        //random_data.node_type = fe::NodeType::Node;
+        random_data.node_name = generateRandomString(2, 10);
+        random_data.position.setX((double)QRandomGenerator::global()->bounded(-2000, 2000));
+        random_data.position.setY((double)QRandomGenerator::global()->bounded(-2000, 2000));
+
+        int in_count = QRandomGenerator::global()->bounded(1, 5);
+        for (int j = 0; j < in_count; ++j)
+        {
+            fe::PortData port;
+            port.port_name = generateRandomString(2, 5);
+            random_data.in_port.emplace_back(port);
+        }
+
+        int out_count = QRandomGenerator::global()->bounded(1, 5);
+        for (int j = 0; j < out_count; ++j)
+        {
+            fe::PortData port;
+            port.port_name = generateRandomString(2, 5);
+            random_data.out_port.emplace_back(port);
+        }
+        flow->nodes.emplace(createGuid16(), random_data);
+    }
 
     flow_view->resize(1200, 800);
     flow_view->show();

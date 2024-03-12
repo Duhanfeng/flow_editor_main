@@ -58,6 +58,7 @@ public:
 class FlowSceneData
 {
 public:
+    //样式管理
     NodeLayoutStyle node_layout_style = NodeLayoutStyle::Horizontal;
     std::shared_ptr<NodeStyle> node_style;
     std::shared_ptr<ConnectionStyle> connection_style;
@@ -85,10 +86,11 @@ public:
     bool getNodePortPosition(const guid16& id, PortType type, unsigned int port_index, QPointF& position); //查询对应节点的对应端口
 
     //控制接口
-    void makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index); //添加草稿连接
-    void resetDraftConnection();                                                                 //复位草稿连接
-    void removeConnection(const guid18& id);                                                     //移除连接
-    void addConnection(const guid18& id, const Connection& connection);                          //添加连接
+    void makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index);                    //添加草稿连接
+    void makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index, QPointF end_point, const guid16& last_hovered_node); //添加草稿连接
+    void resetDraftConnection();                                                                                    //复位草稿连接
+    void removeConnection(const guid18& id);                                                                        //移除连接
+    void addConnection(const guid18& id, const Connection& connection);                                             //添加连接
 
 private:
 };

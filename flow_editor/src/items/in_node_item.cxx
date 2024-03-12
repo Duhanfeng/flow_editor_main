@@ -12,7 +12,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QElapsedTimer>
 #include <src/flow_view/flow_scene_data.hpp>
-//#include "connection_item.hpp"
+#include <src/items/painter/in_node_painter.hpp>
 
 namespace fe
 {
@@ -49,7 +49,7 @@ void InNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, 
 {
     double lod = item->levelOfDetailFromTransform(painter->worldTransform());
     updateCache(lod);
-    paintTo(painter, geometry_->components(), scale_, style_);
+    InNodePainter::painter(painter, this);
 }
 void InNodeItem::updateCache(double scale)
 {
@@ -57,63 +57,20 @@ void InNodeItem::updateCache(double scale)
     {
         scale_ = scale;
         geometry_->update(scale);
-        shape_.clear();
-        shape_.addPolygon(geometry_->components().node_polygon);
-        shape_.addRect(geometry_->components().port_rect);
+        QPainterPath polygon_path;
+        polygon_path.addPolygon(geometry_->components().node_polygon);
+        QPainterPath rect_path;
+        rect_path.addRect(geometry_->components().port_rect2);
+        shape_ = polygon_path.united(rect_path);
         prepareGeometryChange();
         moveConnections();
     }
-}
-void InNodeItem::paintTo(QPainter* painter, const PortUIComponents& components, double scale, std::shared_ptr<NodeStyle>& style)
-{
-    //保存状态
-    painter->save();
-    QPen pen = painter->pen();
-    QBrush brush = painter->brush();
-    QFont font = style->font;
-    painter->setFont(font);
-
-    //画各个区域(调试用)
-    painter->setPen(pen);
-    //painter->drawRect(components.bounding_rect);
-    //painter->drawRect(geometry.icon_rect);
-    painter->drawRect(components.caption_rect);
-    painter->drawRect(components.port_rect);
-
-    //画主区域
-    painter->setBrush(QColor(0x654321));
-    painter->drawPolygon(components.node_polygon);
-    painter->setBrush(brush);
-
-    //绘画标题
-    QFont f = painter->font();
-    //f.setBold(true);
-    painter->setFont(f);
-    painter->setPen(style->font_color);
-    if (scale < 1.0)
-    {
-        painter->save();
-        painter->scale(1.0 / scale, 1.0 / scale);
-        painter->drawStaticText(components.caption_rect.topLeft() * scale, components.port_name);
-        painter->restore();
-    }
-    else
-    {
-        painter->drawStaticText(components.caption_rect.topLeft(), components.port_name);
-    }
-
-    //绘画输入输出端口操作点
-    //painter->setPen(pen);
-    //painter->setBrush(QColor(255, 0, 0));
-    //painter->drawEllipse(components.port_rect);
-    //painter->setBrush(brush);
-    painter->restore();
 }
 void InNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if (geometry_->components().port_rect.contains(event->pos()))
     {
-        scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, 0);
+        scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, 0, mapToScene(event->pos()), id_);
     }
     else
     {
@@ -140,14 +97,10 @@ int InNodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
     {
         return -1;
     }
-
-    QPointF p1 = geometry_->components().port_rect.center();
-    QLineF line(p1, pos);
-    if (line.length() < style_->connection_point_diameter)
+    if (geometry_->components().port_rect.contains(pos))
     {
         return 0;
     }
-
     return -1;
 }
 } //namespace fe

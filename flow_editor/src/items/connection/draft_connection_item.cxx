@@ -120,12 +120,14 @@ void DraftConnectionItem::setEndPoint(PortType port_type, const QPointF& point)
     {
         out_ = point.toPoint();
     }
+    updateCache();
 }
 void DraftConnectionItem::updateCache()
 {
     if (out_ == in_)
     {
         bounding_rect_ = {};
+        shape_ = {};
     }
     else
     {
@@ -138,15 +140,10 @@ void DraftConnectionItem::updateCache()
         //-----计算boundingRect
         QRectF basic_rect = QRectF(out_, in_).normalized();
         QRectF c1c2_rect = QRectF(c1, c2).normalized();
-        //获取基本矩形和控制点矩形的并集，得到一个包含连接所有相关点的矩形。
         QRectF common_rect = basic_rect.united(c1c2_rect);
         float const diam = style_->point_diameter;
-        //创建一个偏移量，用于扩展矩形。
         QPointF const corner_offset(diam, diam);
-        //通过端口圆直径扩展矩形。
-        //将矩形左上角向左上移动直径的距离，以确保连接的起点和终点都被包含在内。
         common_rect.setTopLeft(common_rect.topLeft() - corner_offset);
-        //将矩形右下角向右下移动两倍直径的距离，以确保连接的曲线部分也被包含在内。
         common_rect.setBottomRight(common_rect.bottomRight() + 2 * corner_offset);
         bounding_rect_ = common_rect;
 
@@ -195,24 +192,23 @@ void DraftConnectionItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     setEndPoint(required_port_, end_point);
     //更新图形
     event->accept();
-    updateCache();
 
-    if (required_port_ == PortType::In)
-    {
-        QLineF line(out_, end_point);
-        if (line.length() < 50)
-        {
-            return;
-        }
-    }
-    else if (required_port_ == PortType::Out)
-    {
-        QLineF line(in_, end_point);
-        if (line.length() < 50)
-        {
-            return;
-        }
-    }
+    //if (required_port_ == PortType::In)
+    //{
+    //    QLineF line(out_, end_point);
+    //    if (line.length() < 50)
+    //    {
+    //        return;
+    //    }
+    //}
+    //else if (required_port_ == PortType::Out)
+    //{
+    //    QLineF line(in_, end_point);
+    //    if (line.length() < 50)
+    //    {
+    //        return;
+    //    }
+    //}
 
     //std::cout << "event->pos" << event->pos().x() << "," << event->pos().y() << std::endl;
     //std::cout << "event->scenePos" << event->scenePos().x() << "," << event->scenePos().y() << std::endl;
@@ -224,15 +220,21 @@ void DraftConnectionItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     //如果找到了节点（ngo 非空），则让节点响应连接(用于实现连接有效/无效的动画)
     if (ngo)
     {
-        //std::cout << "ngo->storeConnectionForReaction" << std::endl;
         ngo->storeConnectionForReaction(this);
         ngo->update();
-        //设置连接状态中的最后一个悬停节点 ID。
         last_hovered_node_ = ngo->id();
     }
     else
     {
         //如果没有找到节点，则重置最后一个悬停节点 ID。
+        if (!isInvalid(last_hovered_node_))
+        {
+            auto item = scene_.flowSceneData()->absNodeItem(last_hovered_node_);
+            if (item)
+            {
+                item->update();
+            }
+        }
         last_hovered_node_ = { 0 };
     }
 }
@@ -336,8 +338,20 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     }
 
     //退出
+    //如果没有找到节点，则重置最后一个悬停节点 ID。
+    if (!isInvalid(last_hovered_node_))
+    {
+        auto item = scene_.flowSceneData()->absNodeItem(last_hovered_node_);
+        if (item)
+        {
+            item->update();
+        }
+    }
+    last_hovered_node_ = { 0 };
+
     ungrabMouse();                                  //不再捕获鼠标事件。
     event->accept();                                //标记事件已被正确处理。
     scene_.flowSceneData()->resetDraftConnection(); //重置对象
 }
+
 } //namespace fe

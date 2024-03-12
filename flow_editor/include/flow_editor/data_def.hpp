@@ -32,7 +32,7 @@ class PortData
 {
 public:
     QString port_name;
-    QColor port_color;
+    std::string port_type; //同名类型才可以连接,空表示不进行过滤
 };
 class NodeData
 {
@@ -58,7 +58,6 @@ inline bool isInvalid(const std::array<unsigned char, _Size>& id)
     }
     return true;
 }
-
 class Connection
 {
 public:
@@ -157,7 +156,6 @@ public:
     bool use_data_defined_colors;             //是否使用数据定义的颜色
     std::map<QString, QColor> type_color_map; //类型与颜色映射字典
 };
-
 class DraftConnectionStyle
 {
 public:

@@ -27,6 +27,8 @@ public:
     const QPoint& out() const { return out_; }
     const QPoint& in() const { return in_; }
     const QPoint& endPoint(PortType port_type) const { return (port_type == PortType::Out ? out_ : in_); }
+    void setEndPoint(PortType port_type, QPointF const& point);
+    void setLastHoveredNode(const guid16& last_hovered_node) { last_hovered_node_ = last_hovered_node; }
 
     //绘画接口
     QRectF boundingRect() const override { return bounding_rect_; }
@@ -38,7 +40,6 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
-    void setEndPoint(PortType port_type, QPointF const& point);
     void updateCache();
 
 private:
