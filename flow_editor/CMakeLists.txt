@@ -37,8 +37,8 @@ set(PROJECT_SOURCES
         src/flow_view/flow_scene_data.hpp
         src/flow_view/default_style.hpp
         src/node_sub_geometry/node_sub_geometry.hpp
-        src/node_sub_geometry/dynamic_h_geometry.hpp
-        src/node_sub_geometry/dynamic_h_geometry.cxx
+        src/node_sub_geometry/dynamic_geometry.hpp
+        src/node_sub_geometry/dynamic_geometry.cxx
         src/node_sub_geometry/dynamic_h_port_geometry.hpp
         src/node_sub_geometry/dynamic_h_port_geometry.cxx
         src/items/abs_node_item.hpp

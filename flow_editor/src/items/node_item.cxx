@@ -32,6 +32,8 @@ NodeItem::NodeItem(FlowScene& scene, const guid16& id) :
     style_ = itr->second->node_style;
     z_value_ = itr->second->z_value;
 
+    icon_ = data_->node_icon.pixmap(QSize(32, 32));
+
     //初始化
     setPos(data_->position);
     setZValue(z_value_);
@@ -39,9 +41,8 @@ NodeItem::NodeItem(FlowScene& scene, const guid16& id) :
     setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
     //setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
-    //setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+    setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
-    geometry_->update(1.0);
     updateCache(1.0);
 
     //添加显示对象
@@ -53,7 +54,7 @@ void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, QW
     double lod = item->levelOfDetailFromTransform(painter->worldTransform());
     updateCache(lod);
 
-    NodePainter::painter(painter, this);
+    NodePainter::paint(painter, this);
 }
 void NodeItem::updateCache(double scale)
 {
@@ -74,19 +75,16 @@ void NodeItem::updateCache(double scale)
         crt_model_ = 0;
     }
     moveConnections();
+    prepareGeometryChange();
 }
-void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
-{
-    setCursor(Qt::ArrowCursor);
-    QGraphicsItem::hoverMoveEvent(event);
-}
+
 int NodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
 {
     if (required_port == PortType::Out)
     {
-        for (size_t i = 0; i < geometry_->components().out_port_rect.size(); ++i)
+        for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
         {
-            if (geometry_->components().out_port_rect[i].contains(pos))
+            if (geometry_->components().out_ports[i].port_rect.contains(pos))
             {
                 return (int)i;
             }
@@ -94,9 +92,9 @@ int NodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
     }
     else if (required_port == PortType::In)
     {
-        for (size_t i = 0; i < geometry_->components().in_port_rect.size(); ++i)
+        for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
         {
-            if (geometry_->components().in_port_rect[i].contains(pos))
+            if (geometry_->components().in_ports[i].port_rect.contains(pos))
             {
                 return (int)i;
             }
@@ -104,6 +102,116 @@ int NodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
     }
 
     return -1;
+}
+void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    event->accept();
+
+    if (!isSelected() && event->modifiers() != Qt::CTRL)
+    {
+        scene_.clearSelection();
+        setSelected(true);
+    }
+    if (event->button() == Qt::RightButton)
+    {
+        return;
+    }
+
+    //判断是否为按键点击事件
+    auto pos = event->pos();
+    if (geometry_->components().run_btn_rect2.contains(pos))
+    {
+        is_checked_btn_ = true;
+        //std::cout << "is_checked_btn_ = true" << std::endl;
+        update();
+        //触发相应信号
+        return;
+    }
+
+    //判断点击了对应的端口位置
+    for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+    {
+        if (geometry_->components().in_ports[i].port_rect.contains(pos))
+        {
+            scene_.flowSceneData()->makeDraftConnection(PortType::Out, id_, (unsigned int)i, mapToScene(pos), id_);
+            return;
+        }
+    }
+    for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
+    {
+        if (geometry_->components().out_ports[i].port_rect.contains(pos))
+        {
+            scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, (unsigned int)i, mapToScene(pos), id_);
+            return;
+        }
+    }
+
+    //QGraphicsItem::mousePressEvent(event);
+}
+void NodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (is_checked_btn_)
+    {
+        event->accept();
+        return;
+    }
+    QGraphicsItem::mouseMoveEvent(event);
+}
+void NodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (is_checked_btn_)
+    {
+        is_checked_btn_ = false;
+        //std::cout << "is_checked_btn_ = false" << std::endl;
+        update();
+        event->accept();
+        return;
+    }
+    QGraphicsItem::mouseReleaseEvent(event);
+}
+
+void NodeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    event->accept();
+    return;
+    //QGraphicsItem::mouseDoubleClickEvent(event);
+}
+void NodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    setCursor(Qt::ArrowCursor);
+    setZValue(scene_.flowSceneData()->top_node_z_value);
+    is_hovered_ = true;
+    QGraphicsItem::hoverEnterEvent(event);
+}
+void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
+{
+    if (crt_model_ == 0 && geometry_->components().run_btn_rect2.contains(event->pos()))
+    {
+        if (!is_hovered_btn_)
+        {
+            is_hovered_btn_ = true;
+            update();
+            event->accept();
+            return;
+        }
+    }
+    else
+    {
+        if (is_hovered_btn_)
+        {
+            is_hovered_btn_ = false;
+            update();
+            event->accept();
+            return;
+        }
+    }
+    //QGraphicsItem::hoverMoveEvent(event);
+}
+void NodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    setZValue(z_value_);
+    is_hovered_ = false;
+    QGraphicsItem::hoverLeaveEvent(event);
 }
 
 } //namespace fe

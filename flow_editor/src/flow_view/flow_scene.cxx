@@ -20,6 +20,11 @@ class FlowScene::Data
 {
 public:
     std::unique_ptr<FlowSceneData> flow_scene_data; //flow所配套的UI数据
+
+    //默认样式
+    std::shared_ptr<NodeStyle> node_style;
+    std::shared_ptr<ConnectionStyle> connection_style;
+    std::shared_ptr<DraftConnectionStyle> draft_connection_style;
 };
 
 FlowScene::FlowScene(QObject* parent) :
@@ -29,6 +34,9 @@ FlowScene::FlowScene(QObject* parent) :
     //必须要显式设置index方法为noindex,否则removeItem再delete时,概率出现崩溃问题
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
+    initDefaultStyle(data_->node_style);
+    initDefaultStyle(data_->connection_style);
+    initDefaultStyle(data_->draft_connection_style);
     data_->flow_scene_data = std::make_unique<FlowSceneData>();
 
     //加载默认字体
@@ -51,76 +59,32 @@ void FlowScene::showFlow(std::shared_ptr<Flow> flow)
         return;
     }
 
-    //构建数据
+    //初始化
     data_->flow_scene_data = std::make_unique<FlowSceneData>();
     data_->flow_scene_data->flow = flow;
-
-    initDefaultStyle(data_->flow_scene_data->node_style);
-    initDefaultStyle(data_->flow_scene_data->connection_style);
-    initDefaultStyle(data_->flow_scene_data->draft_connection_style);
+    data_->flow_scene_data->node_style = data_->node_style;
+    data_->flow_scene_data->connection_style = data_->connection_style;
+    data_->flow_scene_data->draft_connection_style = data_->draft_connection_style;
     data_->flow_scene_data->scene = this;
-
     data_->flow_scene_data->node_z_value = 100;
+    data_->flow_scene_data->connection_z_value = 0;
+
+    //构建对象
     for (const auto& node : data_->flow_scene_data->flow->nodes)
     {
-        const auto& guid = node.first;
-        const auto& data = node.second;
-        //构造NodeItemData对象
-        auto item_data = std::make_unique<NodeItemData>();
-        item_data->data = data; //直接拷贝NodeData数据
-        item_data->geometry = std::make_unique<DynamicHGeometry>(item_data->data, data_->flow_scene_data->node_style);
-        item_data->node_style = data_->flow_scene_data->node_style;
-        item_data->z_value = data_->flow_scene_data->node_z_value;
-        //保存数据
-        data_->flow_scene_data->node_items.emplace(guid, std::move(item_data));
-        new NodeItem(*this, guid);
-        data_->flow_scene_data->node_z_value++;
+        data_->flow_scene_data->addNode(node.first, node.second);
     }
     for (const auto& node : data_->flow_scene_data->flow->in_nodes)
     {
-        const auto& guid = node.first;
-        const auto& data = node.second;
-        //构造InPortItemData对象
-        auto item_data = std::make_unique<InPortItemData>();
-        item_data->data = data; //直接拷贝NodeData数据
-        item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::InNode, item_data->data, data_->flow_scene_data->node_style);
-        item_data->node_style = data_->flow_scene_data->node_style;
-        item_data->z_value = data_->flow_scene_data->node_z_value;
-        //保存数据
-        data_->flow_scene_data->in_node_items.emplace(guid, std::move(item_data));
-        new InNodeItem(*this, guid);
-        data_->flow_scene_data->node_z_value++;
+        data_->flow_scene_data->addInNode(node.first, node.second);
     }
     for (const auto& node : data_->flow_scene_data->flow->out_nodes)
     {
-        const auto& guid = node.first;
-        const auto& data = node.second;
-        //构造OutPortItemData对象
-        auto item_data = std::make_unique<OutPortItemData>();
-        item_data->data = data; //直接拷贝NodeData数据
-        item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::OutNode, item_data->data, data_->flow_scene_data->node_style);
-        item_data->node_style = data_->flow_scene_data->node_style;
-        item_data->z_value = data_->flow_scene_data->node_z_value;
-        //保存数据
-        data_->flow_scene_data->out_node_items.emplace(guid, std::move(item_data));
-        new OutNodeItem(*this, guid);
-        data_->flow_scene_data->node_z_value++;
+        data_->flow_scene_data->addOutNode(node.first, node.second);
     }
-    data_->flow_scene_data->connection_z_value = 0;
     for (const auto& connection : data_->flow_scene_data->flow->connections)
     {
-        const auto& guid = connection.first;
-        const auto& data = connection.second;
-        data_->flow_scene_data->addConnection(guid, data);
-        ////构造ConnectionItemData对象
-        //std::unique_ptr<ConnectionItemData> item_data = std::make_unique<ConnectionItemData>();
-        //item_data->connection = data;
-        //item_data->style = data_->flow_scene_data->connection_style;
-        //item_data->z_value = data_->flow_scene_data->connection_z_value;
-        ////保存数据
-        //data_->flow_scene_data->connection_items.emplace(guid, std::move(item_data));
-        //new ConnectionItem(*this, guid);
-        //data_->flow_scene_data->connection_z_value++;
+        data_->flow_scene_data->addConnection(connection.first, connection.second);
     }
 }
 std::shared_ptr<Flow> FlowScene::flow()
@@ -152,11 +116,11 @@ void FlowScene::setNodeLayoutStyle(NodeLayoutStyle node_style)
 }
 std::shared_ptr<NodeStyle> FlowScene::nodeStyle() const
 {
-    return data_->flow_scene_data->node_style;
+    return data_->node_style;
 }
 void FlowScene::setNodeStyle(std::shared_ptr<NodeStyle> style)
 {
-    data_->flow_scene_data->node_style = style;
+    data_->node_style = style;
 }
 
 } //namespace fe

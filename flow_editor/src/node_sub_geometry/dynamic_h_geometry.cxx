@@ -40,7 +40,7 @@ DynamicHGeometry::DynamicHGeometry(const NodeData& data, std::shared_ptr<NodeSty
     components_.out_port_rect.resize(data_.out_port.size());
     components_.out_port_text_rect.resize(data_.out_port.size());
     //初始化字体缓存
-    components_.node_name = QStaticText(data.node_name);
+    components_.caption_text = QStaticText(data.caption_text);
     components_.in_port_text.resize(data_.in_port.size());
     components_.out_port_text.resize(data_.out_port.size());
     for (size_t i = 0; i < data_.in_port.size(); ++i)
@@ -52,7 +52,7 @@ DynamicHGeometry::DynamicHGeometry(const NodeData& data, std::shared_ptr<NodeSty
         components_.out_port_text[i] = QStaticText(data_.out_port[i].port_name);
     }
 
-    simple_components_.node_name = QStaticText(data.node_name);
+    simple_components_.caption_text = QStaticText(data.caption_text);
 }
 void DynamicHGeometry::update(double scale)
 {
@@ -77,7 +77,7 @@ void DynamicHGeometry::update(double scale)
     double half_point_size = port_point_size * 0.5;
 
     //计算标题区域的尺寸
-    QSizeF caption_size = bold_font_metrics_->boundingRect(data_.node_name).size();
+    QSizeF caption_size = bold_font_metrics_->boundingRect(data_.caption_text).size();
     if (scale < 1.0)
     {
         //如果是缩小,则需要进行动态调整,以保证title尺寸保持不变
@@ -109,9 +109,9 @@ void DynamicHGeometry::update(double scale)
     components_.caption_rect = QRectF{ { x_margin + icon_size.width(), y_margin + caption_offset }, caption_size };
     components_.run_btn_rect = QRectF{ { x_margin + node_width - btn_size.width(), y_margin }, btn_size };
     //计算运行按钮的区域
-    components_.run_polygon[0] = (components_.run_btn_rect.topLeft());
-    components_.run_polygon[1] = QPointF{ components_.run_btn_rect.right(), components_.run_btn_rect.center().y() };
-    components_.run_polygon[2] = (components_.run_btn_rect.bottomLeft());
+    components_.run_btn_polygon[0] = (components_.run_btn_rect.topLeft());
+    components_.run_btn_polygon[1] = QPointF{ components_.run_btn_rect.right(), components_.run_btn_rect.center().y() };
+    components_.run_btn_polygon[2] = (components_.run_btn_rect.bottomLeft());
 
     //计算端口交互点区域
     double point_offset = ((double)port_size - port_point_size) * 0.5;
@@ -161,7 +161,7 @@ void DynamicHGeometry::update(double scale)
     {
         rect.translate(translate_offset);
     }
-    for (auto& rect : components_.run_polygon)
+    for (auto& rect : components_.run_btn_polygon)
     {
         rect += translate_offset;
     }
@@ -173,7 +173,7 @@ void DynamicHGeometry::updateSimple(double scale)
     double half_point_size = port_point_size * 0.5;
 
     //计算标题区域的尺寸
-    QSizeF caption_size = bold_font_metrics_->boundingRect(data_.node_name).size();
+    QSizeF caption_size = bold_font_metrics_->boundingRect(data_.caption_text).size();
     if (scale < 1.0)
     {
         //如果是缩小,则需要进行动态调整,以保证尺寸保持

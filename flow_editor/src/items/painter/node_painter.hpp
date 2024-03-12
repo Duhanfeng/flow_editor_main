@@ -10,11 +10,17 @@ namespace fe
 class NodePainter
 {
 public:
-    static void painter(QPainter* painter, NodeItem* item);
+    static void paint(QPainter* painter, NodeItem* item);
 
 private:
-    static void painterNormal(QPainter* painter, NodeItem* item);
-    static void painterSimple(QPainter* painter, NodeItem* item);
+    static void paintNormal(QPainter* painter, NodeItem* item);
+    static void paintSimple(QPainter* painter, NodeItem* item);
+
+private:
+    static void paintFrame(QPainter* painter, NodeItem* item);
+    static void paintNodeRect(QPainter* painter, NodeItem* item);
+    static void paintRunBtn(QPainter* painter, NodeItem* item);
+    static void paintConnectionPoints(QPainter* painter, NodeItem* item);
 };
 
 } //namespace fe

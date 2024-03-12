@@ -13,7 +13,7 @@ DynamicHPortGeometry::DynamicHPortGeometry(NodeType node_type, const fe::NodeDat
     blod_font.setBold(true);
     bold_font_metrics_ = std::make_unique<QFontMetrics>(blod_font);
 
-    components_.port_name = QStaticText(data.node_name);
+    components_.port_name = QStaticText(data.caption_text);
 }
 void DynamicHPortGeometry::update(double scale)
 {
@@ -27,7 +27,7 @@ void DynamicHPortGeometry::update(double scale)
     double half_point_size = port_point_size * 0.5;
 
     //计算标题区域的尺寸
-    QSizeF caption_size = bold_font_metrics_->boundingRect(data_.node_name).size();
+    QSizeF caption_size = bold_font_metrics_->boundingRect(data_.caption_text).size();
     if (scale < 1.0)
     {
         //如果是缩小,则需要进行动态调整,以保证尺寸保持

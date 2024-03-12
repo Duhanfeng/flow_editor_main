@@ -7,7 +7,7 @@
 
 namespace fe
 {
-void OutNodePainter::painter(QPainter* painter, OutNodeItem* item)
+void OutNodePainter::paint(QPainter* painter, OutNodeItem* item)
 {
     double scale = item->scale_;
     const auto& components = item->geometry_->components();

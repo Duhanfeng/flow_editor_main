@@ -9,12 +9,13 @@
 #include <flow_editor/data_def.hpp>
 #include <flow_editor/flow_view/flow_scene.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
-#include <src/node_sub_geometry/dynamic_h_geometry.hpp>
+#include <src/node_sub_geometry/dynamic_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>
 
 namespace fe
 {
 //连接草稿,用于显示未有效的连接,从out->in
+class ConnectionItem;
 class DraftConnectionItem : public QGraphicsItem
 {
 public:
@@ -23,6 +24,8 @@ public:
     DraftConnectionItem(FlowScene& scene, PortType required_port, const guid16& id, unsigned int port_index, std::shared_ptr<DraftConnectionStyle> style, ConnectionItem* original_item);
 
     //查询接口
+    const guid16& id() const { return id_; }
+    unsigned int portIndex() const { return port_index_; }
     PortType requiredPort() const { return required_port_; }
     const QPoint& out() const { return out_; }
     const QPoint& in() const { return in_; }
@@ -51,11 +54,11 @@ private:
     ConnectionItem* original_item_ = nullptr;
 
     //缓存
-    QPoint out_;
-    QPoint in_;
-    QRectF bounding_rect_;
-    QPainterPath cubic_;
-    QPainterPath shape_;
+    QPoint out_;                       //起始点
+    QPoint in_;                        //结束点
+    QRectF bounding_rect_;             //包围边界
+    QPainterPath shape_;               //形状边界
+    QPainterPath cubic_;               //绘画形状
     guid16 last_hovered_node_ = { 0 }; //最后的悬停节点
 };
 

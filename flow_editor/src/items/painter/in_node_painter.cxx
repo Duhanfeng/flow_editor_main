@@ -7,7 +7,7 @@
 
 namespace fe
 {
-void InNodePainter::painter(QPainter* painter, InNodeItem* item)
+void InNodePainter::paint(QPainter* painter, InNodeItem* item)
 {
     double scale = item->scale_;
     const auto& components = item->geometry_->components();

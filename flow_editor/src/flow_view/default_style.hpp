@@ -28,6 +28,9 @@ void initDefaultStyle(std::shared_ptr<fe::NodeStyle>& node_style)
     node_style->filled_connection_point_color = QColor(0, 255, 255);
     node_style->warning_color = QColor(128, 128, 0);
     node_style->error_color = QColor(255, 0, 0);
+    node_style->btn_color = QColor(0, 255, 0);
+    node_style->btn_hovered_color = QColor(125, 125, 125);
+    node_style->btn_checked_color = QColor(255, 0, 0);
     node_style->pen_width = 1.0f;
     node_style->hovered_pen_width = 2.0f;
     node_style->connection_point_diameter = 10.0f;

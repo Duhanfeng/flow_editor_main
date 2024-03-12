@@ -13,6 +13,26 @@
 
 namespace fe
 {
+NodeData* FlowSceneData::getNodeData(const guid16& id)
+{
+    auto iter_node = node_items.find(id);
+    if (iter_node != node_items.end())
+    {
+        return &iter_node->second->data;
+    }
+    auto iter_in = in_node_items.find(id);
+    if (iter_in != in_node_items.end())
+    {
+        return &iter_in->second->data;
+    }
+    auto iter_out = out_node_items.find(id);
+    if (iter_out != out_node_items.end())
+    {
+        return &iter_out->second->data;
+    }
+    return nullptr;
+}
+
 AbsNodeItem* FlowSceneData::absNodeItem(const guid16& id)
 {
     auto iter_node = node_items.find(id);
@@ -53,7 +73,6 @@ std::vector<ConnectionItem*> FlowSceneData::allConnectionItems(const guid16& id)
     }
     return items;
 }
-
 bool FlowSceneData::getNodePortPosition(const guid16& id, PortType type, unsigned int port_index, QPointF& position)
 {
     auto iter_node = node_items.find(id);
@@ -61,19 +80,19 @@ bool FlowSceneData::getNodePortPosition(const guid16& id, PortType type, unsigne
     {
         if (type == PortType::In)
         {
-            const auto& port_rect = iter_node->second->geometry->components().in_port_rect;
+            const auto& port_rect = iter_node->second->geometry->components().in_ports;
             if (port_index < port_rect.size())
             {
-                position = iter_node->second->draw_item->pos() + port_rect[port_index].center();
+                position = iter_node->second->draw_item->pos() + port_rect[port_index].port_center;
                 return true;
             }
         }
         else if (type == PortType::Out)
         {
-            const auto& port_rect = iter_node->second->geometry->components().out_port_rect;
+            const auto& port_rect = iter_node->second->geometry->components().out_ports;
             if (port_index < port_rect.size())
             {
-                position = iter_node->second->draw_item->pos() + port_rect[port_index].center();
+                position = iter_node->second->draw_item->pos() + port_rect[port_index].port_center;
                 return true;
             }
         }
@@ -91,6 +110,37 @@ bool FlowSceneData::getNodePortPosition(const guid16& id, PortType type, unsigne
     {
         const auto& port_rect = iter_out->second->geometry->components().port_rect;
         position = iter_out->second->draw_item->pos() + port_rect.center();
+        return true;
+    }
+
+    return false;
+}
+bool FlowSceneData::checkConnectionPossible(const guid16& out_id, unsigned int out_port_index, const guid16& in_id, unsigned int in_port_index)
+{
+    auto out_data = getNodeData(out_id);
+    auto in_data = getNodeData(in_id);
+    if (!out_data || !in_data)
+    {
+        return false;
+    }
+    if (out_port_index >= out_data->out_port.size())
+    {
+        return false;
+    }
+    if (in_port_index >= in_data->in_port.size())
+    {
+        return false;
+    }
+    if (out_id == in_id)
+    {
+        return false;
+    }
+
+    const PortData& out_port_data = out_data->out_port[out_port_index];
+    const PortData& in_port_data = in_data->in_port[in_port_index];
+
+    if (out_port_data.port_type == in_port_data.port_type || out_port_data.port_type.isEmpty() || in_port_data.port_type.isEmpty())
+    {
         return true;
     }
 
@@ -162,13 +212,45 @@ void FlowSceneData::resetDraftConnection()
         draft_connection = nullptr;
     }
 }
-void FlowSceneData::removeConnection(const guid18& id)
+
+void FlowSceneData::addInNode(const guid16& id, const NodeData& data)
 {
-    auto iter = connection_items.find(id);
-    if (iter != connection_items.end())
-    {
-        connection_items.erase(iter);
-    }
+    //构造InPortItemData对象
+    auto item_data = std::make_unique<InPortItemData>();
+    item_data->data = data; //直接拷贝NodeData数据
+    item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::InNode, item_data->data, node_style);
+    item_data->node_style = node_style;
+    item_data->z_value = node_z_value;
+    //保存数据
+    in_node_items.emplace(id, std::move(item_data));
+    new InNodeItem(*scene, id);
+    node_z_value++;
+}
+void FlowSceneData::addOutNode(const guid16& id, const NodeData& data)
+{
+    //构造OutPortItemData对象
+    auto item_data = std::make_unique<OutPortItemData>();
+    item_data->data = data; //直接拷贝NodeData数据
+    item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::OutNode, item_data->data, node_style);
+    item_data->node_style = node_style;
+    item_data->z_value = node_z_value;
+    //保存数据
+    out_node_items.emplace(id, std::move(item_data));
+    new OutNodeItem(*scene, id);
+    node_z_value++;
+}
+void FlowSceneData::addNode(const guid16& id, const NodeData& data)
+{
+    //构造NodeItemData对象
+    auto item_data = std::make_unique<NodeItemData>();
+    item_data->data = data; //直接拷贝NodeData数据
+    item_data->geometry = std::make_unique<DynamicGeometry>(item_data->data, node_style);
+    item_data->node_style = node_style;
+    item_data->z_value = node_z_value;
+    //保存数据
+    node_items.emplace(id, std::move(item_data));
+    new NodeItem(*scene, id);
+    node_z_value++;
 }
 void FlowSceneData::addConnection(const guid18& id, const Connection& connection)
 {
@@ -179,6 +261,14 @@ void FlowSceneData::addConnection(const guid18& id, const Connection& connection
     connection_items.emplace(id, std::move(item_data));
     new ConnectionItem(*scene, id);
     connection_z_value++;
+}
+void FlowSceneData::removeConnection(const guid18& id)
+{
+    auto iter = connection_items.find(id);
+    if (iter != connection_items.end())
+    {
+        connection_items.erase(iter);
+    }
 }
 
 } //namespace fe

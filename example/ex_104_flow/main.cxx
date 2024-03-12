@@ -86,107 +86,135 @@ QString generateRandomString(int min_length, int max_length)
     return random_string;
 }
 
-int main(int argc, char** argv)
+std::shared_ptr<fe::NodeStyle> createStyle()
 {
-    QApplication app(argc, argv);
+    std::shared_ptr<fe::NodeStyle> node_style = std::make_shared<fe::NodeStyle>();
 
-    fe::FlowScene* scene = new fe::FlowScene();
-    fe::FlowView* flow_view = new fe::FlowView(scene);
-    std::shared_ptr<FLow2> flow = std::make_shared<FLow2>();
+    node_style->normal_boundary_color = QColor(255, 255, 255);
+    node_style->selected_boundary_color = QColor(255, 165, 0);
+    node_style->gradient_color0 = QColor(125, 125, 125);
+    node_style->gradient_color1 = QColor(80, 80, 80);
+    node_style->gradient_color2 = QColor(64, 64, 64);
+    node_style->gradient_color3 = QColor(58, 58, 58);
+    node_style->shadow_color = QColor(20, 20, 20);
+    node_style->font_color = QColor(255, 255, 255);
+    node_style->font_color_faded = QColor(125, 125, 125);
+    node_style->connection_point_color = QColor(169, 169, 169);
+    node_style->filled_connection_point_color = QColor(0, 255, 255);
+    node_style->warning_color = QColor(128, 128, 0);
+    node_style->error_color = QColor(255, 0, 0);
+    node_style->btn_color = QColor(0, 255, 0);
+    node_style->btn_hovered_color = QColor(125, 125, 125);
+    node_style->btn_checked_color = QColor(0, 125, 0);
+
+    node_style->icon_size = 56.0f;
+    node_style->pen_width = 1.0f;
+    node_style->hovered_pen_width = 1.0f;
+    node_style->connection_point_diameter = 10.0f;
+    node_style->opacity = 1.0f;
+    node_style->font_name = u8"NSimSun";
+    node_style->font_size = 12;
+    node_style->font = QFont(node_style->font_name, node_style->font_size);
+
+    //构建映射表
+    node_style->type_color_map[u8"整型"] = QColor(0x55, 0xAA, 0xFF);
+    node_style->type_color_map[u8"浮点数"] = QColor(0xAA, 0x55, 0x00);
+    node_style->type_color_map[u8""] = QColor(0x80, 0x80, 0x80);
+
+    return node_style;
+};
+
+void createNodes(std::shared_ptr<FLow2> flow)
+{
+    QIcon icon(":/icon.bmp");
 
     //绘画对象
     fe::NodeData data1 = {
-        //fe::NodeType::Node,
         u8"这是一段比较长的标题#1",
-        QIcon(),
-        { 100.0, 100.0 },
-        { { u8"输入端口1", u8"" },
-            { u8"输入端口2", u8"" },
+        icon,
+        { -300.0, 100.0 },
+        { { u8"整型1", u8"整型" },
+            { u8"浮点数1", u8"浮点数" },
             { u8"输入端口3", u8"" } },
-        { { u8"输出端口1", u8"" },
-            { u8"输出端口2", u8"" },
-            { u8"输出端口3", u8"" },
+        { { u8"输出端口1", u8"整型" },
+            { u8"输出端口2", u8"整型" },
+            { u8"输出端口3", u8"浮点数" },
             { u8"输出端口4", u8"" } }
     };
     fe::NodeData data2 = {
-        //fe::NodeType::Node,
         u8"节点2",
-        QIcon(),
-        { 100.0, 300.0 },
-        { { u8"输入端口1", u8"" },
+        icon,
+        { -300.0, 300.0 },
+        { { u8"输入端口1", u8"整型" },
+            { u8"输入端口2", u8"浮点数" },
+            { u8"输入端口2", u8"浮点数" },
+            { u8"输入端口2", u8"浮点数" },
+            { u8"输入端口2", u8"浮点数" },
             { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"this is long long port", u8"" } },
+            { u8"输入端口2", u8"整型" },
+            { u8"this is long long port", u8"整型" } },
         { { u8"输出端口1", u8"" },
-            { u8"输出端口2", u8"" },
-            { u8"输出端口3", u8"" },
+            { u8"输出端口2", u8"浮点数" },
+            { u8"输出端口3", u8"整型" },
             { u8"输出端口4", u8"" } }
     };
     fe::NodeData data3 = {
-        //fe::NodeType::OutNode,
         u8"这是一段比较长的标题#1",
-        QIcon(),
-        { 800.0, 100.0 },
-        { { u8"输入端口1", u8"" },
-            { u8"输入端口2", u8"" },
+        icon,
+        { 300.0, 100.0 },
+        { { u8"输入端口1", u8"整型" },
+            { u8"输入端口2", u8"浮点数" },
             { u8"输入端口3", u8"" } },
-        { { u8"输出端口1", u8"" },
-            { u8"输出端口2", u8"" },
-            { u8"输出端口3", u8"" },
+        { { u8"输出端口1", u8"浮点数" },
+            { u8"输出端口2", u8"浮点数" },
+            { u8"输出端口3", u8"整型" },
             { u8"输出端口4", u8"" } }
     };
     fe::NodeData data4 = {
-        //fe::NodeType::OutNode,
         u8"节点2",
-        QIcon(),
-        { 800.0, 300.0 },
+        icon,
+        { 300.0, 300.0 },
         { { u8"输入端口1", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"整型" },
+            { u8"输入端口2", u8"整型" },
+            { u8"输入端口2", u8"整型" },
+            { u8"输入端口2", u8"浮点数" },
+            { u8"输入端口2", u8"浮点数" },
             { u8"输入端口2", u8"" },
             { u8"this is long long port", u8"" } },
-        { { u8"输出端口1", u8"" },
-            { u8"输出端口2", u8"" },
-            { u8"输出端口3", u8"" },
+        { { u8"输出端口1", u8"浮点数" },
+            { u8"输出端口2", u8"浮点数" },
+            { u8"输出端口3", u8"整型" },
             { u8"输出端口4", u8"" } }
     };
 
     fe::NodeData data5 = {
-        //fe::NodeType::InNode,
         u8"这是一段比较长的标题#1",
-        QIcon(),
-        { -800.0, 100.0 },
-        { { u8"输入端口1", u8"" },
+        icon,
+        { 0.0, 0.0 },
+        { { u8"输入端口1", u8"整型" },
             { u8"输入端口2", u8"" },
-            { u8"输入端口3", u8"" } },
-        { { u8"输出端口1", u8"" },
+            { u8"输入端口3", u8"浮点数" } },
+        { { u8"输出端口1", u8"浮点数" },
             { u8"输出端口2", u8"" },
-            { u8"输出端口3", u8"" },
+            { u8"输出端口3", u8"浮点数" },
             { u8"输出端口4", u8"" } }
     };
     fe::NodeData data6 = {
-        //fe::NodeType::InNode,
         u8"节点2",
-        QIcon(),
-        { -800.0, 300.0 },
-        { { u8"输入端口1", u8"" },
+        icon,
+        { 0.0, 400.0 },
+        { { u8"输入端口1", u8"浮点数" },
+            { u8"输入端口2", u8"整型" },
+            { u8"输入端口2", u8"浮点数" },
             { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"浮点数" },
+            { u8"输入端口2", u8"整型" },
+            { u8"输入端口2", u8"整型" },
             { u8"this is long long port", u8"" } },
         { { u8"输出端口1", u8"" },
-            { u8"输出端口2", u8"" },
-            { u8"输出端口3", u8"" },
+            { u8"输出端口2", u8"整型" },
+            { u8"输出端口3", u8"浮点数" },
             { u8"输出端口4", u8"" } }
     };
 
@@ -196,26 +224,29 @@ int main(int argc, char** argv)
     std::array<unsigned char, 16> guid4 = { 04 };
     std::array<unsigned char, 16> guid5 = { 05 };
     std::array<unsigned char, 16> guid6 = { 06 };
-    flow->nodes.emplace(guid1, data1);
-    flow->nodes.emplace(guid2, data2);
+    flow->in_nodes.emplace(guid1, data1);
+    flow->in_nodes.emplace(guid2, data2);
     flow->out_nodes.emplace(guid3, data3);
     flow->out_nodes.emplace(guid4, data4);
-    flow->in_nodes.emplace(guid5, data5);
-    flow->in_nodes.emplace(guid6, data6);
+    flow->nodes.emplace(guid5, data5);
+    flow->nodes.emplace(guid6, data6);
     std::array<unsigned char, 18> c_guid1 = { 01 };
-    flow->connections.emplace(c_guid1, fe::Connection{ guid5, 0, guid3, 0 });
+    flow->connections.emplace(c_guid1, fe::Connection{ guid1, 0, guid3, 0 });
+}
 
-
+void createRandomNodes(std::shared_ptr<FLow2> flow)
+{
+    QIcon icon(":/icon.bmp");
     //随机生成100个节点
     const int count = 0;
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;
         //random_data.node_type = fe::NodeType::Node;
-        random_data.node_name = generateRandomString(2, 10);
+        random_data.caption_text = generateRandomString(2, 10);
         random_data.position.setX((double)QRandomGenerator::global()->bounded(-2000, 2000));
         random_data.position.setY((double)QRandomGenerator::global()->bounded(-2000, 2000));
-
+        random_data.node_icon = icon;
         int in_count = QRandomGenerator::global()->bounded(1, 5);
         for (int j = 0; j < in_count; ++j)
         {
@@ -233,10 +264,20 @@ int main(int argc, char** argv)
         }
         flow->nodes.emplace(createGuid16(), random_data);
     }
+}
 
+int main(int argc, char** argv)
+{
+    QApplication app(argc, argv);
+
+    fe::FlowScene* scene = new fe::FlowScene();
+    fe::FlowView* flow_view = new fe::FlowView(scene);
+    std::shared_ptr<FLow2> flow = std::make_shared<FLow2>();
+    scene->setNodeStyle(createStyle());
     flow_view->resize(1200, 800);
     flow_view->show();
 
+    createNodes(flow);
     scene->showFlow(flow);
 
     app.exec();

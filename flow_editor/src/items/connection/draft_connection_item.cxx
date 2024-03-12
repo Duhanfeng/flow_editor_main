@@ -12,6 +12,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <src/flow_view/flow_scene_data.hpp>
 #include <src/items/abs_node_item.hpp>
+#include <src/items/connection/connection_item.hpp>
 
 namespace
 {
@@ -81,7 +82,7 @@ DraftConnectionItem::DraftConnectionItem(FlowScene& scene, PortType required_por
     port_index_(port_index),
     style_(style)
 {
-    setZValue(500);
+    //setZValue(scene_.flowSceneData()->top_connection_z_value);
     setFlags(ItemIsSelectable | ItemIsFocusable);
 
     if (required_port_ == PortType::In)
@@ -264,6 +265,17 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
                 connection.out_port = port_index;
             }
 
+            //如果环回,则直接退出
+            //if (connection.in == connection.out)
+            //{
+            //    ungrabMouse();                                  //不再捕获鼠标事件。
+            //    event->accept();                                //标记事件已被正确处理。
+            //    scene_.flowSceneData()->resetDraftConnection(); //重置对象
+            //    return;
+            //}
+
+            bool is_possible = scene_.flowSceneData()->checkConnectionPossible(connection.out, connection.out_port, connection.in, connection.in_port);
+
             //如果连接和原本的一致,则显示原有的对象
             if (original_item_)
             {
@@ -281,12 +293,15 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
                         //尝试断开旧链接
                         scene_.flowSceneData()->removeConnection(original_item_->id());
 
-                        //尝试连接
-                        guid18 connection_id = scene_.flow()->tryConnect(connection);
-                        if (!isInvalid(connection_id))
+                        if (is_possible)
                         {
-                            //内部添加新添加的连接对象
-                            scene_.flowSceneData()->addConnection(connection_id, connection);
+                            //尝试连接
+                            guid18 connection_id = scene_.flow()->tryConnect(connection);
+                            if (!isInvalid(connection_id))
+                            {
+                                //内部添加新添加的连接对象
+                                scene_.flowSceneData()->addConnection(connection_id, connection);
+                            }
                         }
                     }
                     else
@@ -298,11 +313,14 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
             else
             {
                 //尝试连接
-                guid18 connection_id = scene_.flow()->tryConnect(connection);
-                if (!isInvalid(connection_id))
+                if (is_possible)
                 {
-                    //内部添加新添加的连接对象
-                    scene_.flowSceneData()->addConnection(connection_id, connection);
+                    guid18 connection_id = scene_.flow()->tryConnect(connection);
+                    if (!isInvalid(connection_id))
+                    {
+                        //内部添加新添加的连接对象
+                        scene_.flowSceneData()->addConnection(connection_id, connection);
+                    }
                 }
             }
         }

@@ -49,7 +49,7 @@ void InNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* item, 
 {
     double lod = item->levelOfDetailFromTransform(painter->worldTransform());
     updateCache(lod);
-    InNodePainter::painter(painter, this);
+    InNodePainter::paint(painter, this);
 }
 void InNodeItem::updateCache(double scale)
 {
@@ -68,7 +68,7 @@ void InNodeItem::updateCache(double scale)
 }
 void InNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (geometry_->components().port_rect.contains(event->pos()))
+    if (geometry_->components().port_rect2.contains(event->pos()))
     {
         scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, 0, mapToScene(event->pos()), id_);
     }

@@ -9,8 +9,6 @@
 
 namespace fe
 {
-class AbsNodeItem;
-class ConnectionItem;
 class FlowSceneData;
 class FlowScene : public QGraphicsScene
 {

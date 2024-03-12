@@ -152,7 +152,7 @@ int main(int argc, char** argv)
     {
         fe::NodeData random_data;
         //random_data.node_type = fe::NodeType::Node;
-        random_data.node_name = generateRandomString(2, 10);
+        random_data.caption_text = generateRandomString(2, 10);
         random_data.position.setX((double)QRandomGenerator::global()->bounded(-2000, 2000));
         random_data.position.setY((double)QRandomGenerator::global()->bounded(-2000, 2000));
 

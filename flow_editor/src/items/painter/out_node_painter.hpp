@@ -10,7 +10,7 @@ namespace fe
 class OutNodePainter
 {
 public:
-    static void painter(QPainter* painter, OutNodeItem* item);
+    static void paint(QPainter* painter, OutNodeItem* item);
 };
 
 } //namespace fe

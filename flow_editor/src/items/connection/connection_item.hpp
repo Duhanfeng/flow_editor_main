@@ -9,7 +9,7 @@
 #include <flow_editor/data_def.hpp>
 #include <flow_editor/flow_view/flow_scene.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
-#include <src/node_sub_geometry/dynamic_h_geometry.hpp>
+#include <src/node_sub_geometry/dynamic_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>
 
 namespace fe
