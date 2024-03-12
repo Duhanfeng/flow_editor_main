@@ -60,7 +60,7 @@ void OutNodeItem::updateCache(double scale)
         QPainterPath polygon_path;
         polygon_path.addPolygon(geometry_->components().node_polygon);
         QPainterPath rect_path;
-        rect_path.addRect(geometry_->components().port_rect2);
+        rect_path.addRect(geometry_->components().port_rect_extend);
         shape_ = polygon_path.united(rect_path);
         prepareGeometryChange();
         moveConnections();
@@ -68,7 +68,7 @@ void OutNodeItem::updateCache(double scale)
 }
 void OutNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (geometry_->components().port_rect2.contains(event->pos()))
+    if (geometry_->components().port_rect_extend.contains(event->pos()))
     {
         scene_.flowSceneData()->makeDraftConnection(PortType::Out, id_, 0, mapToScene(event->pos()), id_);
         draft_connection_item_ = scene_.flowSceneData()->draft_connection.get();
