@@ -35,6 +35,7 @@ private:
     void scaleUp();
     void scaleDown();
     void setupScale(double scale);
+    void initAction();
 
 private:
     class Data;

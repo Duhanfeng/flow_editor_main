@@ -11,6 +11,7 @@
 namespace fe
 {
 class FlowSceneData;
+class SceneConfig;
 class FlowScene : public QGraphicsScene
 {
 public:
@@ -32,6 +33,7 @@ public:
 
     //查询接口
     FlowSceneData* flowSceneData();
+    SceneConfig& sceneConfig();
 
 private:
     class Data;

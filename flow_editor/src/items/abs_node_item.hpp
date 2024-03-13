@@ -49,6 +49,7 @@ protected:
 protected:
     FlowScene& scene_;
     guid16 id_;
+    double preview_scale_ = 0.5;
     const DraftConnectionItem* draft_connection_item_ = nullptr;
 };
 } //namespace fe

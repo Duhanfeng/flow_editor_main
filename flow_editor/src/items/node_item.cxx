@@ -31,6 +31,7 @@ NodeItem::NodeItem(FlowScene& scene, const guid16& id) :
     geometry_ = itr->second->geometry.get();
     style_ = itr->second->node_style;
     z_value_ = itr->second->z_value;
+    preview_scale_ = flow_data->scene_config.preview_scale;
 
     icon_ = data_->node_icon.pixmap(QSize(32, 32));
 
@@ -63,7 +64,7 @@ void NodeItem::updateCache(double scale)
         return;
     }
     scale_ = scale;
-    if (scale_ < 0.5)
+    if (scale_ <= preview_scale_)
     {
         geometry_->updateSimple(scale_);
         bounding_rect_ = &geometry_->simpleComponents().bounding_rect;

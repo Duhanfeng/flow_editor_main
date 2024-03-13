@@ -3,6 +3,10 @@
 //
 
 #include <flow_editor/flow_view/flow_scene.hpp>
+#include <iostream>
+#include <unordered_map>
+#include <QFontDatabase>
+#include <QAction>
 #include <src/flow_view/default_style.hpp>
 #include <src/flow_view/flow_scene_data.hpp>
 #include <src/items/node_item.hpp>
@@ -10,23 +14,17 @@
 #include <src/items/out_node_item.hpp>
 #include <src/items/connection/connection_item.hpp>
 #include <src/items/connection/draft_connection_item.hpp>
-#include <QFontDatabase>
-#include <iostream>
-#include <unordered_map>
+#include "scene_config.hpp"
 
 namespace fe
 {
 class FlowScene::Data
 {
 public:
-    std::unique_ptr<FlowSceneData> flow_scene_data; //flow所配套的UI数据
+    SceneConfig scene_config;
 
-    //默认样式
-    std::shared_ptr<NodeStyle> node_style;
-    std::shared_ptr<ConnectionStyle> connection_style;
-    std::shared_ptr<DraftConnectionStyle> draft_connection_style;
-    //类型映射表
-    std::shared_ptr<TypeColorMap> type_color_map; //类型与颜色映射字典
+    //flow资源(切换flow后会重建内部资源)
+    std::unique_ptr<FlowSceneData> flow_scene_data;
 };
 
 FlowScene::FlowScene(QObject* parent) :
@@ -36,15 +34,12 @@ FlowScene::FlowScene(QObject* parent) :
     //必须要显式设置index方法为noindex,否则removeItem再delete时,概率出现崩溃问题
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
-    initDefaultStyle(data_->node_style);
-    initDefaultStyle(data_->connection_style);
-    initDefaultStyle(data_->draft_connection_style);
-    data_->type_color_map = std::make_shared<TypeColorMap>();
-    data_->flow_scene_data = std::make_unique<FlowSceneData>();
-
-    //加载默认字体
-    //QFontDatabase::addApplicationFont(":/MiSans-Normal.ttf");
-    //data_->node_style->font_name = u8"SimSun";
+    //初始化对应资源
+    initDefaultStyle(data_->scene_config.node_style);
+    initDefaultStyle(data_->scene_config.connection_style);
+    initDefaultStyle(data_->scene_config.draft_connection_style);
+    data_->scene_config.type_color_map = std::make_shared<TypeColorMap>();
+    data_->flow_scene_data = std::make_unique<FlowSceneData>(*this, data_->scene_config);
 }
 FlowScene::~FlowScene()
 {
@@ -57,39 +52,8 @@ void FlowScene::showFlow(std::shared_ptr<Flow> flow)
 {
     //清空资源
     clearItem();
-    if (flow == nullptr)
-    {
-        return;
-    }
-
     //初始化
-    data_->flow_scene_data = std::make_unique<FlowSceneData>();
-    data_->flow_scene_data->flow = flow;
-    data_->flow_scene_data->node_style = data_->node_style;
-    data_->flow_scene_data->connection_style = data_->connection_style;
-    data_->flow_scene_data->draft_connection_style = data_->draft_connection_style;
-    data_->flow_scene_data->type_color_map = data_->type_color_map;
-    data_->flow_scene_data->scene = this;
-    data_->flow_scene_data->node_z_value = 100;
-    data_->flow_scene_data->connection_z_value = 0;
-
-    //构建对象
-    for (const auto& node : data_->flow_scene_data->flow->nodes)
-    {
-        data_->flow_scene_data->addNode(node.first, node.second);
-    }
-    for (const auto& node : data_->flow_scene_data->flow->in_nodes)
-    {
-        data_->flow_scene_data->addInNode(node.first, node.second);
-    }
-    for (const auto& node : data_->flow_scene_data->flow->out_nodes)
-    {
-        data_->flow_scene_data->addOutNode(node.first, node.second);
-    }
-    for (const auto& connection : data_->flow_scene_data->flow->connections)
-    {
-        data_->flow_scene_data->addConnection(connection.first, connection.second);
-    }
+    data_->flow_scene_data->setFlow(flow);
 }
 std::shared_ptr<Flow> FlowScene::flow()
 {
@@ -102,41 +66,40 @@ std::shared_ptr<Flow> FlowScene::flow()
 void FlowScene::clearItem()
 {
     clear();
-    data_->flow_scene_data = nullptr;
+    data_->flow_scene_data->setFlow(nullptr);
 }
 FlowSceneData* FlowScene::flowSceneData()
 {
     return data_->flow_scene_data.get();
 }
+SceneConfig& FlowScene::sceneConfig()
+{
+    return data_->scene_config;
+}
 
 //属性配置
 NodeLayoutStyle FlowScene::nodeLayoutStyle() const
 {
-    return data_->flow_scene_data->node_layout_style;
+    return data_->scene_config.node_layout_style;
 }
 void FlowScene::setNodeLayoutStyle(NodeLayoutStyle node_style)
 {
-    data_->flow_scene_data->node_layout_style = node_style;
+    data_->scene_config.node_layout_style = node_style;
 }
 std::shared_ptr<NodeStyle> FlowScene::nodeStyle() const
 {
-    return data_->node_style;
+    return data_->scene_config.node_style;
 }
 void FlowScene::setNodeStyle(std::shared_ptr<NodeStyle> style)
 {
-    data_->node_style = style;
+    data_->scene_config.node_style = style;
 }
 std::shared_ptr<std::map<QString, QColor>> FlowScene::typeColorMap() const
 {
-    return data_->type_color_map;
+    return data_->scene_config.type_color_map;
 }
 void FlowScene::setTypeColorMap(std::shared_ptr<std::map<QString, QColor>> map)
 {
-    data_->type_color_map = map;
-    if (data_->flow_scene_data != nullptr)
-    {
-        data_->flow_scene_data->type_color_map = data_->type_color_map;
-    }
+    data_->scene_config.type_color_map = map;
 }
-
 } //namespace fe

@@ -81,6 +81,27 @@ public:
     unsigned int in_port = 0;
 };
 
+//----Flow权限
+enum FlowPermission
+{
+    FlowPermissionNone = 0,      //无权限
+    NodeMovable = 0x0001,        //节点可移动
+    InputNodeMovable = 0x0002,   //输入节点可移动
+    OutputNodeMovable = 0x0004,  //输出节点可移动
+    NodeDeletable = 0x0010,      //节点可删除
+    ConnectionEditable = 0x0020, //连接可编辑（新增/修改/删除）
+    FlowPermissionAll = 0xFFFF
+};
+
+enum class SceneShowMode
+{
+    Dynamic,    //动态计算
+    FixNormal,  //强制正常模式
+    FixPreview, //强制预览模式
+};
+
+//-----Style
+
 class GraphicsViewStyle
 {
 public:

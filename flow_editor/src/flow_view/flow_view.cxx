@@ -17,19 +17,32 @@
 #include <QMouseEvent>
 #include <QContextMenuEvent>
 #include <iostream>
+#include "src/items/node_item.hpp"
 
 namespace fe
 {
 class FlowView::Data
 {
 public:
+    //测试用
     double fps = 0;
     double time = 0;
     QElapsedTimer timer;
 
+    //当前Scene
+    FlowScene* scene = nullptr;
+
+    //配置参数
     double minimum_range = 0;
     double maximum_range = 0;
+    double crt_scale = 1.0;
     QPointF click_pos;
+    QPointF crt_pos;
+
+    //事件
+    QAction* delete_selection_action = nullptr; //删除选择的对象,仅普通node时才生效
+    QAction* copy_selection_action = nullptr;   //复制
+    QAction* paste_action = nullptr;            //粘贴
 };
 
 fe::FlowView::FlowView(QWidget* parent) :
@@ -54,9 +67,11 @@ fe::FlowView::FlowView(QWidget* parent) :
     int max_size = 32767;
     setSceneRect(-max_size, -max_size, (max_size * 2), (max_size * 2));
 
+    //初始化相关事件
+    initAction();
+
     //启动测试
     data_->timer.start();
-
     //初始化定时器
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [&]()
@@ -68,6 +83,7 @@ fe::FlowView::FlowView(QWidget* parent) :
 FlowView::FlowView(FlowScene* scene, QWidget* parent) :
     FlowView(parent)
 {
+    data_->scene = scene;
     setScene(scene);
 }
 FlowView::~FlowView()
@@ -186,12 +202,15 @@ void FlowView::mousePressEvent(QMouseEvent* event)
 void FlowView::mouseMoveEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseMoveEvent(event);
+    QPointF scene_pos = mapToScene(event->pos());
+    data_->crt_pos = scene_pos;
+
     if (scene()->mouseGrabberItem() == nullptr && event->buttons() == Qt::LeftButton)
     {
         //Make sure shift is not being pressed
         if ((event->modifiers() & Qt::ShiftModifier) == 0)
         {
-            QPointF difference = data_->click_pos - mapToScene(event->pos());
+            QPointF difference = data_->click_pos - scene_pos;
             setSceneRect(sceneRect().translated(difference.x(), difference.y()));
         }
     }
@@ -207,8 +226,8 @@ void FlowView::contextMenuEvent(QContextMenuEvent* event)
 
 void FlowView::scaleUp()
 {
-    double const step = 1.2;
-    double const factor = std::pow(step, 1.0);
+    constexpr double step = 1.2;
+    const double factor = std::pow(step, 1.0);
 
     if (data_->maximum_range > 0)
     {
@@ -222,12 +241,12 @@ void FlowView::scaleUp()
     }
 
     scale(factor, factor);
-    //Q_EMIT scaleChanged(transform().m11());
+    data_->crt_scale = transform().m11(); //更新当前的缩放系数
 }
 void FlowView::scaleDown()
 {
-    double const step = 1.2;
-    double const factor = std::pow(step, -1.0);
+    constexpr double step = 1.2;
+    const double factor = std::pow(step, -1.0);
 
     if (data_->minimum_range > 0)
     {
@@ -241,7 +260,7 @@ void FlowView::scaleDown()
     }
 
     scale(factor, factor);
-    //Q_EMIT scaleChanged(transform().m11());
+    data_->crt_scale = transform().m11(); //更新当前的缩放系数
 }
 void FlowView::setupScale(double scale)
 {
@@ -259,8 +278,7 @@ void FlowView::setupScale(double scale)
     QTransform matrix;
     matrix.scale(scale, scale);
     setTransform(matrix, false);
-
-    //Q_EMIT scaleChanged(scale);
+    data_->crt_scale = scale;
 }
 void FlowView::paintEvent(QPaintEvent* event)
 {
@@ -284,5 +302,139 @@ void FlowView::paintEvent(QPaintEvent* event)
         fps_count = 0;
         time = 0;
     }
+}
+void FlowView::initAction()
+{
+    //初始化相关事件
+
+    //删除节点
+    data_->delete_selection_action = new QAction(u8"Delete Selection", this);
+    data_->delete_selection_action->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
+    data_->delete_selection_action->setShortcut(QKeySequence(QKeySequence::Delete));
+
+    //复制
+    data_->copy_selection_action = new QAction("Copy Selection", this);
+    data_->copy_selection_action->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
+    data_->copy_selection_action->setShortcut(QKeySequence(QKeySequence::Copy));
+
+    //粘贴
+    data_->paste_action = new QAction("Paste Selection", this);
+    data_->paste_action->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
+    data_->paste_action->setShortcut(QKeySequence(QKeySequence::Paste));
+
+    //连接相关事件
+    connect(data_->delete_selection_action,
+        &QAction::triggered,
+        this,
+        [&]()
+        {
+            //数据校验
+            if (!data_->scene || data_->scene->flow() == nullptr)
+            {
+                return;
+            }
+
+            //提取符合条件的节点
+            std::vector<guid16> node_ids;
+            std::vector<guid18> connection_ids;
+            auto items = data_->scene->selectedItems();
+            for (const auto& item : items)
+            {
+                if (NodeItem* node_item = dynamic_cast<NodeItem*>(item))
+                {
+                    node_ids.emplace_back(node_item->id());
+                }
+                else if (ConnectionItem* connection_item = dynamic_cast<ConnectionItem*>(item))
+                {
+                    connection_ids.emplace_back(connection_item->id());
+                }
+            }
+            if (node_ids.empty() && connection_ids.empty())
+            {
+                return;
+            }
+
+            //在预览模式中,如果只选中一个connection,则删除所有对应的连接
+            bool is_preview = data_->crt_scale < data_->scene->sceneConfig().preview_scale;
+            if (is_preview && node_ids.empty() && connection_ids.size() == 1)
+            {
+                const guid18& connection_id = connection_ids[0];
+                //查找所有输入输出匹配的节点
+                const auto& connections = data_->scene->flow()->connections;
+                auto connection_itr = connections.find(connection_id);
+                if (connection_itr != connections.end())
+                {
+                    const auto& out_id = connection_itr->second.out;
+                    const auto& in_id = connection_itr->second.in;
+
+                    connection_ids.clear();
+                    for (const auto& connection : connections)
+                    {
+                        if (connection.second.out == out_id && connection.second.in == in_id)
+                        {
+                            connection_ids.emplace_back(connection.first);
+                        }
+                    }
+                }
+            }
+
+            //通知删除对应节点
+            if (data_->scene->flow()->tryDeleteItems(node_ids, connection_ids))
+            {
+                QElapsedTimer timer;
+                timer.start();
+                data_->scene->flowSceneData()->recheck();
+                double time_ms = timer.elapsed();
+                std::cout << "recheck time: " << time_ms << " ms" << std::endl;
+            }
+        });
+    connect(data_->copy_selection_action,
+        &QAction::triggered,
+        this,
+        [&]()
+        {
+            //数据校验
+            if (!data_->scene || data_->scene->flow() == nullptr)
+            {
+                return;
+            }
+            //提取符合条件的节点
+            std::vector<guid16> node_ids;
+            auto items = data_->scene->selectedItems();
+            for (const auto& item : items)
+            {
+                if (NodeItem* node_item = dynamic_cast<NodeItem*>(item))
+                {
+                    node_ids.emplace_back(node_item->id());
+                }
+            }
+            if (node_ids.empty())
+            {
+                return;
+            }
+            //通知复制对应节点
+            data_->scene->flow()->tryCopyNodes(node_ids);
+        });
+    connect(data_->paste_action,
+        &QAction::triggered,
+        this,
+        [&]()
+        {
+            //数据校验
+            if (!data_->scene || data_->scene->flow() == nullptr)
+            {
+                return;
+            }
+            //通知粘贴对应节点
+            if (data_->scene->flow()->tryPasteNodes(data_->crt_pos.x(), data_->crt_pos.y()))
+            {
+                data_->scene->flowSceneData()->recheck();
+            }
+        });
+
+    //注册
+    addAction(data_->delete_selection_action);
+    addAction(data_->copy_selection_action);
+    addAction(data_->paste_action);
 }
 } //namespace fe

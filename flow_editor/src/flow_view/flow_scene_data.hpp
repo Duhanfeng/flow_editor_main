@@ -10,6 +10,7 @@
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>
+#include <src/flow_view/scene_config.hpp>
 
 namespace fe
 {
@@ -60,16 +61,12 @@ public:
 class FlowSceneData
 {
 public:
-    //样式管理
-    NodeLayoutStyle node_layout_style = NodeLayoutStyle::Horizontal;
-    std::shared_ptr<NodeStyle> node_style;                        //节点样式
-    std::shared_ptr<ConnectionStyle> connection_style;            //连接样式
-    std::shared_ptr<DraftConnectionStyle> draft_connection_style; //草稿连接样式
-    std::shared_ptr<TypeColorMap> type_color_map;                 //类型与颜色映射字典
+    //场景数据
+    FlowScene& scene;
+    SceneConfig& scene_config;
+    std::shared_ptr<Flow> flow;
 
     //原始数据
-    FlowScene* scene = nullptr;
-    std::shared_ptr<Flow> flow;
     std::map<guid16, std::unique_ptr<NodeItemData>> node_items;
     std::map<guid16, std::unique_ptr<InPortItemData>> in_node_items;
     std::map<guid16, std::unique_ptr<OutPortItemData>> out_node_items;
@@ -80,21 +77,29 @@ public:
     const double top_node_z_value = 500;       //node置顶时的Z轴高度
     const double top_connection_z_value = 495; //node置顶时,其connections的Z轴高度
 
+public:
+    //构造
+    FlowSceneData(FlowScene& scene, SceneConfig& scene_config);
+    void setFlow(std::shared_ptr<Flow> flow);
+
     //查询接口
     NodeData* getNodeData(const guid16& id);
     AbsNodeItem* absNodeItem(const guid16& id);                                                                                       //返回当前id对应的AbsNodeItem
     ConnectionItem* connectionItem(const guid18& id);                                                                                 //返回当前id对应的ConnectionItem
     std::vector<ConnectionItem*> allConnectionItems(const guid16& id);                                                                //返回当前node id所涉及的所有ConnectionItem
     bool getNodePortPosition(const guid16& id, PortType type, unsigned int port_index, QPointF& position);                            //查询对应节点的对应端口
+    bool getNodePreviewPortPosition(const guid16& id, PortType type, unsigned int port_index, QPointF& position);                     //查询对应节点的对应端口
     bool checkConnectionPossible(const guid16& out_id, unsigned int out_port_index, const guid16& in_id, unsigned int in_port_index); //查询是否能够连接
 
     //流程内对象管理
-    void addInNode(const guid16& id, const NodeData& data);                                      //添加输入节点
-    void addOutNode(const guid16& id, const NodeData& data);                                     //添加输出节点
-    void addNode(const guid16& id, const NodeData& data);                                        //添加节点
-    void addConnection(const guid18& id, const Connection& connection);                          //添加连接
-    void removeConnection(const guid18& id);                                                     //移除连接
-    void makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index); //添加草稿连接
+    void recheck();                                                                                   //重新校验flow和本地资源的差异性,适用于flow内部数据发生较大调整难以同步的情况
+    void addInNode(const guid16& id, const NodeData& data);                                           //添加输入节点
+    void addOutNode(const guid16& id, const NodeData& data);                                          //添加输出节点
+    void addNode(const guid16& id, const NodeData& data);                                             //添加节点
+    void addConnection(const guid18& id, const Connection& connection);                               //添加连接
+    void removeConnection(const guid18& id);                                                          //移除连接
+    void deleteItems(const std::vector<guid16>& node_ids, const std::vector<guid18>& connection_ids); //删除对应对象
+    void makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index);      //添加草稿连接
     void makeDraftConnection(PortType required_port, const guid16& id, unsigned int port_index,
         QPointF end_point, const guid16& last_hovered_node); //添加草稿连接
     void resetDraftConnection();                             //复位草稿连接

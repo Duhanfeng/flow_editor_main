@@ -105,7 +105,7 @@ inline void createRandomNodes(std::shared_ptr<Flow2> flow)
 {
     QIcon icon(":/icon.bmp");
     //随机生成100个节点
-    const int count = 200;
+    const int count = 1000;
     for (int i = 0; i < count; ++i)
     {
         fe::NodeData random_data;

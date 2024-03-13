@@ -50,6 +50,8 @@ private:
     std::shared_ptr<ConnectionStyle> style_ = nullptr;
     double z_value_ = 0.0;
     bool hovered_ = false; //悬停标志
+    double scale_ = 1.0;
+    double preview_scale_ = 0.5;
 
     //缓存
     QPoint start_;

@@ -52,6 +52,7 @@ ConnectionItem::ConnectionItem(FlowScene& scene, const guid18& id) :
     connection_ = &itr->second->connection;
     style_ = itr->second->style;
     z_value_ = itr->second->z_value;
+    preview_scale_ = flow_data->scene_config.preview_scale;
 
     setZValue(z_value_);
     setAcceptHoverEvents(true);
@@ -113,6 +114,13 @@ void ConnectionItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* it
 {
     const bool hovered = hovered_;
     const bool selected = isSelected();
+
+    double lod = item->levelOfDetailFromTransform(painter->worldTransform());
+    if (lod != scale_)
+    {
+        scale_ = lod;
+        move();
+    }
 
     painter->save();
     if (hovered || selected)
@@ -181,11 +189,23 @@ void ConnectionItem::updateCache(const QPoint& start, const QPoint& end)
 }
 void ConnectionItem::move()
 {
-    QPointF start;
-    scene_.flowSceneData()->getNodePortPosition(connection_->out, PortType::Out, connection_->out_port, start);
-    QPointF end;
-    scene_.flowSceneData()->getNodePortPosition(connection_->in, PortType::In, connection_->in_port, end);
-    updateCache(start.toPoint(), end.toPoint());
+    auto flow_scene_data = scene_.flowSceneData();
+    if (scale_ > preview_scale_)
+    {
+        QPointF start;
+        flow_scene_data->getNodePortPosition(connection_->out, PortType::Out, connection_->out_port, start);
+        QPointF end;
+        flow_scene_data->getNodePortPosition(connection_->in, PortType::In, connection_->in_port, end);
+        updateCache(start.toPoint(), end.toPoint());
+    }
+    else
+    {
+        QPointF start;
+        flow_scene_data->getNodePreviewPortPosition(connection_->out, PortType::Out, connection_->out_port, start);
+        QPointF end;
+        flow_scene_data->getNodePreviewPortPosition(connection_->in, PortType::In, connection_->in_port, end);
+        updateCache(start.toPoint(), end.toPoint());
+    }
 }
 
 void ConnectionItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
