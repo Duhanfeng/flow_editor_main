@@ -213,8 +213,37 @@ void NodePainter::paintConnectionPoints(QPainter* painter, NodeItem* item)
                 painter->drawEllipse(components.in_ports[i].port_rect);
             }
 
+            guid16 in_id = draft_item->id();
+            unsigned int in_port_index = draft_item->portIndex();
+            QPointF end_point = item->mapFromScene(draft_item->endPoint(required_port)); //相对坐标
             for (size_t i = 0; i < components.out_ports.size(); ++i)
             {
+                const PortComponent& port_component = components.out_ports[i];
+                painter->setBrush(port_component.port_color);
+
+                double half_rect_width = port_component.port_rect.width() * 0.5;
+                double half_rect_extend_width = port_component.port_rect_extend.width() * 0.5;
+
+                //d2: 鼠标到操作中心的距离
+                QPointF p = port_component.port_center;
+                double d2 = (p.x() - end_point.x()) * (p.x() - end_point.x()) + (p.y() - end_point.y()) * (p.y() - end_point.y());
+                double trigger_distance = 2 * half_rect_extend_width * half_rect_extend_width;
+
+                //如果满足距离,则进行尺寸运算
+                if (d2 < trigger_distance)
+                {
+                    bool possible = item->scene_.flowSceneData()->checkConnectionPossible(item->id(), (unsigned int)i, in_id, in_port_index);
+
+                    double dr = d2 / trigger_distance;
+                    double r = possible ? std::max(2.0 - dr, 1.0) : std::min(dr, 1.0);
+                    double rx = r * half_rect_width;
+
+                    painter->drawEllipse(p, rx, rx);
+                }
+                else
+                {
+                    painter->drawEllipse(port_component.port_rect);
+                }
             }
         }
     }

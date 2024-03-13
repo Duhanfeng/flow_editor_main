@@ -123,11 +123,11 @@ bool FlowSceneData::checkConnectionPossible(const guid16& out_id, unsigned int o
     {
         return false;
     }
-    if (out_port_index >= out_data->out_port.size())
+    if (out_port_index >= out_data->outputs.size())
     {
         return false;
     }
-    if (in_port_index >= in_data->in_port.size())
+    if (in_port_index >= in_data->inputs.size())
     {
         return false;
     }
@@ -136,8 +136,8 @@ bool FlowSceneData::checkConnectionPossible(const guid16& out_id, unsigned int o
         return false;
     }
 
-    const PortData& out_port_data = out_data->out_port[out_port_index];
-    const PortData& in_port_data = in_data->in_port[in_port_index];
+    const PortData& out_port_data = out_data->outputs[out_port_index];
+    const PortData& in_port_data = in_data->inputs[in_port_index];
 
     if (out_port_data.port_type == in_port_data.port_type || out_port_data.port_type.isEmpty() || in_port_data.port_type.isEmpty())
     {

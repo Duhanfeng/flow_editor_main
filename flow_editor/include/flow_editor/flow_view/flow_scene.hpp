@@ -3,9 +3,10 @@
 //
 
 #pragma once
+#include <memory>
 #include <QGraphicsScene>
 #include <flow_editor/data_def.hpp>
-#include <memory>
+#include <flow_editor/flow.hpp>
 
 namespace fe
 {

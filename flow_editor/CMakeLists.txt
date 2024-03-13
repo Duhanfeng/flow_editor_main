@@ -25,6 +25,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(PROJECT_INCLUDE
         include/flow_editor/flow_editor.hpp
         include/flow_editor/data_def.hpp
+        include/flow_editor/flow.hpp
         include/flow_editor/flow_view/flow_view.hpp
         include/flow_editor/flow_view/flow_scene.hpp
 )

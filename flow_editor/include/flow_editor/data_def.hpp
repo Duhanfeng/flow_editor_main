@@ -28,11 +28,23 @@ enum class NodeType
     InNode,
     OutNode
 };
+enum class PortStatus
+{
+    Fixed,     //端口是永久固定的，不能改动
+    Detachable //端口是可以被移除的
+};
+enum class PortConfigOptions
+{
+    Fixed,      //端口是永久固定的，不能改动
+    Detachable, //端口是可以被移除的
+    Attachable  //端口是可以添加的
+};
 class PortData
 {
 public:
-    QString port_name;
-    QString port_type; //同名类型才可以连接,空表示不进行过滤
+    QString port_name;                         //端口名
+    QString port_type;                         //端口类型,同名类型才可以连接,空表示不进行过滤
+    PortStatus port_state = PortStatus::Fixed; //端口状态
 };
 class NodeData
 {
@@ -40,8 +52,10 @@ public:
     QString caption_text;
     QIcon node_icon;
     QPointF position;
-    std::vector<PortData> in_port;
-    std::vector<PortData> out_port;
+    std::vector<PortData> inputs;
+    std::vector<PortData> outputs;
+    PortConfigOptions in_ports_config;
+    PortConfigOptions out_ports_config;
 };
 
 using guid16 = std::array<unsigned char, 16>;
@@ -65,45 +79,6 @@ public:
     unsigned int out_port = 0;
     guid16 in;
     unsigned int in_port = 0;
-};
-class Flow
-{
-public:
-    virtual ~Flow() = default;
-
-public:
-    //原始数据
-    std::map<guid16, NodeData> nodes;
-    std::map<guid16, NodeData> in_nodes;
-    std::map<guid16, NodeData> out_nodes;
-    std::map<guid18, Connection> connections;
-
-public:
-    //界面交互响应
-    virtual bool tryDeleteNode(const guid16& id)
-    {
-        auto iter = nodes.find(id);
-        if (iter != nodes.end())
-        {
-            nodes.erase(iter);
-            return true;
-        }
-        return false;
-    }
-    virtual bool tryDisconnect(const guid18& id)
-    {
-        auto iter = connections.find(id);
-        if (iter != connections.end())
-        {
-            connections.erase(iter);
-            return true;
-        }
-        return false;
-    }
-    virtual guid18 tryConnect(const Connection& connection)
-    {
-        return { 0 };
-    }
 };
 
 class GraphicsViewStyle

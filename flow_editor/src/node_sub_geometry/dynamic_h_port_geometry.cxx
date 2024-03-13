@@ -18,9 +18,9 @@ DynamicHPortGeometry::DynamicHPortGeometry(NodeType node_type, const fe::NodeDat
 
     if (node_type_ == NodeType::InNode)
     {
-        if (!data_.out_port.empty())
+        if (!data_.outputs.empty())
         {
-            components_.port_type = data_.out_port[0].port_type;
+            components_.port_type = data_.outputs[0].port_type;
         }
         else
         {
@@ -29,9 +29,9 @@ DynamicHPortGeometry::DynamicHPortGeometry(NodeType node_type, const fe::NodeDat
     }
     else
     {
-        if (!data_.in_port.empty())
+        if (!data_.inputs.empty())
         {
-            components_.port_type = data_.in_port[0].port_type;
+            components_.port_type = data_.inputs[0].port_type;
         }
         else
         {

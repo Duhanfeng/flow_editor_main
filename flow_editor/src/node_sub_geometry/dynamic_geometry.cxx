@@ -9,8 +9,8 @@ namespace
 //端口垂直方向的最大尺寸
 inline double maxVerticalPortsExtent(const fe::NodeData& data, unsigned int port_size, unsigned int port_spasing)
 {
-    size_t n_in_ports = data.in_port.size();
-    size_t n_out_ports = data.out_port.size();
+    size_t n_in_ports = data.inputs.size();
+    size_t n_out_ports = data.outputs.size();
     size_t max_num_of_entries = std::max(n_in_ports, n_out_ports);
     size_t step = port_size + port_spasing;
     return step * max_num_of_entries + port_spasing;
@@ -40,13 +40,13 @@ DynamicGeometry::DynamicGeometry(const fe::NodeData& data, std::shared_ptr<NodeS
     //初始化对象
     simple_components_.caption_text = QStaticText(data.caption_text);
     components_.caption_text = QStaticText(data.caption_text);
-    components_.in_ports.resize(data_.in_port.size());
-    components_.out_ports.resize(data_.out_port.size());
-    for (size_t i = 0; i < data_.in_port.size(); ++i)
+    components_.in_ports.resize(data_.inputs.size());
+    components_.out_ports.resize(data_.outputs.size());
+    for (size_t i = 0; i < data_.inputs.size(); ++i)
     {
-        components_.in_ports[i].port_text = QStaticText(data_.in_port[i].port_name);
-        components_.in_ports[i].port_type = data_.in_port[i].port_type;
-        auto itr = type_color_map->find(data_.in_port[i].port_type);
+        components_.in_ports[i].port_text = QStaticText(data_.inputs[i].port_name);
+        components_.in_ports[i].port_type = data_.inputs[i].port_type;
+        auto itr = type_color_map->find(data_.inputs[i].port_type);
         if (itr != type_color_map->end())
         {
             components_.in_ports[i].port_color = itr->second;
@@ -56,11 +56,11 @@ DynamicGeometry::DynamicGeometry(const fe::NodeData& data, std::shared_ptr<NodeS
             components_.in_ports[i].port_color = { 125, 125, 125 };
         }
     }
-    for (size_t i = 0; i < data_.out_port.size(); ++i)
+    for (size_t i = 0; i < data_.outputs.size(); ++i)
     {
-        components_.out_ports[i].port_text = QStaticText(data_.out_port[i].port_name);
-        components_.out_ports[i].port_type = data_.out_port[i].port_type;
-        auto itr = type_color_map->find(data_.out_port[i].port_type);
+        components_.out_ports[i].port_text = QStaticText(data_.outputs[i].port_name);
+        components_.out_ports[i].port_type = data_.outputs[i].port_type;
+        auto itr = type_color_map->find(data_.outputs[i].port_type);
         if (itr != type_color_map->end())
         {
             components_.out_ports[i].port_color = itr->second;
@@ -83,12 +83,12 @@ void DynamicGeometry::update()
     double point_diameter_extend = 2.0 * point_diameter;            //扩展的连接点尺寸
 
     double in_width = 0;
-    for (const auto& port : data_.in_port)
+    for (const auto& port : data_.inputs)
     {
         in_width = std::max(in_width, textWidth(font_metrics_.get(), port.port_name));
     }
     double out_width = 0;
-    for (const auto& port : data_.out_port)
+    for (const auto& port : data_.outputs)
     {
         out_width = std::max(out_width, textWidth(font_metrics_.get(), port.port_name));
     }
