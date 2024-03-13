@@ -53,7 +53,7 @@ public:
         auto iter = connections.find(id);
         if (iter != connections.end())
         {
-            std::cout << "connections.erase(iter)" << std::endl;
+            //std::cout << "connections.erase(iter)" << std::endl;
             connections.erase(iter);
             return true;
         }
@@ -116,11 +116,6 @@ std::shared_ptr<fe::NodeStyle> createStyle()
     node_style->font_size = 12;
     node_style->font = QFont(node_style->font_name, node_style->font_size);
 
-    //构建映射表
-    node_style->type_color_map[u8"整型"] = QColor(0x55, 0xAA, 0xFF);
-    node_style->type_color_map[u8"浮点数"] = QColor(0xAA, 0x55, 0x00);
-    node_style->type_color_map[u8""] = QColor(0x80, 0x80, 0x80);
-
     return node_style;
 };
 
@@ -129,63 +124,33 @@ void createNodes(std::shared_ptr<FLow2> flow)
     QIcon icon(":/icon.bmp");
 
     //绘画对象
-    fe::NodeData data1 = {
-        u8"这是一段比较长的标题#1",
+    fe::NodeData in_data1 = {
+        u8"输入端口#1",
         icon,
         { -300.0, 100.0 },
-        { { u8"整型1", u8"整型" },
-            { u8"浮点数1", u8"浮点数" },
-            { u8"输入端口3", u8"" } },
-        { { u8"输出端口1", u8"整型" },
-            { u8"输出端口2", u8"整型" },
-            { u8"输出端口3", u8"浮点数" },
-            { u8"输出端口4", u8"" } }
+        {},
+        { { u8"输出端口1", u8"整型" } }
     };
-    fe::NodeData data2 = {
-        u8"节点2",
+    fe::NodeData in_data2 = {
+        u8"命名稍长输入端口#2",
         icon,
         { -300.0, 300.0 },
-        { { u8"输入端口1", u8"整型" },
-            { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口2", u8"" },
-            { u8"输入端口2", u8"整型" },
-            { u8"this is long long port", u8"整型" } },
-        { { u8"输出端口1", u8"" },
-            { u8"输出端口2", u8"浮点数" },
-            { u8"输出端口3", u8"整型" },
-            { u8"输出端口4", u8"" } }
+        {},
+        { { u8"输出端口1", u8"" } }
     };
-    fe::NodeData data3 = {
-        u8"这是一段比较长的标题#1",
+    fe::NodeData out_data1 = {
+        u8"输出端口#1",
         icon,
         { 300.0, 100.0 },
-        { { u8"输入端口1", u8"整型" },
-            { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口3", u8"" } },
-        { { u8"输出端口1", u8"浮点数" },
-            { u8"输出端口2", u8"浮点数" },
-            { u8"输出端口3", u8"整型" },
-            { u8"输出端口4", u8"" } }
+        { { u8"输入端口1", u8"整型" } },
+        {}
     };
-    fe::NodeData data4 = {
-        u8"节点2",
+    fe::NodeData out_data2 = {
+        u8"命名稍长输出端口#2",
         icon,
         { 300.0, 300.0 },
-        { { u8"输入端口1", u8"" },
-            { u8"输入端口2", u8"整型" },
-            { u8"输入端口2", u8"整型" },
-            { u8"输入端口2", u8"整型" },
-            { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口2", u8"" },
-            { u8"this is long long port", u8"" } },
-        { { u8"输出端口1", u8"浮点数" },
-            { u8"输出端口2", u8"浮点数" },
-            { u8"输出端口3", u8"整型" },
-            { u8"输出端口4", u8"" } }
+        { { u8"输入端口1", u8"" } },
+        {}
     };
 
     fe::NodeData data5 = {
@@ -217,6 +182,16 @@ void createNodes(std::shared_ptr<FLow2> flow)
             { u8"输出端口3", u8"浮点数" },
             { u8"输出端口4", u8"" } }
     };
+    fe::NodeData data7 = {
+        u8"执行节点",
+        icon,
+        { 0.0, 200.0 },
+        { { u8"浮点数", u8"浮点数" },
+            { u8"整型", u8"整型" },
+            { u8"通用端口", u8"" } },
+        { { u8"整型", u8"整型" },
+            { u8"浮点数", u8"浮点数" } }
+    };
 
     std::array<unsigned char, 16> guid1 = { 01 };
     std::array<unsigned char, 16> guid2 = { 02 };
@@ -224,12 +199,14 @@ void createNodes(std::shared_ptr<FLow2> flow)
     std::array<unsigned char, 16> guid4 = { 04 };
     std::array<unsigned char, 16> guid5 = { 05 };
     std::array<unsigned char, 16> guid6 = { 06 };
-    flow->in_nodes.emplace(guid1, data1);
-    flow->in_nodes.emplace(guid2, data2);
-    flow->out_nodes.emplace(guid3, data3);
-    flow->out_nodes.emplace(guid4, data4);
+    std::array<unsigned char, 16> guid7 = { 07 };
+    flow->in_nodes.emplace(guid1, in_data1);
+    flow->in_nodes.emplace(guid2, in_data2);
+    flow->out_nodes.emplace(guid3, out_data1);
+    flow->out_nodes.emplace(guid4, out_data2);
     flow->nodes.emplace(guid5, data5);
     flow->nodes.emplace(guid6, data6);
+    flow->nodes.emplace(guid7, data7);
     std::array<unsigned char, 18> c_guid1 = { 01 };
     flow->connections.emplace(c_guid1, fe::Connection{ guid1, 0, guid3, 0 });
 }
@@ -274,11 +251,19 @@ int main(int argc, char** argv)
     fe::FlowView* flow_view = new fe::FlowView(scene);
     std::shared_ptr<FLow2> flow = std::make_shared<FLow2>();
     scene->setNodeStyle(createStyle());
-    flow_view->resize(1200, 800);
-    flow_view->show();
+
+    //构建映射表
+    auto type_color_map = std::make_shared<fe::TypeColorMap>();
+    type_color_map->emplace(u8"整型", QColor(0x55, 0xAA, 0xFF));
+    type_color_map->emplace(u8"浮点数", QColor(0xAA, 0x55, 0x00));
+    type_color_map->emplace(u8"", QColor(0x80, 0x80, 0x80));
+    scene->setTypeColorMap(type_color_map);
 
     createNodes(flow);
     scene->showFlow(flow);
+
+    flow_view->resize(1200, 800);
+    flow_view->show();
 
     app.exec();
     return 0;

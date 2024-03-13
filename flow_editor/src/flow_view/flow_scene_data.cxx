@@ -218,7 +218,7 @@ void FlowSceneData::addInNode(const guid16& id, const NodeData& data)
     //构造InPortItemData对象
     auto item_data = std::make_unique<InPortItemData>();
     item_data->data = data; //直接拷贝NodeData数据
-    item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::InNode, item_data->data, node_style);
+    item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::InNode, item_data->data, node_style, type_color_map);
     item_data->node_style = node_style;
     item_data->z_value = node_z_value;
     //保存数据
@@ -231,7 +231,7 @@ void FlowSceneData::addOutNode(const guid16& id, const NodeData& data)
     //构造OutPortItemData对象
     auto item_data = std::make_unique<OutPortItemData>();
     item_data->data = data; //直接拷贝NodeData数据
-    item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::OutNode, item_data->data, node_style);
+    item_data->geometry = std::make_unique<DynamicHPortGeometry>(NodeType::OutNode, item_data->data, node_style, type_color_map);
     item_data->node_style = node_style;
     item_data->z_value = node_z_value;
     //保存数据
@@ -244,7 +244,7 @@ void FlowSceneData::addNode(const guid16& id, const NodeData& data)
     //构造NodeItemData对象
     auto item_data = std::make_unique<NodeItemData>();
     item_data->data = data; //直接拷贝NodeData数据
-    item_data->geometry = std::make_unique<DynamicGeometry>(item_data->data, node_style);
+    item_data->geometry = std::make_unique<DynamicGeometry>(item_data->data, node_style, type_color_map);
     item_data->node_style = node_style;
     item_data->z_value = node_z_value;
     //保存数据

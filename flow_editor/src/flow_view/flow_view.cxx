@@ -42,7 +42,7 @@ fe::FlowView::FlowView(QWidget* parent) :
     //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setCacheMode(QGraphicsView::CacheBackground);
     setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-    setRenderHint(QPainter::Antialiasing, false);
+    setRenderHint(QPainter::Antialiasing, true);
     setOptimizationFlags(QGraphicsView::DontSavePainterState);
     setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);

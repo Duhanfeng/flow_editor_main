@@ -345,7 +345,7 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         {
             if (scene_.flow()->tryDisconnect(original_item_->id()))
             {
-                std::cout << "scene_.flowSceneData()->removeConnection" << std::endl;
+                //std::cout << "scene_.flowSceneData()->removeConnection" << std::endl;
                 scene_.flowSceneData()->removeConnection(original_item_->id());
             }
             else

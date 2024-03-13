@@ -11,6 +11,12 @@ class InNodePainter
 {
 public:
     static void paint(QPainter* painter, InNodeItem* item);
+
+private:
+    static void paintFrame(QPainter* painter, InNodeItem* item);
+    static void paintNodeRect(QPainter* painter, InNodeItem* item);
+    static void paintCaption(QPainter* painter, InNodeItem* item);
+    static void paintConnectionPoints(QPainter* painter, InNodeItem* item);
 };
 
 } //namespace fe

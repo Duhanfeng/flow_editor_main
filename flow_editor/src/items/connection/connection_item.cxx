@@ -142,12 +142,12 @@ void ConnectionItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* it
     }
 
     //draw end points
-    const double point_diameter = style_->point_diameter;
-    painter->setPen(style_->construction_color);
-    painter->setBrush(style_->construction_color);
-    double const point_radius = point_diameter / 2.0;
-    painter->drawEllipse(start_.toPointF(), point_radius, point_radius);
-    painter->drawEllipse(end_.toPointF(), point_radius, point_radius);
+    //const double point_diameter = style_->point_diameter;
+    //painter->setPen(style_->construction_color);
+    //painter->setBrush(style_->construction_color);
+    //double const point_radius = point_diameter / 2.0;
+    //painter->drawEllipse(start_.toPointF(), point_radius, point_radius);
+    //painter->drawEllipse(end_.toPointF(), point_radius, point_radius);
 
     painter->restore();
 }

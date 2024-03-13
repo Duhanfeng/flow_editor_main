@@ -139,8 +139,6 @@ public:
     float connection_point_diameter = 5.0f; //连接点的直径大小
     float opacity = 1.0f;                   //不透明度，用于控制颜色的透明度, 范围:[0,1]
 
-    std::map<QString, QColor> type_color_map; //类型与颜色映射字典
-
     QString font_name; //默认字体名
     int font_size = 9; //默认字体大小
     QFont font;        //默认字体
@@ -161,8 +159,7 @@ public:
     float point_diameter;          //点的直径
 
     //自定义颜色
-    bool use_data_defined_colors;                 //是否使用数据定义的颜色
-    std::map<std::string, QColor> type_color_map; //类型与颜色映射字典
+    bool use_data_defined_colors; //是否使用数据定义的颜色
 };
 class DraftConnectionStyle
 {
@@ -172,5 +169,7 @@ public:
     float construction_line_width; //构造时线条宽度
     float point_diameter;          //点的直径
 };
+
+using TypeColorMap = std::map<QString, QColor>;
 
 } //namespace fe

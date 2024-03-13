@@ -13,7 +13,7 @@ namespace fe
 class DynamicHPortGeometry
 {
 public:
-    DynamicHPortGeometry(NodeType node_type, const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
+    DynamicHPortGeometry(NodeType node_type, const NodeData& data, std::shared_ptr<NodeStyle> node_style, std::shared_ptr<TypeColorMap> type_color_map);
     void update(double scale);
     const PortUIComponents& components() const { return components_; }
 
@@ -22,6 +22,7 @@ private:
     NodeType node_type_;
     const NodeData& data_;
     std::shared_ptr<NodeStyle> node_style_;
+    std::shared_ptr<TypeColorMap> type_color_map_;
     //输出
     PortUIComponents components_;
     //缓存

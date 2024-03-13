@@ -25,6 +25,8 @@ public:
     std::shared_ptr<NodeStyle> node_style;
     std::shared_ptr<ConnectionStyle> connection_style;
     std::shared_ptr<DraftConnectionStyle> draft_connection_style;
+    //类型映射表
+    std::shared_ptr<TypeColorMap> type_color_map; //类型与颜色映射字典
 };
 
 FlowScene::FlowScene(QObject* parent) :
@@ -37,6 +39,7 @@ FlowScene::FlowScene(QObject* parent) :
     initDefaultStyle(data_->node_style);
     initDefaultStyle(data_->connection_style);
     initDefaultStyle(data_->draft_connection_style);
+    data_->type_color_map = std::make_shared<TypeColorMap>();
     data_->flow_scene_data = std::make_unique<FlowSceneData>();
 
     //加载默认字体
@@ -65,6 +68,7 @@ void FlowScene::showFlow(std::shared_ptr<Flow> flow)
     data_->flow_scene_data->node_style = data_->node_style;
     data_->flow_scene_data->connection_style = data_->connection_style;
     data_->flow_scene_data->draft_connection_style = data_->draft_connection_style;
+    data_->flow_scene_data->type_color_map = data_->type_color_map;
     data_->flow_scene_data->scene = this;
     data_->flow_scene_data->node_z_value = 100;
     data_->flow_scene_data->connection_z_value = 0;
@@ -121,6 +125,18 @@ std::shared_ptr<NodeStyle> FlowScene::nodeStyle() const
 void FlowScene::setNodeStyle(std::shared_ptr<NodeStyle> style)
 {
     data_->node_style = style;
+}
+std::shared_ptr<std::map<QString, QColor>> FlowScene::typeColorMap() const
+{
+    return data_->type_color_map;
+}
+void FlowScene::setTypeColorMap(std::shared_ptr<std::map<QString, QColor>> map)
+{
+    data_->type_color_map = map;
+    if (data_->flow_scene_data != nullptr)
+    {
+        data_->flow_scene_data->type_color_map = data_->type_color_map;
+    }
 }
 
 } //namespace fe

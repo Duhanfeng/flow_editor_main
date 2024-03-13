@@ -181,11 +181,12 @@ void NodePainter::paintConnectionPoints(QPainter* painter, NodeItem* item)
                 painter->setBrush(port_component.port_color);
 
                 double half_rect_width = port_component.port_rect.width() * 0.5;
+                double half_rect_extend_width = port_component.port_rect_extend.width() * 0.5;
 
                 //d2: 鼠标到操作中心的距离
                 QPointF p = port_component.port_center;
                 double d2 = (p.x() - end_point.x()) * (p.x() - end_point.x()) + (p.y() - end_point.y()) * (p.y() - end_point.y());
-                double trigger_distance = 2 * port_component.port_rect_extend.width() * port_component.port_rect_extend.width();
+                double trigger_distance = 2 * half_rect_extend_width * half_rect_extend_width;
 
                 //如果满足距离,则进行尺寸运算
                 if (d2 < trigger_distance)
@@ -238,18 +239,15 @@ void NodePainter::paintSimple(QPainter* painter, NodeItem* item)
     auto& style = item->style_;
 
     //保存状态
-    QPen pen = painter->pen();
-    QBrush brush = painter->brush();
-    QFont font = style->font;
-    painter->setFont(font);
+    painter->setFont(style->font);
 
     //画各个区域(调试用)
-    painter->setPen(pen);
-    //painter->drawRect(geometry_simple.bounding_rect);
-    painter->drawRect(components.icon_rect);
-    painter->drawRect(components.caption_rect);
-    painter->drawRect(components.in_port_rect);
-    painter->drawRect(components.out_port_rect);
+    painter->setPen(QPen());
+    //painter->drawRect(components.bounding_rect);
+    //painter->drawRect(components.icon_rect);
+    //painter->drawRect(components.caption_rect);
+    //painter->drawRect(components.in_port_rect);
+    //painter->drawRect(components.out_port_rect);
 
     //画图标
     if (!item->icon_.isNull())
@@ -261,10 +259,12 @@ void NodePainter::paintSimple(QPainter* painter, NodeItem* item)
         painter->fillRect(components.icon_rect, 0xC0C0C0);
     }
 
+    if (item->isSelected())
+    {
+        painter->fillRect(components.caption_rect, item->style_->selected_boundary_color);
+    }
+
     //绘画标题
-    QFont f = painter->font();
-    //f.setBold(true);
-    painter->setFont(f);
     painter->setPen(style->font_color);
     if (scale < 1.0)
     {
@@ -279,10 +279,9 @@ void NodePainter::paintSimple(QPainter* painter, NodeItem* item)
     }
 
     //绘画输入输出端口操作点
-    painter->setPen(pen);
+    painter->setPen(item->isSelected() ? item->style_->selected_boundary_color : item->style_->normal_boundary_color);
     painter->setBrush(QColor(255, 0, 0));
     painter->drawEllipse(components.in_port_rect);
     painter->drawEllipse(components.out_port_rect);
-    painter->setBrush(brush);
 }
 } //namespace fe

@@ -28,8 +28,8 @@ inline double textWidth(QFontMetrics* font_metrics, const QString& str)
 
 namespace fe
 {
-DynamicGeometry::DynamicGeometry(const fe::NodeData& data, std::shared_ptr<NodeStyle>& node_style) :
-    data_(data), node_style_(node_style)
+DynamicGeometry::DynamicGeometry(const fe::NodeData& data, std::shared_ptr<NodeStyle> node_style, std::shared_ptr<TypeColorMap> type_color_map) :
+    data_(data), node_style_(node_style), type_color_map_(type_color_map)
 {
     QFont font = node_style_->font;
     QFont blod_font = node_style_->font;
@@ -46,8 +46,8 @@ DynamicGeometry::DynamicGeometry(const fe::NodeData& data, std::shared_ptr<NodeS
     {
         components_.in_ports[i].port_text = QStaticText(data_.in_port[i].port_name);
         components_.in_ports[i].port_type = data_.in_port[i].port_type;
-        auto itr = node_style_->type_color_map.find(data_.in_port[i].port_type);
-        if (itr != node_style_->type_color_map.end())
+        auto itr = type_color_map->find(data_.in_port[i].port_type);
+        if (itr != type_color_map->end())
         {
             components_.in_ports[i].port_color = itr->second;
         }
@@ -60,8 +60,8 @@ DynamicGeometry::DynamicGeometry(const fe::NodeData& data, std::shared_ptr<NodeS
     {
         components_.out_ports[i].port_text = QStaticText(data_.out_port[i].port_name);
         components_.out_ports[i].port_type = data_.out_port[i].port_type;
-        auto itr = node_style_->type_color_map.find(data_.out_port[i].port_type);
-        if (itr != node_style_->type_color_map.end())
+        auto itr = type_color_map->find(data_.out_port[i].port_type);
+        if (itr != type_color_map->end())
         {
             components_.out_ports[i].port_color = itr->second;
         }
@@ -92,7 +92,7 @@ void DynamicGeometry::update()
     {
         out_width = std::max(out_width, textWidth(font_metrics_.get(), port.port_name));
     }
-    unsigned int port_spasing = 5;                                                      //端口字符之间的间隔
+    constexpr unsigned int port_spasing = 5;                                            //端口字符之间的间隔
     unsigned int port_text_height = font_metrics_->height();                            //端口字符的高度
     double port_width = in_width + out_width + point_diameter + 2 * port_spasing;       //端口区域宽度
     double port_height = maxVerticalPortsExtent(data_, port_text_height, port_spasing); //端口字符区域高度
@@ -177,8 +177,8 @@ void DynamicGeometry::update()
 }
 void DynamicGeometry::updateSimple(double scale)
 {
-    double port_point_size = node_style_->connection_point_diameter * 2; //连接点尺寸
-    double half_point_size = port_point_size * 0.5;
+    double point_diameter_extend = node_style_->connection_point_diameter * 2; //连接点尺寸
+    double half_point_diameter_extend = point_diameter_extend * 0.5;
 
     //计算标题区域的尺寸
     QSizeF caption_size = bold_font_metrics_->boundingRect(data_.caption_text).size();
@@ -191,40 +191,93 @@ void DynamicGeometry::updateSimple(double scale)
     //计算icon区域
     QSizeF icon_size = { 100, 100 };
 
-    //计算标题区域
+    //计算边界保留区域
     constexpr double margin = 3.0; //3个像素的边界保留
-    double x_margin = margin;
-    double y_margin = margin;
-    double x_offset = std::abs(caption_size.width() - icon_size.width()) * 0.5;
-    if (caption_size.width() >= (icon_size.width() + port_point_size))
+    double left_margin = margin;
+    double right_margin = margin;
+    double top_margin = margin;
+    double bottom_margin = margin;
+
+    //计算对象的边界
+    double node_width = std::max(caption_size.width(), icon_size.width() + point_diameter_extend);
+    double node_height = icon_size.height() + caption_size.height();
+    QSizeF node_size = { node_width, node_height };
+    simple_components_.bounding_rect = { 0, 0, node_size.width() + left_margin + right_margin, node_size.height() + top_margin + bottom_margin };
+    simple_components_.bounding_rect.moveCenter({ 0, 0 });
+    QPointF translate_offset = simple_components_.bounding_rect.topLeft() + QPointF{ left_margin, top_margin };
+    double offset_x = translate_offset.x();
+    double offset_y = translate_offset.y();
+
+    //计算标题区域
+    //double icon_title_offset_x = std::abs(caption_size.width() - icon_size.width()) * 0.5;
+    //if (caption_size.width() >= (icon_size.width() + point_diameter_extend))
+    //{
+    //    //标题比图标区域大的情况
+    //    simple_components_.icon_rect = { offset_x + icon_title_offset_x, offset_y, icon_size.width(), icon_size.height() };
+    //    simple_components_.caption_rect = { offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
+    //}
+    //else
+    //{
+    //    //图标区域比标题大的情况
+    //    //x_margin += half_point_size;
+    //    simple_components_.icon_rect = { offset_x + half_point_diameter_extend, offset_y, icon_size.width(), icon_size.height() };
+    //    simple_components_.caption_rect = { offset_x + icon_title_offset_x + half_point_diameter_extend, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
+    //}
+
+    double icon_extend_width = icon_size.width() + point_diameter_extend;
+    if (caption_size.width() >= icon_extend_width)
     {
-        //标题比图标区域大的情况
-        simple_components_.icon_rect = { x_margin + x_offset, y_margin, icon_size.width(), icon_size.height() };
-        simple_components_.caption_rect = { x_margin, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+        //标题比icon扩展区域大
+        double icon_title_offset_x = (caption_size.width() - icon_size.width()) * 0.5;
+        simple_components_.caption_rect = { offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
+        simple_components_.icon_rect = { offset_x + icon_title_offset_x, offset_y, icon_size.width(), icon_size.height() };
     }
     else
     {
-        //图标区域比标题大的情况
-        x_margin += half_point_size;
-        simple_components_.icon_rect = { x_margin, y_margin, icon_size.width(), icon_size.height() };
-        simple_components_.caption_rect = { x_margin + x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+        //标题比icon区域小
+        double icon_title_offset_x = (icon_size.width() - caption_size.width()) * 0.5;
+        simple_components_.icon_rect = { offset_x + half_point_diameter_extend, offset_y, icon_size.width(), icon_size.height() };
+        simple_components_.caption_rect = { offset_x + half_point_diameter_extend + icon_title_offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
     }
 
     //计算port区域
-    simple_components_.in_port_rect = { simple_components_.icon_rect.left() - half_point_size, simple_components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
-    simple_components_.out_port_rect = { simple_components_.icon_rect.right() - half_point_size, simple_components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
+    simple_components_.in_port_rect = { simple_components_.icon_rect.left() - half_point_diameter_extend, simple_components_.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
+    simple_components_.out_port_rect = { simple_components_.icon_rect.right() - half_point_diameter_extend, simple_components_.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
 
-    //计算对象的边界
-    simple_components_.bounding_rect = { 0.0, 0.0, std::max(caption_size.width(), icon_size.width()) + 2 * x_margin, icon_size.height() + caption_size.height() + 2 * y_margin };
-
-    //-----平移区域
-    //获取bounding_rect的中心点坐标
-    simple_components_.bounding_rect.moveCenter({ 0, 0 });
-    QPointF translate_offset = simple_components_.bounding_rect.topLeft();
-    //调整每个矩形的坐标，使其相对于bounding_rect的中心
-    simple_components_.icon_rect.translate(translate_offset);
-    simple_components_.caption_rect.translate(translate_offset);
-    simple_components_.in_port_rect.translate(translate_offset);
-    simple_components_.out_port_rect.translate(translate_offset);
+    ////计算标题区域
+    //constexpr double margin = 3.0; //3个像素的边界保留
+    //double x_margin = margin;
+    //double y_margin = margin;
+    //double x_offset = std::abs(caption_size.width() - icon_size.width()) * 0.5;
+    //if (caption_size.width() >= (icon_size.width() + port_point_size))
+    //{
+    //    //标题比图标区域大的情况
+    //    simple_components_.icon_rect = { x_margin + x_offset, y_margin, icon_size.width(), icon_size.height() };
+    //    simple_components_.caption_rect = { x_margin, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+    //}
+    //else
+    //{
+    //    //图标区域比标题大的情况
+    //    x_margin += half_point_size;
+    //    simple_components_.icon_rect = { x_margin, y_margin, icon_size.width(), icon_size.height() };
+    //    simple_components_.caption_rect = { x_margin + x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
+    //}
+    //
+    ////计算port区域
+    //simple_components_.in_port_rect = { simple_components_.icon_rect.left() - half_point_size, simple_components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
+    //simple_components_.out_port_rect = { simple_components_.icon_rect.right() - half_point_size, simple_components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
+    //
+    ////计算对象的边界
+    //simple_components_.bounding_rect = { 0.0, 0.0, std::max(caption_size.width(), icon_size.width()) + 2 * x_margin, icon_size.height() + caption_size.height() + 2 * y_margin };
+    //
+    ////-----平移区域
+    ////获取bounding_rect的中心点坐标
+    //simple_components_.bounding_rect.moveCenter({ 0, 0 });
+    //QPointF translate_offset = simple_components_.bounding_rect.topLeft();
+    ////调整每个矩形的坐标，使其相对于bounding_rect的中心
+    //simple_components_.icon_rect.translate(translate_offset);
+    //simple_components_.caption_rect.translate(translate_offset);
+    //simple_components_.in_port_rect.translate(translate_offset);
+    //simple_components_.out_port_rect.translate(translate_offset);
 }
 } //namespace fe

@@ -11,6 +11,12 @@ class OutNodePainter
 {
 public:
     static void paint(QPainter* painter, OutNodeItem* item);
+
+private:
+    static void paintFrame(QPainter* painter, OutNodeItem* item);
+    static void paintNodeRect(QPainter* painter, OutNodeItem* item);
+    static void paintCaption(QPainter* painter, OutNodeItem* item);
+    static void paintConnectionPoints(QPainter* painter, OutNodeItem* item);
 };
 
 } //namespace fe

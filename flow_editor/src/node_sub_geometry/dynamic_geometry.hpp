@@ -13,7 +13,7 @@ namespace fe
 class DynamicGeometry
 {
 public:
-    DynamicGeometry(const NodeData& data, std::shared_ptr<NodeStyle>& node_style);
+    DynamicGeometry(const NodeData& data, std::shared_ptr<NodeStyle> node_style, std::shared_ptr<TypeColorMap> type_color_map);
     void update();
     void updateSimple(double scale);
     const NodeUIComponents& components() const { return components_; }
@@ -23,6 +23,7 @@ private:
     //输入
     const NodeData& data_;
     std::shared_ptr<NodeStyle> node_style_;
+    std::shared_ptr<TypeColorMap> type_color_map_;
     //输出
     NodeUIComponents components_;
     NodeUISimpleComponents simple_components_;

@@ -57,6 +57,7 @@ void OutNodeItem::updateCache(double scale)
     {
         scale_ = scale;
         geometry_->update(scale);
+
         QPainterPath polygon_path;
         polygon_path.addPolygon(geometry_->components().node_polygon);
         QPainterPath rect_path;

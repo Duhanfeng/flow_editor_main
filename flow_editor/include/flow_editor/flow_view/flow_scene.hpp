@@ -26,6 +26,8 @@ public:
     void setNodeLayoutStyle(NodeLayoutStyle node_style);
     std::shared_ptr<NodeStyle> nodeStyle() const;
     void setNodeStyle(std::shared_ptr<NodeStyle> style);
+    std::shared_ptr<TypeColorMap> typeColorMap() const;
+    void setTypeColorMap(std::shared_ptr<TypeColorMap> map);
 
     //查询接口
     FlowSceneData* flowSceneData();

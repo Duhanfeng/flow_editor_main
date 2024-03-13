@@ -56,27 +56,30 @@ class NodeUISimpleComponents
 {
 public:
     //子组件区域
-    QRectF bounding_rect; //边界区域
-    QRectF icon_rect;     //图标位置区域
-    QRectF caption_rect;  //标题区域
-    QRectF in_port_rect;  //输入端口位置
-    QRectF out_port_rect; //输出端口位置
-    //字符缓存
-    QStaticText caption_text;
+    QRectF bounding_rect;     //边界区域
+    QRectF icon_rect;         //图标位置区域
+    QRectF caption_rect;      //标题区域
+    QRectF in_port_rect;      //输入端口位置
+    QRectF out_port_rect;     //输出端口位置
+    QStaticText caption_text; //标题缓存
 };
 //端口
 class PortUIComponents
 {
 public:
     //子组件区域
-    QRectF bounding_rect;    //边界区域
-    QRectF icon_rect;        //图标位置区域
-    QRectF caption_rect;     //标题区域
-    QRectF port_rect;        //端口位置
-    QRectF port_rect_extend; //端口位置(扩大区域)
-    QPolygonF node_polygon;  //node多边形
-    //字符缓存
-    QStaticText port_name;
+    QRectF bounding_rect;     //边界区域
+    QRectF icon_rect;         //图标位置区域
+    QRectF caption_rect;      //标题区域
+    QPolygonF node_polygon;   //node多边形
+    QStaticText caption_text; //标题缓存
+
+    //端口属性
+    QRectF port_rect;           //端口连接点交互区域
+    QRectF port_rect_extend;    //端口连接点交互区域(扩展,用于动态显示时)
+    QPointF port_center;        //端口中心
+    QString port_type;          //端口类型
+    QColor port_color;          //端口颜色
 };
 
 } //namespace fe

@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <map>
 #include <unordered_map>
 #include <flow_editor/data_def.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
@@ -60,9 +61,10 @@ class FlowSceneData
 public:
     //样式管理
     NodeLayoutStyle node_layout_style = NodeLayoutStyle::Horizontal;
-    std::shared_ptr<NodeStyle> node_style;
-    std::shared_ptr<ConnectionStyle> connection_style;
-    std::shared_ptr<DraftConnectionStyle> draft_connection_style;
+    std::shared_ptr<NodeStyle> node_style;                        //节点样式
+    std::shared_ptr<ConnectionStyle> connection_style;            //连接样式
+    std::shared_ptr<DraftConnectionStyle> draft_connection_style; //草稿连接样式
+    std::shared_ptr<TypeColorMap> type_color_map;                 //类型与颜色映射字典
 
     //原始数据
     FlowScene* scene = nullptr;
