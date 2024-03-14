@@ -221,7 +221,20 @@ void FlowView::mouseReleaseEvent(QMouseEvent* event)
 }
 void FlowView::contextMenuEvent(QContextMenuEvent* event)
 {
-    QGraphicsView::contextMenuEvent(event);
+    if (itemAt(event->pos()))
+    {
+        QGraphicsView::contextMenuEvent(event);
+        return;
+    }
+    //数据校验
+    if (!data_->scene || data_->scene->flowModel() == nullptr)
+    {
+        return;
+    }
+    const auto scene_pos = mapToScene(event->pos());
+
+    //触发信号
+    emit data_->scene->sceneContextMenu(scene_pos);
 }
 
 void FlowView::scaleUp()
@@ -329,7 +342,14 @@ void FlowView::initAction()
         [&]()
         {
             //数据校验
-            if (!data_->scene || data_->scene->flow() == nullptr)
+            if (!data_->scene || data_->scene->flowModel() == nullptr)
+            {
+                return;
+            }
+            //如果没有操作权限,直接退出
+            bool can_remove_node = data_->scene->sceneConfig().flow_permission & FlowPermission::NodeDeletable;
+            bool can_remove_connection = data_->scene->sceneConfig().flow_permission & FlowPermission::ConnectionEditable;
+            if (!can_remove_node && !can_remove_connection)
             {
                 return;
             }
@@ -349,6 +369,15 @@ void FlowView::initAction()
                     connection_ids.emplace_back(connection_item->id());
                 }
             }
+
+            if (!can_remove_node)
+            {
+                node_ids.clear();
+            }
+            if (!can_remove_connection)
+            {
+                connection_ids.clear();
+            }
             if (node_ids.empty() && connection_ids.empty())
             {
                 return;
@@ -360,7 +389,7 @@ void FlowView::initAction()
             {
                 const guid18& connection_id = connection_ids[0];
                 //查找所有输入输出匹配的节点
-                const auto& connections = data_->scene->flow()->connections;
+                const auto& connections = data_->scene->flowModel()->connections;
                 auto connection_itr = connections.find(connection_id);
                 if (connection_itr != connections.end())
                 {
@@ -379,7 +408,7 @@ void FlowView::initAction()
             }
 
             //通知删除对应节点
-            if (data_->scene->flow()->tryDeleteItems(node_ids, connection_ids))
+            if (data_->scene->flowModel()->tryDeleteItems(node_ids, connection_ids))
             {
                 QElapsedTimer timer;
                 timer.start();
@@ -394,7 +423,7 @@ void FlowView::initAction()
         [&]()
         {
             //数据校验
-            if (!data_->scene || data_->scene->flow() == nullptr)
+            if (!data_->scene || data_->scene->flowModel() == nullptr)
             {
                 return;
             }
@@ -413,7 +442,7 @@ void FlowView::initAction()
                 return;
             }
             //通知复制对应节点
-            data_->scene->flow()->tryCopyNodes(node_ids);
+            data_->scene->flowModel()->tryCopyNodes(node_ids);
         });
     connect(data_->paste_action,
         &QAction::triggered,
@@ -421,12 +450,12 @@ void FlowView::initAction()
         [&]()
         {
             //数据校验
-            if (!data_->scene || data_->scene->flow() == nullptr)
+            if (!data_->scene || data_->scene->flowModel() == nullptr)
             {
                 return;
             }
             //通知粘贴对应节点
-            if (data_->scene->flow()->tryPasteNodes(data_->crt_pos.x(), data_->crt_pos.y()))
+            if (data_->scene->flowModel()->tryPasteNodes(data_->crt_pos.x(), data_->crt_pos.y()))
             {
                 data_->scene->flowSceneData()->recheck();
             }

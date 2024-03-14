@@ -18,6 +18,7 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         u8"输入端口#1",
         icon,
         { -300.0, 100.0 },
+        false,
         {},
         { { u8"输出端口1", u8"整型" } }
     };
@@ -25,6 +26,7 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         u8"命名稍长输入端口#2",
         icon,
         { -300.0, 300.0 },
+        false,
         {},
         { { u8"输出端口1", u8"" } }
     };
@@ -32,6 +34,7 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         u8"输出端口#1",
         icon,
         { 300.0, 100.0 },
+        false,
         { { u8"输入端口1", u8"整型" } },
         {}
     };
@@ -39,6 +42,7 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         u8"命名稍长输出端口#2",
         icon,
         { 300.0, 300.0 },
+        false,
         { { u8"输入端口1", u8"" } },
         {}
     };
@@ -47,6 +51,7 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         u8"这是一段比较长的标题#1",
         icon,
         { 0.0, 0.0 },
+        false,
         { { u8"输入端口1", u8"整型" },
             { u8"输入端口2", u8"" },
             { u8"输入端口3", u8"浮点数" } },
@@ -59,6 +64,7 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         u8"节点2",
         icon,
         { 0.0, 400.0 },
+        false,
         { { u8"输入端口1", u8"浮点数" },
             { u8"输入端口2", u8"整型" },
             { u8"输入端口2", u8"浮点数" },
@@ -76,6 +82,7 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         u8"执行节点",
         icon,
         { 0.0, 200.0 },
+        true,
         { { u8"浮点数", u8"浮点数" },
             { u8"整型", u8"整型" },
             { u8"通用端口", u8"" } },

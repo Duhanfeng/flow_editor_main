@@ -46,16 +46,29 @@ public:
     QString port_type;                         //端口类型,同名类型才可以连接,空表示不进行过滤
     PortStatus port_state = PortStatus::Fixed; //端口状态
 };
+enum class ErrorLevel
+{
+    Accept = 0,     //接受(正常运行,无异常)
+    Warning = 1,    //警告(正常运行,但会记录进日志)
+    Error = 2,      //错误(终止运行,并记录日志)
+    Unexecuted = 4, //未执行/跳过执行
+};
 class NodeData
 {
 public:
-    QString caption_text;
-    QIcon node_icon;
-    QPointF position;
-    std::vector<PortData> inputs;
-    std::vector<PortData> outputs;
-    PortConfigOptions in_ports_config;
-    PortConfigOptions out_ports_config;
+    //基础属性
+    QString caption_text;        //节点标题
+    QIcon node_icon;             //节点图标
+    QPointF position;            //节点位置
+    bool is_highlighted = false; //是否高亮显示
+    //端口配置
+    std::vector<PortData> inputs;       //输入端口
+    std::vector<PortData> outputs;      //输出端口
+    PortConfigOptions in_ports_config;  //输入端口配置
+    PortConfigOptions out_ports_config; //输出端口配置
+    //消息提示
+    ErrorLevel error = ErrorLevel::Accept;
+    QString error_message;
 };
 
 using guid16 = std::array<unsigned char, 16>;

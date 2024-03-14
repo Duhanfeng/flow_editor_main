@@ -288,7 +288,7 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
                 }
                 else
                 {
-                    if (scene_.flow()->tryDisconnect(original_item_->id()))
+                    if (scene_.flowModel()->tryDisconnect(original_item_->id()))
                     {
                         //尝试断开旧链接
                         scene_.flowSceneData()->removeConnection(original_item_->id());
@@ -296,7 +296,7 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
                         if (is_possible)
                         {
                             //尝试连接
-                            guid18 connection_id = scene_.flow()->tryConnect(connection);
+                            guid18 connection_id = scene_.flowModel()->tryConnect(connection);
                             if (!isInvalid(connection_id))
                             {
                                 //内部添加新添加的连接对象
@@ -315,7 +315,7 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
                 //尝试连接
                 if (is_possible)
                 {
-                    guid18 connection_id = scene_.flow()->tryConnect(connection);
+                    guid18 connection_id = scene_.flowModel()->tryConnect(connection);
                     if (!isInvalid(connection_id))
                     {
                         //内部添加新添加的连接对象
@@ -328,7 +328,7 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         {
             if (original_item_)
             {
-                if (scene_.flow()->tryDisconnect(original_item_->id()))
+                if (scene_.flowModel()->tryDisconnect(original_item_->id()))
                 {
                     scene_.flowSceneData()->removeConnection(original_item_->id());
                 }
@@ -343,7 +343,7 @@ void DraftConnectionItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     {
         if (original_item_)
         {
-            if (scene_.flow()->tryDisconnect(original_item_->id()))
+            if (scene_.flowModel()->tryDisconnect(original_item_->id()))
             {
                 //std::cout << "scene_.flowSceneData()->removeConnection" << std::endl;
                 scene_.flowSceneData()->removeConnection(original_item_->id());

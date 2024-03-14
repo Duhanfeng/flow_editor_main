@@ -50,6 +50,7 @@ protected:
     FlowScene& scene_;
     guid16 id_;
     double preview_scale_ = 0.5;
+    FlowPermission flow_permission_ = FlowPermission::FlowPermissionAll;//权限
     const DraftConnectionItem* draft_connection_item_ = nullptr;
 };
 } //namespace fe

@@ -8,10 +8,10 @@
 
 namespace fe
 {
-class Flow
+class FlowModel
 {
 public:
-    virtual ~Flow() = default;
+    virtual ~FlowModel() = default;
 
 public:
     //原始数据

@@ -48,18 +48,18 @@ FlowScene::~FlowScene()
 }
 
 //流程控制
-void FlowScene::showFlow(std::shared_ptr<Flow> flow)
+void FlowScene::showFlowModel(std::shared_ptr<FlowModel> flow)
 {
     //清空资源
     clearItem();
     //初始化
     data_->flow_scene_data->setFlow(flow);
 }
-std::shared_ptr<Flow> FlowScene::flow()
+std::shared_ptr<FlowModel> FlowScene::flowModel()
 {
     if (data_->flow_scene_data != nullptr)
     {
-        return data_->flow_scene_data->flow;
+        return data_->flow_scene_data->flow_model;
     }
     return nullptr;
 }

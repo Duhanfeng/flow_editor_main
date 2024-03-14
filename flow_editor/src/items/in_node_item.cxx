@@ -36,8 +36,13 @@ InNodeItem::InNodeItem(FlowScene& scene, const guid16& id) :
     setPos(data_->position);
     setZValue(z_value_);
     setAcceptHoverEvents(true);
-    setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
+    setFlags(ItemIsSelectable | ItemIsFocusable);
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
+    flow_permission_ = flow_data->scene_config.flow_permission;
+    if (flow_permission_ & FlowPermission::NodeMovable)
+    {
+        setFlag(QGraphicsItem::ItemIsMovable);
+    }
 
     updateCache(1.0);
 
@@ -68,14 +73,50 @@ void InNodeItem::updateCache(double scale)
 }
 void InNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (geometry_->components().port_rect_extend.contains(event->pos()))
+    event->accept();
+    if (!isSelected() && event->modifiers() != Qt::CTRL)
+    {
+        scene_.clearSelection();
+        setSelected(true);
+    }
+    if (event->button() == Qt::RightButton)
+    {
+        //如果有多个节点,则
+        QList<QGraphicsItem*> items = scene_.selectedItems();
+        if (items.size() > 1)
+        {
+            std::vector<guid16> node_ids;
+            for (const auto& item : items)
+            {
+                if (AbsNodeItem* node_item = dynamic_cast<AbsNodeItem*>(item))
+                {
+                    node_ids.emplace_back(node_item->id());
+                }
+            }
+            if (node_ids.size() > 1)
+            {
+                emit scene_.nodesContextMenu(node_ids, mapToScene(event->pos()));
+            }
+            else if (node_ids.size() == 1)
+            {
+                emit scene_.nodeContextMenu(node_ids[0], mapToScene(event->pos()));
+            }
+        }
+        else
+        {
+            emit scene_.nodeContextMenu(id_, mapToScene(event->pos()));
+        }
+        return;
+    }
+
+    if ((flow_permission_ & FlowPermission::ConnectionEditable) && geometry_->components().port_rect_extend.contains(event->pos()))
     {
         scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, 0, mapToScene(event->pos()), id_);
     }
-    else
-    {
-        QGraphicsItem::mousePressEvent(event);
-    }
+    //else
+    //{
+    //    QGraphicsItem::mousePressEvent(event);
+    //}
 }
 void InNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -84,6 +125,15 @@ void InNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void InNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
+}
+void InNodeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    event->accept();
+    if (event->button() != Qt::LeftButton)
+    {
+        return;
+    }
+    emit scene_.nodeDoubleClicked(id_);
 }
 void InNodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {

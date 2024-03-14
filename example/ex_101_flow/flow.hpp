@@ -8,7 +8,7 @@
 #include "util/guid_creator.hpp"
 #include "util/random_string.hpp"
 
-class Flow2 : public fe::Flow
+class Flow2 : public fe::FlowModel
 {
 public:
     bool tryDeleteNode(const fe::guid16& id) override
@@ -17,7 +17,7 @@ public:
         QMessageBox::StandardButton buttons = QMessageBox::question(nullptr, u8"确认", u8"是否要删除对应节点?");
         if (buttons == QMessageBox::StandardButton::Yes)
         {
-            return fe::Flow::tryDeleteNode(id);
+            return fe::FlowModel::tryDeleteNode(id);
         }
         return false;
     }
@@ -27,7 +27,7 @@ public:
         QMessageBox::StandardButton buttons = QMessageBox::question(nullptr, u8"确认", u8"是否要删除?");
         if (buttons == QMessageBox::StandardButton::Yes)
         {
-            return fe::Flow::tryDeleteItems(node_ids, connection_ids);
+            return fe::FlowModel::tryDeleteItems(node_ids, connection_ids);
         }
         return false;
     }

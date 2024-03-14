@@ -64,7 +64,7 @@ public:
     //场景数据
     FlowScene& scene;
     SceneConfig& scene_config;
-    std::shared_ptr<Flow> flow;
+    std::shared_ptr<FlowModel> flow_model;
 
     //原始数据
     std::map<guid16, std::unique_ptr<NodeItemData>> node_items;
@@ -80,7 +80,7 @@ public:
 public:
     //构造
     FlowSceneData(FlowScene& scene, SceneConfig& scene_config);
-    void setFlow(std::shared_ptr<Flow> flow);
+    void setFlow(std::shared_ptr<FlowModel> flow_model);
 
     //查询接口
     NodeData* getNodeData(const guid16& id);

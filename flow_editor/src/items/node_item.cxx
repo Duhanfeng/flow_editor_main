@@ -39,10 +39,16 @@ NodeItem::NodeItem(FlowScene& scene, const guid16& id) :
     setPos(data_->position);
     setZValue(z_value_);
     setAcceptHoverEvents(true);
-    setFlags(ItemIsSelectable | ItemIsMovable | ItemIsFocusable);
+    setFlags(ItemIsSelectable | ItemIsFocusable);
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
     //setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
     setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+    flow_permission_ = flow_data->scene_config.flow_permission;
+    if (flow_permission_ & FlowPermission::NodeMovable)
+    {
+        setFlag(QGraphicsItem::ItemIsMovable);
+    }
 
     updateCache(1.0);
 
@@ -115,6 +121,31 @@ void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
     }
     if (event->button() == Qt::RightButton)
     {
+        //如果有多个节点,则
+        QList<QGraphicsItem*> items = scene_.selectedItems();
+        if (items.size() > 1)
+        {
+            std::vector<guid16> node_ids;
+            for (const auto& item : items)
+            {
+                if (AbsNodeItem* node_item = dynamic_cast<AbsNodeItem*>(item))
+                {
+                    node_ids.emplace_back(node_item->id());
+                }
+            }
+            if (node_ids.size() > 1)
+            {
+                emit scene_.nodesContextMenu(node_ids, mapToScene(event->pos()));
+            }
+            else if (node_ids.size() == 1)
+            {
+                emit scene_.nodeContextMenu(node_ids[0], mapToScene(event->pos()));
+            }
+        }
+        else
+        {
+            emit scene_.nodeContextMenu(id_, mapToScene(event->pos()));
+        }
         return;
     }
 
@@ -123,6 +154,7 @@ void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
     if (geometry_->components().run_btn_rect2.contains(pos))
     {
         is_checked_btn_ = true;
+        emit scene_.runBtnClicked(id_);
         //std::cout << "is_checked_btn_ = true" << std::endl;
         update();
         //触发相应信号
@@ -130,20 +162,23 @@ void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
     }
 
     //判断点击了对应的端口位置
-    for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+    if (flow_permission_ & FlowPermission::ConnectionEditable)
     {
-        if (geometry_->components().in_ports[i].port_rect.contains(pos))
+        for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
         {
-            scene_.flowSceneData()->makeDraftConnection(PortType::Out, id_, (unsigned int)i, mapToScene(pos), id_);
-            return;
+            if (geometry_->components().in_ports[i].port_rect.contains(pos))
+            {
+                scene_.flowSceneData()->makeDraftConnection(PortType::Out, id_, (unsigned int)i, mapToScene(pos), id_);
+                return;
+            }
         }
-    }
-    for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
-    {
-        if (geometry_->components().out_ports[i].port_rect.contains(pos))
+        for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
         {
-            scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, (unsigned int)i, mapToScene(pos), id_);
-            return;
+            if (geometry_->components().out_ports[i].port_rect.contains(pos))
+            {
+                scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, (unsigned int)i, mapToScene(pos), id_);
+                return;
+            }
         }
     }
 
@@ -174,8 +209,23 @@ void NodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void NodeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     event->accept();
-    return;
-    //QGraphicsItem::mouseDoubleClickEvent(event);
+    if (event->button() != Qt::LeftButton)
+    {
+        return;
+    }
+
+    //判断是否为按键点击事件
+    auto pos = event->pos();
+    if (geometry_->components().run_btn_rect2.contains(pos))
+    {
+        is_checked_btn_ = true;
+        emit scene_.runBtnClicked(id_);
+        update();
+    }
+    else
+    {
+        emit scene_.nodeDoubleClicked(id_);
+    }
 }
 void NodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {

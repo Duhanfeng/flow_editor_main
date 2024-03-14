@@ -109,6 +109,10 @@ void NodePainter::paintNodeRect(QPainter* painter, NodeItem* item)
     painter->setBrush(color2);
 
     double const radius = 3.0;
+    if (item->data_->is_highlighted)
+    {
+        painter->setPen(QColor(0, 187, 158));
+    }
     painter->drawRoundedRect(components.node_rect, radius, radius);
 
     if (item->isSelected())

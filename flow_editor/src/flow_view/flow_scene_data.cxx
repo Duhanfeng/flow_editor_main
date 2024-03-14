@@ -18,9 +18,9 @@ FlowSceneData::FlowSceneData(FlowScene& scene_, SceneConfig& scene_config_) :
 {
 }
 
-void FlowSceneData::setFlow(std::shared_ptr<Flow> flow_)
+void FlowSceneData::setFlow(std::shared_ptr<FlowModel> flow_model_)
 {
-    flow = flow_;
+    flow_model = flow_model_;
 
     //清空资源
     scene.clear();
@@ -31,25 +31,25 @@ void FlowSceneData::setFlow(std::shared_ptr<Flow> flow_)
     node_z_value = 100;
     connection_z_value = 0;
 
-    if (!flow)
+    if (!flow_model)
     {
         return;
     }
 
     //构建对象
-    for (const auto& node : flow->nodes)
+    for (const auto& node : flow_model->nodes)
     {
         addNode(node.first, node.second);
     }
-    for (const auto& node : flow->in_nodes)
+    for (const auto& node : flow_model->in_nodes)
     {
         addInNode(node.first, node.second);
     }
-    for (const auto& node : flow->out_nodes)
+    for (const auto& node : flow_model->out_nodes)
     {
         addOutNode(node.first, node.second);
     }
-    for (const auto& connection : flow->connections)
+    for (const auto& connection : flow_model->connections)
     {
         addConnection(connection.first, connection.second);
     }
@@ -294,7 +294,7 @@ void FlowSceneData::resetDraftConnection()
 void FlowSceneData::recheck()
 {
     //对于1000个对象,进行一次recheck,耗时大概7-10ms
-    if (flow == nullptr)
+    if (flow_model == nullptr)
     {
         return;
     }
@@ -304,8 +304,8 @@ void FlowSceneData::recheck()
     for (const auto& scene_node : node_items)
     {
         const auto& node_id = scene_node.first;
-        auto itr = flow->nodes.find(node_id);
-        if (itr == flow->nodes.end())
+        auto itr = flow_model->nodes.find(node_id);
+        if (itr == flow_model->nodes.end())
         {
             invalid_node_ids.emplace_back(node_id);
         }
@@ -319,7 +319,7 @@ void FlowSceneData::recheck()
 
     //如果是flow中存在,但是scene中没有的,则构建
     std::vector<guid16> valid_node_ids;
-    for (const auto& flow_node : flow->nodes)
+    for (const auto& flow_node : flow_model->nodes)
     {
         const auto& node_id = flow_node.first;
         auto itr = node_items.find(node_id);
@@ -330,7 +330,7 @@ void FlowSceneData::recheck()
     }
     for (const auto& node_id : valid_node_ids)
     {
-        auto itr = flow->nodes.find(node_id);
+        auto itr = flow_model->nodes.find(node_id);
         addInNode(itr->first, itr->second);
     }
 
@@ -339,8 +339,8 @@ void FlowSceneData::recheck()
     for (const auto& scene_node : connection_items)
     {
         const auto& node_id = scene_node.first;
-        auto itr = flow->connections.find(node_id);
-        if (itr == flow->connections.end())
+        auto itr = flow_model->connections.find(node_id);
+        if (itr == flow_model->connections.end())
         {
             invalid_connection_ids.emplace_back(node_id);
         }
@@ -354,7 +354,7 @@ void FlowSceneData::recheck()
 
     //如果是flow中存在,但是scene中没有的,则构建
     std::vector<guid18> valid_connection_ids;
-    for (const auto& flow_connection : flow->connections)
+    for (const auto& flow_connection : flow_model->connections)
     {
         const auto& connection_id = flow_connection.first;
         auto itr = connection_items.find(connection_id);
@@ -365,7 +365,7 @@ void FlowSceneData::recheck()
     }
     for (const auto& connection_id : valid_connection_ids)
     {
-        auto itr = flow->connections.find(connection_id);
+        auto itr = flow_model->connections.find(connection_id);
         addConnection(itr->first, itr->second);
     }
 }
