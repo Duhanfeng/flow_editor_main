@@ -46,10 +46,11 @@ public:
     QStaticText caption_text; //标题内容
 
     //消息区域
-    bool enable_message = false; //使能消息
-    QRectF message_box_rect;     //消息区域位置(若有)
-    QPointF message_position;    //消息绘画位置
-    QStaticText message_text;    //消息内容
+    bool enable_message = false;            //使能消息
+    QRectF message_box_rect;                //消息区域位置(若有)
+    QColor message_box_color;               //消息框颜色
+    std::vector<QStaticText> message_texts; //消息内容
+    std::vector<QPointF> message_positions; //消息绘画位置
 };
 //简略图实现
 class NodeUISimpleComponents
@@ -75,11 +76,11 @@ public:
     QStaticText caption_text; //标题缓存
 
     //端口属性
-    QRectF port_rect;           //端口连接点交互区域
-    QRectF port_rect_extend;    //端口连接点交互区域(扩展,用于动态显示时)
-    QPointF port_center;        //端口中心
-    QString port_type;          //端口类型
-    QColor port_color;          //端口颜色
+    QRectF port_rect;        //端口连接点交互区域
+    QRectF port_rect_extend; //端口连接点交互区域(扩展,用于动态显示时)
+    QPointF port_center;     //端口中心
+    QString port_type;       //端口类型
+    QColor port_color;       //端口颜色
 };
 
 } //namespace fe

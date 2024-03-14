@@ -62,6 +62,9 @@ void NodePainter::paintNormal(QPainter* painter, NodeItem* item)
 
     //画连接点
     paintConnectionPoints(painter, item);
+
+    //画错误提示框
+    paintMessage(painter, item);
 }
 
 void NodePainter::paintFrame(QPainter* painter, NodeItem* item)
@@ -262,6 +265,36 @@ void NodePainter::paintConnectionPoints(QPainter* painter, NodeItem* item)
         {
             painter->setBrush(components.out_ports[i].port_color);
             painter->drawEllipse(components.out_ports[i].port_rect);
+        }
+    }
+}
+void NodePainter::paintMessage(QPainter* painter, NodeItem* item)
+{
+    const auto& components = item->geometry_->components();
+    if (components.enable_message)
+    {
+        auto color = item->isSelected() ? item->style_->selected_boundary_color : item->style_->normal_boundary_color;
+        if (item->is_hovered_)
+        {
+            QPen p(color, item->style_->hovered_pen_width);
+            painter->setPen(p);
+        }
+        else
+        {
+            QPen p(color, item->style_->pen_width);
+            painter->setPen(p);
+        }
+
+        //画边框
+        double const radius = 3.0;
+        painter->setBrush(components.message_box_color);
+        painter->drawRoundedRect(components.message_box_rect, radius, radius);
+
+        //显示字体内容
+        painter->setPen(item->style_->font_color);
+        for (size_t i = 0; i < components.message_texts.size(); ++i)
+        {
+            painter->drawStaticText(components.message_positions[i], components.message_texts[i]);
         }
     }
 }

@@ -18,25 +18,36 @@
 #include "flow.hpp"
 #include "nodes_creator.hpp"
 
-class EventProcess : public QObject
+void updateConnection(fe::FlowScene* scene)
 {
-public:
-    EventProcess(fe::FlowView* flow_view, fe::FlowScene* scene) :
-        QObject(scene)
-    {
-        QObject::connect(scene, &fe::FlowScene::sceneContextMenu, scene, [&](const QPointF pos)
-            {
-                std::cout << "trigger sceneContextMenu" << std::endl;
-                QMenu* menu = new QMenu();
-                menu->addAction(new QAction("1"));
-                menu->addAction(new QAction("1"));
-                menu->addAction(new QAction("1"));
-                menu->addAction(new QAction("1"));
-                menu->exec(QCursor::pos());
-                delete menu;
-            });
-    }
-};
+    QObject::connect(scene, &fe::FlowScene::sceneContextMenu, scene, [&](const QPointF pos)
+        {
+            std::cout << "trigger sceneContextMenu" << std::endl;
+            QMenu* menu = new QMenu();
+            menu->addAction(new QAction("1"));
+            menu->addAction(new QAction("1"));
+            menu->addAction(new QAction("1"));
+            menu->addAction(new QAction("1"));
+            menu->exec(QCursor::pos());
+            delete menu;
+        });
+    QObject::connect(scene, &fe::FlowScene::nodeContextMenu, scene, [&](const fe::guid16& node_id, const QPointF pos)
+        {
+            std::cout << "trigger sceneContextMenu" << std::endl;
+            QMenu* menu = new QMenu();
+            menu->addAction(new QAction("2"));
+            menu->exec(QCursor::pos());
+            delete menu;
+        });
+    QObject::connect(scene, &fe::FlowScene::nodesContextMenu, scene, [&](const std::vector<fe::guid16>& node_ids, const QPointF pos)
+        {
+            std::cout << "trigger sceneContextMenu" << std::endl;
+            QMenu* menu = new QMenu();
+            menu->addAction(new QAction("3"));
+            menu->exec(QCursor::pos());
+            delete menu;
+        });
+}
 
 int main(int argc, char** argv)
 {
@@ -55,18 +66,7 @@ int main(int argc, char** argv)
     createNodes(flow);
     //createRandomNodes(flow);
     scene->showFlowModel(flow);
-
-    QObject::connect(scene, &fe::FlowScene::sceneContextMenu, scene, [&](const QPointF pos)
-        {
-            std::cout << "trigger sceneContextMenu" << std::endl;
-            QMenu* menu = new QMenu();
-            menu->addAction(new QAction("1"));
-            menu->addAction(new QAction("1"));
-            menu->addAction(new QAction("1"));
-            menu->addAction(new QAction("1"));
-            menu->exec(QCursor::pos());
-            delete menu;
-        });
+    updateConnection(scene);
 
     flow_view->resize(1200, 800);
     flow_view->show();

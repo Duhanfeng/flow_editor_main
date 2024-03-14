@@ -76,7 +76,11 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         { { u8"输出端口1", u8"" },
             { u8"输出端口2", u8"整型" },
             { u8"输出端口3", u8"浮点数" },
-            { u8"输出端口4", u8"" } }
+            { u8"输出端口4", u8"" } },
+        fe::PortConfigOptions::Fixed,
+        fe::PortConfigOptions::Fixed,
+        fe::ErrorLevel::Error,
+        u8"执行错误"
     };
     fe::NodeData data7 = {
         u8"执行节点",
@@ -87,7 +91,11 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
             { u8"整型", u8"整型" },
             { u8"通用端口", u8"" } },
         { { u8"整型", u8"整型" },
-            { u8"浮点数", u8"浮点数" } }
+            { u8"浮点数", u8"浮点数" } },
+        fe::PortConfigOptions::Fixed,
+        fe::PortConfigOptions::Fixed,
+        fe::ErrorLevel::Warning,
+        u8"这是一个需要自动换行的长文本示例，如果文本长度超过边界宽度，则需要自动换行。"
     };
 
     std::array<unsigned char, 16> guid1 = { 01 };

@@ -24,6 +24,75 @@ inline double textWidth(QFontMetrics* font_metrics, const QString& str)
     return (double)font_metrics->width(str);
 #endif
 }
+
+inline std::vector<QString> getMultiLineMessage(QFontMetrics* font_metrics, const QString& text, int max_width, int max_lines)
+{
+    //计算单行文本的最大宽度
+    int single_line_width = font_metrics->horizontalAdvance(text);
+    //如果单行文本宽度小于最大宽度，则不需要换行
+    if (single_line_width <= max_width)
+    {
+        //直接返回原始文本
+        return { text };
+    }
+    //如果单行文本宽度超过最大宽度，则尝试换行
+    QStringList lines;
+    int current_line_width = 0;
+    QString current_line;
+    QString remaining_text = text;
+    for (int i = 0; i < text.length(); ++i)
+    {
+        QChar current_char = text[i];
+        int char_width = font_metrics->horizontalAdvance(current_char);
+        //检查当前字符是否会超出最大宽度
+        if (current_line_width + char_width > max_width)
+        {
+            //如果当前行不为空，则保存当前行并重置
+            if (!current_line.isEmpty())
+            {
+                lines.append(current_line);
+                current_line.clear();
+                current_line_width = 0;
+                //如果已经达到最大行数，则截断剩余文本并退出循环
+                if (lines.count() >= max_lines)
+                {
+                    remaining_text = remaining_text.mid(i);
+                    break;
+                }
+            }
+        }
+        //添加当前字符到当前行
+        current_line.append(current_char);
+        current_line_width += char_width;
+    }
+
+    //添加最后一行（如果有的话）
+    if (!current_line.isEmpty())
+    {
+        lines.append(current_line);
+    }
+    //如果还有剩余文本，则在最后一行添加省略号
+    if (!remaining_text.isEmpty())
+    {
+        QString last_line = lines.takeLast();
+        int ellipsis_width = font_metrics->horizontalAdvance("...");
+        while (last_line.length() > 0 && font_metrics->horizontalAdvance(last_line) + ellipsis_width > max_width)
+        {
+            last_line.chop(1); //移除最后一个字符，以便添加省略号
+        }
+        last_line += "...";
+        lines.append(last_line);
+    }
+
+    //返回结果
+    std::vector<QString> result_lines;
+    for (const auto& line : lines)
+    {
+        result_lines.emplace_back(line);
+    }
+    return result_lines;
+}
+
 } //namespace
 
 namespace fe
@@ -77,6 +146,8 @@ DynamicGeometry::DynamicGeometry(const fe::NodeData& data, std::shared_ptr<NodeS
 }
 void DynamicGeometry::update()
 {
+    auto& components = components_;
+
     //-----计算端口文本区域
     //计算连接点尺寸
     double point_diameter = node_style_->connection_point_diameter; //连接点尺寸
@@ -96,6 +167,8 @@ void DynamicGeometry::update()
     unsigned int port_text_height = font_metrics_->height();                            //端口字符的高度
     double port_width = in_width + out_width + point_diameter + 2 * port_spasing;       //端口区域宽度
     double port_height = maxVerticalPortsExtent(data_, port_text_height, port_spasing); //端口字符区域高度
+    double message_margin_x = port_spasing;
+    double message_margin_y = port_spasing;
 
     //计算标题区域
     QSizeF caption_size = bold_font_metrics_->boundingRect(data_.caption_text).size();
@@ -109,9 +182,29 @@ void DynamicGeometry::update()
     QSizeF btn_size = { title_height, title_height };
     double title_width = icon_size2.width() + caption_size.width() + btn_size.width();
 
-    //计算节点主区域的尺寸
+    //-----计算错误提示框区域
     double node_width = std::max(title_width, port_width);
-    double node_height = title_height + port_height;
+    QSizeF message_size = { 0, 0 };
+    if (data_.error != ErrorLevel::Accept && !data_.error_message.isEmpty())
+    {
+        double max_message_width = node_width - message_margin_x;
+        components.enable_message = true;
+        components.message_box_color = (data_.error == ErrorLevel::Error) ? QColor(213, 7, 7) : QColor(111, 111, 7);
+
+        //消息切分并添加对象
+        std::vector<QString> message_multi_line = getMultiLineMessage(font_metrics_.get(), data_.error_message, max_message_width, 3);
+        components.message_texts.resize(message_multi_line.size());
+        components.message_positions.resize(message_multi_line.size());
+        for (size_t i = 0; i < message_multi_line.size(); ++i)
+        {
+            components.message_texts[i] = QStaticText(message_multi_line[i]);
+        }
+
+        message_size = { node_width, port_text_height * message_multi_line.size() + message_margin_y * 2 };
+    }
+
+    //计算节点主区域的尺寸
+    double node_height = title_height + port_height + message_size.height();
     QSizeF node_size = { node_width, node_height };
 
     //计算边界保留区域
@@ -122,29 +215,50 @@ void DynamicGeometry::update()
     double bottom_margin = margin;
 
     //计算边界区域
-    components_.bounding_rect = { 0, 0, node_size.width() + left_margin + right_margin, node_size.height() + top_margin + bottom_margin };
-    components_.bounding_rect.moveCenter({ 0, 0 });
-    QPointF translate_offset = components_.bounding_rect.topLeft() + QPointF{ left_margin, top_margin };
+    components.bounding_rect = { 0, 0, node_size.width() + left_margin + right_margin, node_size.height() + top_margin + bottom_margin };
+    components.bounding_rect.moveCenter({ 0, 0 });
+    QPointF translate_offset = components.bounding_rect.topLeft() + QPointF{ left_margin, top_margin };
     double offset_x = translate_offset.x();
     double offset_y = translate_offset.y();
 
     //计算各区域位置
-    components_.node_rect = { translate_offset, node_size };
-    components_.icon_rect = { QPointF{ -icon_offset + offset_x, -icon_offset + offset_y }, icon_size };
-    components_.run_btn_rect = { { node_width - btn_size.width() + offset_x, 0 + offset_y }, btn_size };
+    components.node_rect = { translate_offset, node_size };
+    components.icon_rect = { QPointF{ -icon_offset + offset_x, -icon_offset + offset_y }, icon_size };
+    components.run_btn_rect = { { node_width - btn_size.width() + offset_x, 0 + offset_y }, btn_size };
     double caption_offset = (icon_size2.height() - caption_size.height()) * 0.5;
-    components_.caption_rect = { { icon_size2.width() + offset_x, caption_offset + offset_y }, caption_size };
-    components_.title_rect = { icon_size2.width() + offset_x, offset_y, node_width - icon_size2.width() - btn_size.width(), title_height - 3.0 };
-    components_.port_rect = { offset_x, title_height + offset_y, node_width, port_height };
-    components_.caption_position = components_.caption_rect.topLeft();
+    components.caption_rect = { { icon_size2.width() + offset_x, caption_offset + offset_y }, caption_size };
+    components.title_rect = { icon_size2.width() + offset_x, offset_y, node_width - icon_size2.width() - btn_size.width(), title_height - 3.0 };
+    components.port_rect = { offset_x, title_height + offset_y, node_width, port_height };
+    components.caption_position = components.caption_rect.topLeft();
+    if (components.enable_message)
+    {
+        components.message_box_rect = { offset_x, title_height + port_height + offset_y, node_width, message_size.height() };
+        double message_text_left = components.message_box_rect.left() + message_margin_x;
+        double message_text_top = components.message_box_rect.top() + message_margin_y;
+
+        if (components.message_texts.size() == 1)
+        {
+            //如果只有一行,则实现居中显示
+            QString msg = components.message_texts[0].text();
+            QSizeF msg_size = font_metrics_->boundingRect(msg).size();
+            components.message_positions[0] = { message_text_left + (node_width - msg_size.width()) * 0.5, message_text_top };
+        }
+        else
+        {
+            for (size_t i = 0; i < components.message_texts.size(); ++i)
+            {
+                components.message_positions[i] = { message_text_left, message_text_top + (i * port_text_height) };
+            }
+        }
+    }
 
     //计算运行按钮三角位置
     double btn_offset = btn_size.width() * 0.2;
     double btn_offset2 = btn_size.width() * 0.1;
-    components_.run_btn_rect2 = { components_.run_btn_rect.topLeft() + QPointF{ btn_offset2, btn_offset2 }, QSizeF{ btn_size.width() - 2 * btn_offset2, btn_size.height() - 2 * btn_offset2 } };
-    components_.run_btn_polygon[0] = { components_.run_btn_rect.topLeft() + QPointF{ btn_offset, btn_offset } };
-    components_.run_btn_polygon[1] = QPointF{ components_.run_btn_rect.right() - btn_offset, components_.run_btn_rect.center().y() };
-    components_.run_btn_polygon[2] = { components_.run_btn_rect.bottomLeft() + QPointF{ btn_offset, -btn_offset } };
+    components.run_btn_rect2 = { components.run_btn_rect.topLeft() + QPointF{ btn_offset2, btn_offset2 }, QSizeF{ btn_size.width() - 2 * btn_offset2, btn_size.height() - 2 * btn_offset2 } };
+    components.run_btn_polygon[0] = { components.run_btn_rect.topLeft() + QPointF{ btn_offset, btn_offset } };
+    components.run_btn_polygon[1] = QPointF{ components.run_btn_rect.right() - btn_offset, components.run_btn_rect.center().y() };
+    components.run_btn_polygon[2] = { components.run_btn_rect.bottomLeft() + QPointF{ btn_offset, -btn_offset } };
 
     //开始绘画各port区域
     double half_point_size = point_diameter * 0.5;
@@ -152,31 +266,33 @@ void DynamicGeometry::update()
     double point_offset = ((double)port_text_height - point_diameter) * 0.5;
     double point_offset2 = ((double)port_text_height - point_diameter_extend) * 0.5;
     double total_port_height = title_height + port_spasing * 0.5;
-    for (size_t i = 0; i < components_.in_ports.size(); ++i)
+    for (size_t i = 0; i < components.in_ports.size(); ++i)
     {
-        components_.in_ports[i].port_rect = QRectF{ -half_point_size + offset_x, total_port_height + point_offset + offset_y, point_diameter, point_diameter };
-        components_.in_ports[i].port_rect_extend = QRectF{ -half_point_diameter_extend + offset_x, total_port_height + point_offset2 + offset_y, point_diameter_extend, point_diameter_extend };
-        components_.in_ports[i].port_text_rect = QRectF{ half_point_size + port_spasing + offset_x, total_port_height + offset_y, in_width, (float)port_text_height };
-        components_.in_ports[i].port_center = components_.in_ports[i].port_rect.center();
-        components_.in_ports[i].port_text_position = components_.in_ports[i].port_text_rect.topLeft();
+        components.in_ports[i].port_rect = QRectF{ -half_point_size + offset_x, total_port_height + point_offset + offset_y, point_diameter, point_diameter };
+        components.in_ports[i].port_rect_extend = QRectF{ -half_point_diameter_extend + offset_x, total_port_height + point_offset2 + offset_y, point_diameter_extend, point_diameter_extend };
+        components.in_ports[i].port_text_rect = QRectF{ half_point_size + port_spasing + offset_x, total_port_height + offset_y, in_width, (float)port_text_height };
+        components.in_ports[i].port_center = components.in_ports[i].port_rect.center();
+        components.in_ports[i].port_text_position = components.in_ports[i].port_text_rect.topLeft();
         total_port_height += (double)port_text_height + port_spasing;
     }
     total_port_height = title_height + port_spasing * 0.5;
     double output_offset_x = node_width - half_point_size - out_width - port_spasing;
     double output_point_offset_x = node_width - half_point_size;
     double output_point_offset_x2 = node_width - half_point_diameter_extend;
-    for (size_t i = 0; i < components_.out_ports.size(); ++i)
+    for (size_t i = 0; i < components.out_ports.size(); ++i)
     {
-        components_.out_ports[i].port_rect = QRectF{ output_point_offset_x + offset_x, total_port_height + point_offset + offset_y, point_diameter, point_diameter };
-        components_.out_ports[i].port_rect_extend = QRectF{ output_point_offset_x2 + offset_x, total_port_height + point_offset2 + offset_y, point_diameter_extend, point_diameter_extend };
-        components_.out_ports[i].port_text_rect = QRectF{ output_offset_x + offset_x, total_port_height + offset_y, out_width, (float)port_text_height };
-        components_.out_ports[i].port_center = components_.out_ports[i].port_rect.center();
-        components_.out_ports[i].port_text_position = components_.out_ports[i].port_text_rect.topLeft();
+        components.out_ports[i].port_rect = QRectF{ output_point_offset_x + offset_x, total_port_height + point_offset + offset_y, point_diameter, point_diameter };
+        components.out_ports[i].port_rect_extend = QRectF{ output_point_offset_x2 + offset_x, total_port_height + point_offset2 + offset_y, point_diameter_extend, point_diameter_extend };
+        components.out_ports[i].port_text_rect = QRectF{ output_offset_x + offset_x, total_port_height + offset_y, out_width, (float)port_text_height };
+        components.out_ports[i].port_center = components.out_ports[i].port_rect.center();
+        components.out_ports[i].port_text_position = components.out_ports[i].port_text_rect.topLeft();
         total_port_height += (double)port_text_height + port_spasing;
     }
 }
 void DynamicGeometry::updateSimple(double scale)
 {
+    auto& components = simple_components_;
+
     double point_diameter_extend = node_style_->connection_point_diameter * 2; //连接点尺寸
     double half_point_diameter_extend = point_diameter_extend * 0.5;
 
@@ -202,82 +318,31 @@ void DynamicGeometry::updateSimple(double scale)
     double node_width = std::max(caption_size.width(), icon_size.width() + point_diameter_extend);
     double node_height = icon_size.height() + caption_size.height();
     QSizeF node_size = { node_width, node_height };
-    simple_components_.bounding_rect = { 0, 0, node_size.width() + left_margin + right_margin, node_size.height() + top_margin + bottom_margin };
-    simple_components_.bounding_rect.moveCenter({ 0, 0 });
-    QPointF translate_offset = simple_components_.bounding_rect.topLeft() + QPointF{ left_margin, top_margin };
+    components.bounding_rect = { 0, 0, node_size.width() + left_margin + right_margin, node_size.height() + top_margin + bottom_margin };
+    components.bounding_rect.moveCenter({ 0, 0 });
+    QPointF translate_offset = components.bounding_rect.topLeft() + QPointF{ left_margin, top_margin };
     double offset_x = translate_offset.x();
     double offset_y = translate_offset.y();
 
     //计算标题区域
-    //double icon_title_offset_x = std::abs(caption_size.width() - icon_size.width()) * 0.5;
-    //if (caption_size.width() >= (icon_size.width() + point_diameter_extend))
-    //{
-    //    //标题比图标区域大的情况
-    //    simple_components_.icon_rect = { offset_x + icon_title_offset_x, offset_y, icon_size.width(), icon_size.height() };
-    //    simple_components_.caption_rect = { offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
-    //}
-    //else
-    //{
-    //    //图标区域比标题大的情况
-    //    //x_margin += half_point_size;
-    //    simple_components_.icon_rect = { offset_x + half_point_diameter_extend, offset_y, icon_size.width(), icon_size.height() };
-    //    simple_components_.caption_rect = { offset_x + icon_title_offset_x + half_point_diameter_extend, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
-    //}
-
     double icon_extend_width = icon_size.width() + point_diameter_extend;
     if (caption_size.width() >= icon_extend_width)
     {
         //标题比icon扩展区域大
         double icon_title_offset_x = (caption_size.width() - icon_size.width()) * 0.5;
-        simple_components_.caption_rect = { offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
-        simple_components_.icon_rect = { offset_x + icon_title_offset_x, offset_y, icon_size.width(), icon_size.height() };
+        components.caption_rect = { offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
+        components.icon_rect = { offset_x + icon_title_offset_x, offset_y, icon_size.width(), icon_size.height() };
     }
     else
     {
         //标题比icon区域小
         double icon_title_offset_x = (icon_size.width() - caption_size.width()) * 0.5;
-        simple_components_.icon_rect = { offset_x + half_point_diameter_extend, offset_y, icon_size.width(), icon_size.height() };
-        simple_components_.caption_rect = { offset_x + half_point_diameter_extend + icon_title_offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
+        components.icon_rect = { offset_x + half_point_diameter_extend, offset_y, icon_size.width(), icon_size.height() };
+        components.caption_rect = { offset_x + half_point_diameter_extend + icon_title_offset_x, offset_y + icon_size.height(), caption_size.width(), caption_size.height() };
     }
 
     //计算port区域
-    simple_components_.in_port_rect = { simple_components_.icon_rect.left() - half_point_diameter_extend, simple_components_.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
-    simple_components_.out_port_rect = { simple_components_.icon_rect.right() - half_point_diameter_extend, simple_components_.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
-
-    ////计算标题区域
-    //constexpr double margin = 3.0; //3个像素的边界保留
-    //double x_margin = margin;
-    //double y_margin = margin;
-    //double x_offset = std::abs(caption_size.width() - icon_size.width()) * 0.5;
-    //if (caption_size.width() >= (icon_size.width() + port_point_size))
-    //{
-    //    //标题比图标区域大的情况
-    //    simple_components_.icon_rect = { x_margin + x_offset, y_margin, icon_size.width(), icon_size.height() };
-    //    simple_components_.caption_rect = { x_margin, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
-    //}
-    //else
-    //{
-    //    //图标区域比标题大的情况
-    //    x_margin += half_point_size;
-    //    simple_components_.icon_rect = { x_margin, y_margin, icon_size.width(), icon_size.height() };
-    //    simple_components_.caption_rect = { x_margin + x_offset, y_margin + icon_size.height(), caption_size.width(), caption_size.height() };
-    //}
-    //
-    ////计算port区域
-    //simple_components_.in_port_rect = { simple_components_.icon_rect.left() - half_point_size, simple_components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
-    //simple_components_.out_port_rect = { simple_components_.icon_rect.right() - half_point_size, simple_components_.icon_rect.center().y() - half_point_size, port_point_size, port_point_size };
-    //
-    ////计算对象的边界
-    //simple_components_.bounding_rect = { 0.0, 0.0, std::max(caption_size.width(), icon_size.width()) + 2 * x_margin, icon_size.height() + caption_size.height() + 2 * y_margin };
-    //
-    ////-----平移区域
-    ////获取bounding_rect的中心点坐标
-    //simple_components_.bounding_rect.moveCenter({ 0, 0 });
-    //QPointF translate_offset = simple_components_.bounding_rect.topLeft();
-    ////调整每个矩形的坐标，使其相对于bounding_rect的中心
-    //simple_components_.icon_rect.translate(translate_offset);
-    //simple_components_.caption_rect.translate(translate_offset);
-    //simple_components_.in_port_rect.translate(translate_offset);
-    //simple_components_.out_port_rect.translate(translate_offset);
+    components.in_port_rect = { components.icon_rect.left() - half_point_diameter_extend, components.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
+    components.out_port_rect = { components.icon_rect.right() - half_point_diameter_extend, components.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
 }
 } //namespace fe

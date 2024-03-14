@@ -21,6 +21,7 @@ private:
     static void paintNodeRect(QPainter* painter, NodeItem* item);
     static void paintRunBtn(QPainter* painter, NodeItem* item);
     static void paintConnectionPoints(QPainter* painter, NodeItem* item);
+    static void paintMessage(QPainter* painter, NodeItem* item);
 };
 
 } //namespace fe
