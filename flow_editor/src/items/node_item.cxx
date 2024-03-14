@@ -87,13 +87,27 @@ void NodeItem::updateCache(double scale)
 
 int NodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
 {
+    const auto& components = geometry_->components();
+    double min_distance_sqr = std::numeric_limits<double>::max();
+    int index = -1;
+
     if (required_port == PortType::Out)
     {
         for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
         {
-            if (geometry_->components().out_ports[i].port_rect.contains(pos))
+            const PortComponent& port_component = components.out_ports[i];
+            double half_rect_extend_width = port_component.port_rect_extend.width() * 0.5;
+            double trigger_distance = 2 * half_rect_extend_width * half_rect_extend_width;
+            const auto& port_center = port_component.port_center;
+            //计算当前点到端点的距离
+            double crt_distance_sqr = (pos.x() - port_center.x()) * (pos.x() - port_center.x()) + (pos.y() - port_center.y()) * (pos.y() - port_center.y());
+            if (crt_distance_sqr < trigger_distance)
             {
-                return (int)i;
+                if (min_distance_sqr > crt_distance_sqr)
+                {
+                    min_distance_sqr = crt_distance_sqr;
+                    index = (int)i;
+                }
             }
         }
     }
@@ -101,14 +115,24 @@ int NodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
     {
         for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
         {
-            if (geometry_->components().in_ports[i].port_rect.contains(pos))
+            const PortComponent& port_component = components.in_ports[i];
+            double half_rect_extend_width = port_component.port_rect_extend.width() * 0.5;
+            double trigger_distance = 2 * half_rect_extend_width * half_rect_extend_width;
+            const auto& port_center = port_component.port_center;
+            //计算当前点到端点的距离
+            double crt_distance_sqr = (pos.x() - port_center.x()) * (pos.x() - port_center.x()) + (pos.y() - port_center.y()) * (pos.y() - port_center.y());
+            if (crt_distance_sqr < trigger_distance)
             {
-                return (int)i;
+                if (min_distance_sqr > crt_distance_sqr)
+                {
+                    min_distance_sqr = crt_distance_sqr;
+                    index = (int)i;
+                }
             }
         }
     }
 
-    return -1;
+    return index;
 }
 void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -164,25 +188,19 @@ void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
     //判断点击了对应的端口位置
     if (flow_permission_ & FlowPermission::ConnectionEditable)
     {
-        for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+        int in_index = getPortIndex(PortType::In, pos.toPoint());
+        if (in_index >= 0)
         {
-            if (geometry_->components().in_ports[i].port_rect.contains(pos))
-            {
-                scene_.flowSceneData()->makeDraftConnection(PortType::Out, id_, (unsigned int)i, mapToScene(pos), id_);
-                return;
-            }
+            scene_.flowSceneData()->makeDraftConnection(PortType::Out, id_, (unsigned int)in_index, mapToScene(pos), id_);
+            return;
         }
-        for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
+        int out_index = getPortIndex(PortType::Out, pos.toPoint());
+        if (out_index >= 0)
         {
-            if (geometry_->components().out_ports[i].port_rect.contains(pos))
-            {
-                scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, (unsigned int)i, mapToScene(pos), id_);
-                return;
-            }
+            scene_.flowSceneData()->makeDraftConnection(PortType::In, id_, (unsigned int)out_index, mapToScene(pos), id_);
+            return;
         }
     }
-
-    //QGraphicsItem::mousePressEvent(event);
 }
 void NodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {

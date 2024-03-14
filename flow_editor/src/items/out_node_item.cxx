@@ -150,7 +150,7 @@ int OutNodeItem::getPortIndex(PortType required_port, const QPoint& pos) const
     {
         return -1;
     }
-    if (geometry_->components().port_rect.contains(pos))
+    if (geometry_->components().port_rect_extend.contains(pos))
     {
         return 0;
     }
