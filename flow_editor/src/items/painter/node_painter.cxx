@@ -47,15 +47,8 @@ void NodePainter::paintNormal(QPainter* painter, NodeItem* item)
     painter->setPen(style->font_color);
     painter->drawStaticText(components.caption_position, components.caption_text);
 
-    //绘画输入输出名
-    for (const auto& port : components.in_ports)
-    {
-        painter->drawStaticText(port.port_text_position, port.port_text);
-    }
-    for (const auto& port : components.out_ports)
-    {
-        painter->drawStaticText(port.port_text_position, port.port_text);
-    }
+    //画端口区域
+    paintPort(painter, item);
 
     //画交互点
     paintRunBtn(painter, item);
@@ -123,6 +116,80 @@ void NodePainter::paintNodeRect(QPainter* painter, NodeItem* item)
         painter->setPen(Qt::NoPen);
         painter->setBrush(color);
         painter->drawRect(components.title_rect);
+    }
+}
+void NodePainter::paintPort(QPainter* painter, NodeItem* item)
+{
+    const auto& components = item->geometry_->components();
+    for (const auto& port : components.in_ports)
+    {
+        painter->drawStaticText(port.port_text_position, port.port_text);
+    }
+    for (const auto& port : components.out_ports)
+    {
+        painter->drawStaticText(port.port_text_position, port.port_text);
+    }
+
+    //判断悬停
+    if (item->crt_hovered_in_add_btn_ != -1)
+    {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(item->style_->btn_hovered_color);
+        painter->drawRect(components.in_ports[item->crt_hovered_in_add_btn_].port_add_btn_rect);
+    }
+    else if (item->crt_hovered_in_del_btn_ != -1)
+    {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(item->style_->btn_hovered_color);
+        painter->drawRect(components.in_ports[item->crt_hovered_in_del_btn_].port_del_btn_rect);
+    }
+    else if (item->crt_hovered_out_add_btn_ != -1)
+    {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(item->style_->btn_hovered_color);
+        painter->drawRect(components.out_ports[item->crt_hovered_out_add_btn_].port_add_btn_rect);
+    }
+    else if (item->crt_hovered_out_del_btn_ != -1)
+    {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(item->style_->btn_hovered_color);
+        painter->drawRect(components.out_ports[item->crt_hovered_out_del_btn_].port_del_btn_rect);
+    }
+
+    painter->setPen(item->style_->font_color);
+    painter->setBrush(Qt::NoBrush);
+    QTextOption option(Qt::AlignmentFlag::AlignCenter);
+    if (components.enable_in_port_add_btn)
+    {
+        for (const auto& port : components.in_ports)
+        {
+            //painter->drawRect(port.port_add_btn_rect);
+            painter->drawText(port.port_add_btn_rect, "+", option);
+        }
+        if (components.enable_in_port_del_btn)
+        {
+            for (const auto& port : components.in_ports)
+            {
+                //painter->drawRect(port.port_del_btn_rect);
+                painter->drawText(port.port_del_btn_rect, "-", option);
+            }
+        }
+    }
+    if (components.enable_out_port_add_btn)
+    {
+        for (const auto& port : components.out_ports)
+        {
+            //painter->drawRect(port.port_add_btn_rect);
+            painter->drawText(port.port_add_btn_rect, "+", option);
+        }
+        if (components.enable_out_port_del_btn)
+        {
+            for (const auto& port : components.out_ports)
+            {
+                //painter->drawRect(port.port_del_btn_rect);
+                painter->drawText(port.port_del_btn_rect, "-", option);
+            }
+        }
     }
 }
 void NodePainter::paintRunBtn(QPainter* painter, NodeItem* item)
@@ -350,4 +417,5 @@ void NodePainter::paintSimple(QPainter* painter, NodeItem* item)
     painter->drawEllipse(components.in_port_rect);
     painter->drawEllipse(components.out_port_rect);
 }
+
 } //namespace fe

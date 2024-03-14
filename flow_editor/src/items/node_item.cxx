@@ -254,7 +254,14 @@ void NodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 }
 void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
-    if (crt_model_ == 0 && geometry_->components().run_btn_rect2.contains(event->pos()))
+    if (crt_model_ != 0)
+    {
+        return;
+    }
+
+    //判断是否悬停在运行按钮上
+    auto pos = event->pos();
+    if (geometry_->components().run_btn_rect2.contains(pos))
     {
         if (!is_hovered_btn_)
         {
@@ -274,12 +281,75 @@ void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
             return;
         }
     }
+
+    crt_hovered_in_add_btn_ = -1;
+    crt_hovered_in_del_btn_ = -1;
+    crt_hovered_out_add_btn_ = -1;
+    crt_hovered_out_del_btn_ = -1;
+    if (geometry_->components().enable_in_port_add_btn)
+    {
+        for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+        {
+            const auto& in_port = geometry_->components().in_ports[i];
+            if (in_port.port_add_btn_rect.contains(pos))
+            {
+                crt_hovered_in_add_btn_ = (int)i;
+                update();
+                return;
+            }
+        }
+        if (geometry_->components().enable_in_port_del_btn)
+        {
+            for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+            {
+                const auto& in_port = geometry_->components().in_ports[i];
+                if (in_port.port_del_btn_rect.contains(pos))
+                {
+                    crt_hovered_in_del_btn_ = (int)i;
+                    update();
+                    return;
+                }
+            }
+        }
+    }
+    if (geometry_->components().enable_out_port_add_btn)
+    {
+        for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
+        {
+            const auto& out_port = geometry_->components().out_ports[i];
+            if (out_port.port_add_btn_rect.contains(pos))
+            {
+                crt_hovered_out_add_btn_ = (int)i;
+                update();
+                return;
+            }
+        }
+        if (geometry_->components().enable_out_port_del_btn)
+        {
+            for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
+            {
+                const auto& out_port = geometry_->components().out_ports[i];
+                if (out_port.port_del_btn_rect.contains(pos))
+                {
+                    crt_hovered_out_del_btn_ = (int)i;
+                    update();
+                    return;
+                }
+            }
+        }
+    }
+
     //QGraphicsItem::hoverMoveEvent(event);
 }
 void NodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(z_value_);
     is_hovered_ = false;
+    crt_hovered_in_add_btn_ = -1;
+    crt_hovered_in_del_btn_ = -1;
+    crt_hovered_out_add_btn_ = -1;
+    crt_hovered_out_del_btn_ = -1;
+    update();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 

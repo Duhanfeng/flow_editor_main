@@ -148,11 +148,62 @@ void DynamicGeometry::update()
 {
     auto& components = components_;
 
-    //-----计算端口文本区域
-    //计算连接点尺寸
+    //-----计算端口区域
     double point_diameter = node_style_->connection_point_diameter; //连接点尺寸
     double point_diameter_extend = 2.0 * point_diameter;            //扩展的连接点尺寸
+    constexpr double port_spasing = 5;                              //端口字符之间的间隔
+    double port_text_height = font_metrics_->height();              //端口字符的高度
+    double port_btn_width = port_text_height;                       //端口按钮的尺寸
 
+    //计算端口添加/修改按钮
+    bool enable_in_port_add_btn = false;
+    bool enable_in_port_del_btn = false;
+    bool enable_out_port_add_btn = false;
+    bool enable_out_port_del_btn = false;
+    if (data_.inputs_config == PortConfig::Modifiable)
+    {
+        enable_in_port_add_btn = true;
+        for (const auto& input : data_.inputs)
+        {
+            if (input.port_state == PortStatus::Removable)
+            {
+                enable_in_port_del_btn = true;
+                break;
+            }
+        }
+    }
+    if (data_.outputs_config == PortConfig::Modifiable)
+    {
+        enable_out_port_add_btn = true;
+        for (const auto& output : data_.outputs)
+        {
+            if (output.port_state == PortStatus::Removable)
+            {
+                enable_out_port_del_btn = true;
+                break;
+            }
+        }
+    }
+    double in_port_btn_width = 0;
+    if (enable_in_port_add_btn)
+    {
+        in_port_btn_width = port_btn_width + port_spasing * 2;
+        if (enable_in_port_del_btn)
+        {
+            in_port_btn_width += port_btn_width;
+        }
+    }
+    double out_port_btn_width = 0;
+    if (enable_out_port_add_btn)
+    {
+        out_port_btn_width = port_btn_width + port_spasing * 2;
+        if (enable_out_port_del_btn)
+        {
+            out_port_btn_width += port_btn_width;
+        }
+    }
+    double port_btn_redundancy = (enable_in_port_add_btn || enable_out_port_add_btn) ? port_btn_width : 0;
+    //计算输入/输出文本区域
     double in_width = 0;
     for (const auto& port : data_.inputs)
     {
@@ -163,14 +214,12 @@ void DynamicGeometry::update()
     {
         out_width = std::max(out_width, textWidth(font_metrics_.get(), port.port_name));
     }
-    constexpr unsigned int port_spasing = 5;                                            //端口字符之间的间隔
-    unsigned int port_text_height = font_metrics_->height();                            //端口字符的高度
-    double port_width = in_width + out_width + point_diameter + 2 * port_spasing;       //端口区域宽度
-    double port_height = maxVerticalPortsExtent(data_, port_text_height, port_spasing); //端口字符区域高度
+    double port_width = in_width + out_width + in_port_btn_width + out_port_btn_width + port_btn_redundancy + point_diameter + 2 * port_spasing; //端口区域宽度
+    double port_height = maxVerticalPortsExtent(data_, port_text_height, port_spasing);                                                          //端口字符区域高度
     double message_margin_x = port_spasing;
     double message_margin_y = port_spasing;
 
-    //计算标题区域
+    //-----计算标题区域
     QSizeF caption_size = bold_font_metrics_->boundingRect(data_.caption_text).size();
     constexpr double btn_scale = 1.6;
     constexpr double icon_offset_rate = 0.2;
@@ -263,8 +312,8 @@ void DynamicGeometry::update()
     //开始绘画各port区域
     double half_point_size = point_diameter * 0.5;
     double half_point_diameter_extend = point_diameter_extend * 0.5;
-    double point_offset = ((double)port_text_height - point_diameter) * 0.5;
-    double point_offset2 = ((double)port_text_height - point_diameter_extend) * 0.5;
+    double point_offset = (port_text_height - point_diameter) * 0.5;
+    double point_offset2 = (port_text_height - point_diameter_extend) * 0.5;
     double total_port_height = title_height + port_spasing * 0.5;
     for (size_t i = 0; i < components.in_ports.size(); ++i)
     {
@@ -273,8 +322,33 @@ void DynamicGeometry::update()
         components.in_ports[i].port_text_rect = QRectF{ half_point_size + port_spasing + offset_x, total_port_height + offset_y, in_width, (float)port_text_height };
         components.in_ports[i].port_center = components.in_ports[i].port_rect.center();
         components.in_ports[i].port_text_position = components.in_ports[i].port_text_rect.topLeft();
-        total_port_height += (double)port_text_height + port_spasing;
+        total_port_height += port_text_height + port_spasing;
     }
+    //计算添加/删除按钮
+    if (enable_in_port_add_btn)
+    {
+        double crt_top = title_height + port_spasing * 0.5 + offset_y;
+        double left = half_point_size + port_spasing + offset_x + in_width + port_spasing * 2;
+        if (enable_in_port_del_btn)
+        {
+            double left2 = left + port_btn_width;
+            for (size_t i = 0; i < components.in_ports.size(); ++i)
+            {
+                components.in_ports[i].port_add_btn_rect = { left, crt_top, port_btn_width, port_btn_width };
+                components.in_ports[i].port_del_btn_rect = { left2, crt_top, port_btn_width, port_btn_width };
+                crt_top += port_text_height + port_spasing;
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < components.in_ports.size(); ++i)
+            {
+                components.in_ports[i].port_add_btn_rect = { left, crt_top, port_btn_width, port_btn_width };
+                crt_top += port_text_height + port_spasing;
+            }
+        }
+    }
+
     total_port_height = title_height + port_spasing * 0.5;
     double output_offset_x = node_width - half_point_size - out_width - port_spasing;
     double output_point_offset_x = node_width - half_point_size;
@@ -286,8 +360,37 @@ void DynamicGeometry::update()
         components.out_ports[i].port_text_rect = QRectF{ output_offset_x + offset_x, total_port_height + offset_y, out_width, (float)port_text_height };
         components.out_ports[i].port_center = components.out_ports[i].port_rect.center();
         components.out_ports[i].port_text_position = components.out_ports[i].port_text_rect.topLeft();
-        total_port_height += (double)port_text_height + port_spasing;
+        total_port_height += port_text_height + port_spasing;
     }
+    //计算添加/删除按钮
+    if (enable_out_port_add_btn)
+    {
+        double crt_top = title_height + port_spasing * 0.5 + offset_y;
+        double left = output_offset_x + offset_x - out_port_btn_width;
+        if (enable_in_port_del_btn)
+        {
+            double left2 = left + port_btn_width;
+            for (size_t i = 0; i < components.out_ports.size(); ++i)
+            {
+                components.out_ports[i].port_add_btn_rect = { left, crt_top, port_btn_width, port_btn_width };
+                components.out_ports[i].port_del_btn_rect = { left2, crt_top, port_btn_width, port_btn_width };
+                crt_top += port_text_height + port_spasing;
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < components.out_ports.size(); ++i)
+            {
+                components.out_ports[i].port_add_btn_rect = { left, crt_top, port_btn_width, port_btn_width };
+                crt_top += port_text_height + port_spasing;
+            }
+        }
+    }
+
+    components.enable_in_port_add_btn = enable_in_port_add_btn;
+    components.enable_in_port_del_btn = enable_in_port_del_btn;
+    components.enable_out_port_add_btn = enable_out_port_add_btn;
+    components.enable_out_port_del_btn = enable_out_port_del_btn;
 }
 void DynamicGeometry::updateSimple(double scale)
 {

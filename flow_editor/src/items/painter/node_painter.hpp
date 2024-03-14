@@ -19,6 +19,7 @@ private:
 private:
     static void paintFrame(QPainter* painter, NodeItem* item);
     static void paintNodeRect(QPainter* painter, NodeItem* item);
+    static void paintPort(QPainter* painter, NodeItem* item);
     static void paintRunBtn(QPainter* painter, NodeItem* item);
     static void paintConnectionPoints(QPainter* painter, NodeItem* item);
     static void paintMessage(QPainter* painter, NodeItem* item);

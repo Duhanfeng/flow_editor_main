@@ -22,6 +22,8 @@ public:
     QStaticText port_text;      //端口文本内容
     QString port_type;          //端口类型
     QColor port_color;          //端口颜色
+    QRectF port_add_btn_rect;   //端口添加按钮区域
+    QRectF port_del_btn_rect;   //端口删除按钮区域
 };
 
 //NodeItem里面每个组件的尺寸,用于渲染时绘画,坐标原点(0,0)为边界区域的中心
@@ -37,6 +39,10 @@ public:
     QRectF run_btn_rect;                  //运行按钮区域
     QRectF run_btn_rect2;                 //运行按钮区域(裁剪后的)
     QRectF port_rect;                     //端口区域
+    bool enable_in_port_add_btn = false;  //使能添加输入端口按钮
+    bool enable_in_port_del_btn = false;  //使能删除输入端口按钮
+    bool enable_out_port_add_btn = false; //使能添加输出端口按钮
+    bool enable_out_port_del_btn = false; //使能删除输出端口按钮
     std::vector<PortComponent> in_ports;  //输入端口
     std::vector<PortComponent> out_ports; //输出端口
     QPolygonF run_btn_polygon;            //运行按钮

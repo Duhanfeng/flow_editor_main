@@ -52,23 +52,25 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
         icon,
         { 0.0, 0.0 },
         false,
-        { { u8"输入端口1", u8"整型" },
+        { { u8"输入端口1", u8"整型", fe::PortStatus::Removable },
             { u8"输入端口2", u8"" },
             { u8"输入端口3", u8"浮点数" } },
         { { u8"输出端口1", u8"浮点数" },
-            { u8"输出端口2", u8"" },
+            { u8"输出端口2", u8"", fe::PortStatus::Removable },
             { u8"输出端口3", u8"浮点数" },
-            { u8"输出端口4", u8"" } }
+            { u8"输出端口4", u8"" } },
+        fe::PortConfig::Modifiable,
+        fe::PortConfig::Modifiable,
     };
     fe::NodeData data6 = {
         u8"节点2",
         icon,
-        { 0.0, 400.0 },
+        { 0.0, 500.0 },
         false,
         { { u8"输入端口1", u8"浮点数" },
             { u8"输入端口2", u8"整型" },
             { u8"输入端口2", u8"浮点数" },
-            { u8"输入端口2", u8"" },
+            { u8"输入端口2", u8"", fe::PortStatus::Removable },
             { u8"输入端口2", u8"浮点数" },
             { u8"输入端口2", u8"整型" },
             { u8"输入端口2", u8"整型" },
@@ -77,8 +79,8 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
             { u8"输出端口2", u8"整型" },
             { u8"输出端口3", u8"浮点数" },
             { u8"输出端口4", u8"" } },
-        fe::PortConfigOptions::Fixed,
-        fe::PortConfigOptions::Fixed,
+        fe::PortConfig::Modifiable,
+        fe::PortConfig::Modifiable,
         fe::ErrorLevel::Error,
         u8"执行错误"
     };
@@ -92,8 +94,8 @@ inline void createNodes(std::shared_ptr<Flow2> flow)
             { u8"通用端口", u8"" } },
         { { u8"整型", u8"整型" },
             { u8"浮点数", u8"浮点数" } },
-        fe::PortConfigOptions::Fixed,
-        fe::PortConfigOptions::Fixed,
+        fe::PortConfig::Immutable,
+        fe::PortConfig::Immutable,
         fe::ErrorLevel::Warning,
         u8"这是一个需要自动换行的长文本示例，如果文本长度超过边界宽度，则需要自动换行。"
     };

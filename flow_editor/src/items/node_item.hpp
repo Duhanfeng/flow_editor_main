@@ -53,6 +53,10 @@ private:
     bool is_hovered_ = false;
     bool is_hovered_btn_ = false;
     bool is_checked_btn_ = false;
+    int crt_hovered_in_add_btn_ = -1;
+    int crt_hovered_in_del_btn_ = -1;
+    int crt_hovered_out_add_btn_ = -1;
+    int crt_hovered_out_del_btn_ = -1;
 };
 
 } //namespace fe

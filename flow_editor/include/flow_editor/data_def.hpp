@@ -10,7 +10,6 @@
 
 namespace fe
 {
-
 enum class NodeLayoutStyle
 {
     Horizontal,
@@ -18,9 +17,9 @@ enum class NodeLayoutStyle
 };
 enum class PortType
 {
-    In = 0,  ///<Input node port (from the left).
-    Out = 1, ///<Output node port (from the right).
-    None = 2
+    In,
+    Out,
+    None
 };
 enum class NodeType
 {
@@ -30,21 +29,21 @@ enum class NodeType
 };
 enum class PortStatus
 {
-    Fixed,     //端口是永久固定的，不能改动
-    Detachable //端口是可以被移除的
+    Immutable, //端口是固定的,不能改动
+    Removable  //端口是可以被移除的
 };
-enum class PortConfigOptions
+//PortConfig和PortStatus的区别:  PortStatus只是决定当前端口是否可以被移除,而PortConfig为全局配置,仅为Modifiable时,每个端口的PortStatus才有效
+enum class PortConfig
 {
-    Fixed,      //端口是永久固定的，不能改动
-    Detachable, //端口是可以被移除的
-    Attachable  //端口是可以添加的
+    Immutable, //所有端口都是固定的，不能改动
+    Modifiable //可以自由添加和移除端口
 };
 class PortData
 {
 public:
-    QString port_name;                         //端口名
-    QString port_type;                         //端口类型,同名类型才可以连接,空表示不进行过滤
-    PortStatus port_state = PortStatus::Fixed; //端口状态
+    QString port_name;                             //端口名
+    QString port_type;                             //端口类型,同名类型才可以连接,空表示不进行过滤
+    PortStatus port_state = PortStatus::Immutable; //端口状态
 };
 enum class ErrorLevel
 {
@@ -62,10 +61,10 @@ public:
     QPointF position;            //节点位置
     bool is_highlighted = false; //是否高亮显示
     //端口配置
-    std::vector<PortData> inputs;       //输入端口
-    std::vector<PortData> outputs;      //输出端口
-    PortConfigOptions in_ports_config;  //输入端口配置
-    PortConfigOptions out_ports_config; //输出端口配置
+    std::vector<PortData> inputs;  //输入端口
+    std::vector<PortData> outputs; //输出端口
+    PortConfig inputs_config;      //输入端口配置
+    PortConfig outputs_config;     //输出端口配置
     //消息提示
     ErrorLevel error = ErrorLevel::Accept;
     QString error_message;
