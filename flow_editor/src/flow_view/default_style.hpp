@@ -66,4 +66,4 @@ void initDefaultStyle(std::shared_ptr<fe::DraftConnectionStyle>& draft_connectio
     draft_connection_style->construction_line_width = 2.0f;
     draft_connection_style->point_diameter = 10.0f;
 }
-}
+} //namespace fe

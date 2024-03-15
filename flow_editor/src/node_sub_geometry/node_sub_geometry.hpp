@@ -68,10 +68,10 @@ public:
     QRectF caption_rect;      //标题区域
     QStaticText caption_text; //标题缓存
     //端口属性
-    QRectF in_port_rect;         //输入端口位置
-    QPointF in_port_center;      //端口中心
-    QRectF out_port_rect;        //输出端口位置
-    QPointF out_port_center;     //端口中心
+    QRectF in_port_rect;     //输入端口位置
+    QPointF in_port_center;  //端口中心
+    QRectF out_port_rect;    //输出端口位置
+    QPointF out_port_center; //端口中心
     //消息提示框
     QRectF message_box_rect;  //消息提示框
     QColor message_box_color; //消息颜色
