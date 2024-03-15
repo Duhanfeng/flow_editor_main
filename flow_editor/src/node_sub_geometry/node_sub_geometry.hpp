@@ -66,9 +66,15 @@ public:
     QRectF bounding_rect;     //边界区域
     QRectF icon_rect;         //图标位置区域
     QRectF caption_rect;      //标题区域
-    QRectF in_port_rect;      //输入端口位置
-    QRectF out_port_rect;     //输出端口位置
     QStaticText caption_text; //标题缓存
+    //端口属性
+    QRectF in_port_rect;         //输入端口位置
+    QPointF in_port_center;      //端口中心
+    QRectF out_port_rect;        //输出端口位置
+    QPointF out_port_center;     //端口中心
+    //消息提示框
+    QRectF message_box_rect;  //消息提示框
+    QColor message_box_color; //消息颜色
 };
 //端口
 class PortUIComponents
@@ -80,7 +86,6 @@ public:
     QRectF caption_rect;      //标题区域
     QPolygonF node_polygon;   //node多边形
     QStaticText caption_text; //标题缓存
-
     //端口属性
     QRectF port_rect;        //端口连接点交互区域
     QRectF port_rect_extend; //端口连接点交互区域(扩展,用于动态显示时)

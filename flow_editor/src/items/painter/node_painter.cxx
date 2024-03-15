@@ -132,38 +132,6 @@ void NodePainter::paintPort(QPainter* painter, NodeItem* item)
 
     if (!item->is_immutable_port_)
     {
-
-        //判断点击
-        //bool is_checked = false;
-        //if (item->crt_checked_in_add_btn_ != -1)
-        //{
-        //    is_checked = true;
-        //    //painter->setPen(Qt::NoPen);
-        //    //painter->setBrush(item->style_->btn_hovered_color);
-        //    //painter->drawRect(components.in_ports[item->crt_hovered_in_add_btn_].port_add_btn_rect);
-        //}
-        //else if (item->crt_checked_in_del_btn_ != -1)
-        //{
-        //    is_checked = true;
-        //    //painter->setPen(Qt::NoPen);
-        //    //painter->setBrush(item->style_->btn_hovered_color);
-        //    //painter->drawRect(components.in_ports[item->crt_hovered_in_del_btn_].port_del_btn_rect);
-        //}
-        //else if (item->crt_checked_out_add_btn_ != -1)
-        //{
-        //    is_checked = true;
-        //    //painter->setPen(Qt::NoPen);
-        //    //painter->setBrush(item->style_->btn_hovered_color);
-        //    //painter->drawRect(components.out_ports[item->crt_hovered_out_add_btn_].port_add_btn_rect);
-        //}
-        //else if (item->crt_checked_out_del_btn_ != -1)
-        //{
-        //    is_checked = true;
-        //    //painter->setPen(Qt::NoPen);
-        //    //painter->setBrush(item->style_->btn_hovered_color);
-        //    //painter->drawRect(components.out_ports[item->crt_hovered_out_del_btn_].port_del_btn_rect);
-        //}
-
         //判断悬停
         if (!item->is_checked_port_btn_ && item->is_hovered_port_btn_)
         {
@@ -462,6 +430,14 @@ void NodePainter::paintSimple(QPainter* painter, NodeItem* item)
     painter->setBrush(QColor(255, 0, 0));
     painter->drawEllipse(components.in_port_rect);
     painter->drawEllipse(components.out_port_rect);
+
+    //画消息提示框
+    if (!components.message_box_rect.isEmpty())
+    {
+        painter->setPen(QPen());
+        painter->setBrush(components.message_box_color);
+        painter->drawRect(components.message_box_rect);
+    }
 }
 
 } //namespace fe

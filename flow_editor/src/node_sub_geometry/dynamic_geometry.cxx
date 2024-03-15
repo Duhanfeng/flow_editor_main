@@ -447,5 +447,19 @@ void DynamicGeometry::updateSimple(double scale)
     //计算port区域
     components.in_port_rect = { components.icon_rect.left() - half_point_diameter_extend, components.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
     components.out_port_rect = { components.icon_rect.right() - half_point_diameter_extend, components.icon_rect.center().y() - half_point_diameter_extend, point_diameter_extend, point_diameter_extend };
+    components.in_port_center = components.in_port_rect.center();
+    components.out_port_center = components.out_port_rect.center();
+
+    //计算消息框
+    if (data_.error != ErrorLevel::Accept && !data_.error_message.isEmpty())
+    {
+        components.message_box_color = (data_.error == ErrorLevel::Error) ? QColor(213, 7, 7) : QColor(255, 255, 7);
+        components.message_box_rect = { 0, 0, 20, 20 };
+        components.message_box_rect.moveBottomRight(components.icon_rect.bottomRight());
+    }
+    else
+    {
+        components.message_box_rect = {};
+    }
 }
 } //namespace fe
