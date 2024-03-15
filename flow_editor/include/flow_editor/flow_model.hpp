@@ -100,6 +100,16 @@ public:
     {
         return true;
     }
+
+    //动态端口管理
+    virtual bool tryAddPort(const guid16& id, PortType port_type, unsigned int port_index)
+    {
+        return false;
+    }
+    virtual bool tryDelPort(const guid16& id, PortType port_type, unsigned int port_index)
+    {
+        return false;
+    }
 };
 
 } //namespace fe

@@ -130,64 +130,110 @@ void NodePainter::paintPort(QPainter* painter, NodeItem* item)
         painter->drawStaticText(port.port_text_position, port.port_text);
     }
 
-    //判断悬停
-    if (item->crt_hovered_in_add_btn_ != -1)
+    if (!item->is_immutable_port_)
     {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(item->style_->btn_hovered_color);
-        painter->drawRect(components.in_ports[item->crt_hovered_in_add_btn_].port_add_btn_rect);
-    }
-    else if (item->crt_hovered_in_del_btn_ != -1)
-    {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(item->style_->btn_hovered_color);
-        painter->drawRect(components.in_ports[item->crt_hovered_in_del_btn_].port_del_btn_rect);
-    }
-    else if (item->crt_hovered_out_add_btn_ != -1)
-    {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(item->style_->btn_hovered_color);
-        painter->drawRect(components.out_ports[item->crt_hovered_out_add_btn_].port_add_btn_rect);
-    }
-    else if (item->crt_hovered_out_del_btn_ != -1)
-    {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(item->style_->btn_hovered_color);
-        painter->drawRect(components.out_ports[item->crt_hovered_out_del_btn_].port_del_btn_rect);
-    }
 
-    painter->setPen(item->style_->font_color);
-    painter->setBrush(Qt::NoBrush);
-    QTextOption option(Qt::AlignmentFlag::AlignCenter);
-    if (components.enable_in_port_add_btn)
-    {
-        for (const auto& port : components.in_ports)
+        //判断点击
+        //bool is_checked = false;
+        //if (item->crt_checked_in_add_btn_ != -1)
+        //{
+        //    is_checked = true;
+        //    //painter->setPen(Qt::NoPen);
+        //    //painter->setBrush(item->style_->btn_hovered_color);
+        //    //painter->drawRect(components.in_ports[item->crt_hovered_in_add_btn_].port_add_btn_rect);
+        //}
+        //else if (item->crt_checked_in_del_btn_ != -1)
+        //{
+        //    is_checked = true;
+        //    //painter->setPen(Qt::NoPen);
+        //    //painter->setBrush(item->style_->btn_hovered_color);
+        //    //painter->drawRect(components.in_ports[item->crt_hovered_in_del_btn_].port_del_btn_rect);
+        //}
+        //else if (item->crt_checked_out_add_btn_ != -1)
+        //{
+        //    is_checked = true;
+        //    //painter->setPen(Qt::NoPen);
+        //    //painter->setBrush(item->style_->btn_hovered_color);
+        //    //painter->drawRect(components.out_ports[item->crt_hovered_out_add_btn_].port_add_btn_rect);
+        //}
+        //else if (item->crt_checked_out_del_btn_ != -1)
+        //{
+        //    is_checked = true;
+        //    //painter->setPen(Qt::NoPen);
+        //    //painter->setBrush(item->style_->btn_hovered_color);
+        //    //painter->drawRect(components.out_ports[item->crt_hovered_out_del_btn_].port_del_btn_rect);
+        //}
+
+        //判断悬停
+        if (!item->is_checked_port_btn_ && item->is_hovered_port_btn_)
         {
-            //painter->drawRect(port.port_add_btn_rect);
-            painter->drawText(port.port_add_btn_rect, "+", option);
-        }
-        if (components.enable_in_port_del_btn)
-        {
-            for (const auto& port : components.in_ports)
+            if (item->crt_hovered_in_add_btn_ != -1)
             {
-                //painter->drawRect(port.port_del_btn_rect);
-                painter->drawText(port.port_del_btn_rect, "-", option);
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(item->style_->btn_hovered_color);
+                painter->drawRect(components.in_ports[item->crt_hovered_in_add_btn_].port_add_btn_rect);
+            }
+            else if (item->crt_hovered_in_del_btn_ != -1)
+            {
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(item->style_->btn_hovered_color);
+                painter->drawRect(components.in_ports[item->crt_hovered_in_del_btn_].port_del_btn_rect);
+            }
+            else if (item->crt_hovered_out_add_btn_ != -1)
+            {
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(item->style_->btn_hovered_color);
+                painter->drawRect(components.out_ports[item->crt_hovered_out_add_btn_].port_add_btn_rect);
+            }
+            else if (item->crt_hovered_out_del_btn_ != -1)
+            {
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(item->style_->btn_hovered_color);
+                painter->drawRect(components.out_ports[item->crt_hovered_out_del_btn_].port_del_btn_rect);
             }
         }
-    }
-    if (components.enable_out_port_add_btn)
-    {
-        for (const auto& port : components.out_ports)
+
+        painter->setPen(item->style_->font_color);
+        painter->setBrush(Qt::NoBrush);
+        QTextOption option(Qt::AlignmentFlag::AlignCenter);
+        if (components.enable_in_port_add_btn)
         {
-            //painter->drawRect(port.port_add_btn_rect);
-            painter->drawText(port.port_add_btn_rect, "+", option);
+            painter->setPen(item->style_->font_color);
+            for (const auto& port : components.in_ports)
+            {
+                painter->drawText(port.port_add_btn_rect, "+", option);
+            }
+            if (components.enable_in_port_del_btn)
+            {
+                QColor enable_color = item->style_->font_color;
+                QColor disable_color = item->style_->font_color.darker();
+                for (size_t i = 0; i < components.in_ports.size(); ++i)
+                {
+                    const auto& port = components.in_ports[i];
+                    bool enable = item->data_->inputs[i].port_state == PortStatus::Removable;
+                    painter->setPen(enable ? enable_color : disable_color);
+                    painter->drawText(port.port_del_btn_rect, "-", option);
+                }
+            }
         }
-        if (components.enable_out_port_del_btn)
+        if (components.enable_out_port_add_btn)
         {
+            painter->setPen(item->style_->font_color);
             for (const auto& port : components.out_ports)
             {
-                //painter->drawRect(port.port_del_btn_rect);
-                painter->drawText(port.port_del_btn_rect, "-", option);
+                painter->drawText(port.port_add_btn_rect, "+", option);
+            }
+            if (components.enable_out_port_del_btn)
+            {
+                QColor enable_color = item->style_->font_color;
+                QColor disable_color = item->style_->font_color.darker();
+                for (size_t i = 0; i < components.out_ports.size(); ++i)
+                {
+                    const auto& port = components.out_ports[i];
+                    bool enable = item->data_->outputs[i].port_state == PortStatus::Removable;
+                    painter->setPen(enable ? enable_color : disable_color);
+                    painter->drawText(port.port_del_btn_rect, "-", option);
+                }
             }
         }
     }

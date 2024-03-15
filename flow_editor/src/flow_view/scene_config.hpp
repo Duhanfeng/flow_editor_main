@@ -7,7 +7,7 @@
 #include <memory>
 #include <unordered_map>
 #include <flow_editor/data_def.hpp>
-#include <flow_editor/flow.hpp>
+#include <flow_editor/flow_model.hpp>
 
 namespace fe
 {

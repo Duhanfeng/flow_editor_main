@@ -6,7 +6,7 @@
 #include <map>
 #include <unordered_map>
 #include <flow_editor/data_def.hpp>
-#include <flow_editor/flow.hpp>
+#include <flow_editor/flow_model.hpp>
 #include <src/node_sub_geometry/node_sub_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_geometry.hpp>
 #include <src/node_sub_geometry/dynamic_h_port_geometry.hpp>

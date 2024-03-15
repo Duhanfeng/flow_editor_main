@@ -32,6 +32,7 @@ NodeItem::NodeItem(FlowScene& scene, const guid16& id) :
     style_ = itr->second->node_style;
     z_value_ = itr->second->z_value;
     preview_scale_ = flow_data->scene_config.preview_scale;
+    is_immutable_port_ = (data_->inputs_config == PortConfig::Immutable) && (data_->outputs_config == PortConfig::Immutable);
 
     icon_ = data_->node_icon.pixmap(QSize(32, 32));
 
@@ -201,10 +202,83 @@ void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
             return;
         }
     }
+
+    //判断点击了对应的端口修改位置
+    if (!is_immutable_port_)
+    {
+        crt_checked_in_add_btn_ = -1;
+        crt_checked_in_del_btn_ = -1;
+        crt_checked_out_add_btn_ = -1;
+        crt_checked_out_del_btn_ = -1;
+        if (geometry_->components().enable_in_port_add_btn)
+        {
+            for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+            {
+                const auto& in_port = geometry_->components().in_ports[i];
+                if (in_port.port_add_btn_rect.contains(pos))
+                {
+                    crt_checked_in_add_btn_ = (int)i;
+                    is_checked_port_btn_ = true;
+                    scene_.flowModel()->tryAddPort(id_, PortType::In, (unsigned int)i);
+                    update();
+                    return;
+                }
+            }
+            if (geometry_->components().enable_in_port_del_btn)
+            {
+                for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+                {
+                    const auto& in_port = geometry_->components().in_ports[i];
+                    if ((data_->inputs[i].port_state == PortStatus::Removable) && in_port.port_del_btn_rect.contains(pos))
+                    {
+                        crt_checked_in_del_btn_ = (int)i;
+                        is_checked_port_btn_ = true;
+                        scene_.flowModel()->tryDelPort(id_, PortType::In, (unsigned int)i);
+                        update();
+                        return;
+                    }
+                }
+            }
+        }
+        if (geometry_->components().enable_out_port_add_btn)
+        {
+            for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
+            {
+                const auto& out_port = geometry_->components().out_ports[i];
+                if (out_port.port_add_btn_rect.contains(pos))
+                {
+                    crt_checked_out_add_btn_ = (int)i;
+                    is_checked_port_btn_ = true;
+                    scene_.flowModel()->tryAddPort(id_, PortType::Out, (unsigned int)i);
+                    update();
+                    return;
+                }
+            }
+            if (geometry_->components().enable_out_port_del_btn)
+            {
+                for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
+                {
+                    const auto& out_port = geometry_->components().out_ports[i];
+                    if ((data_->outputs[i].port_state == PortStatus::Removable) && out_port.port_del_btn_rect.contains(pos))
+                    {
+                        crt_checked_out_del_btn_ = (int)i;
+                        is_checked_port_btn_ = true;
+                        scene_.flowModel()->tryDelPort(id_, PortType::Out, (unsigned int)i);
+                        update();
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 void NodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (is_checked_btn_)
+    if (is_checked_btn_ ||
+        (crt_checked_in_add_btn_ != -1) ||
+        (crt_checked_in_del_btn_ != -1) ||
+        (crt_checked_out_add_btn_ != -1) ||
+        (crt_checked_out_del_btn_ != -1))
     {
         event->accept();
         return;
@@ -216,11 +290,22 @@ void NodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     if (is_checked_btn_)
     {
         is_checked_btn_ = false;
-        //std::cout << "is_checked_btn_ = false" << std::endl;
         update();
         event->accept();
         return;
     }
+    if (is_checked_port_btn_)
+    {
+        is_checked_port_btn_ = false;
+        crt_checked_in_add_btn_ = -1;
+        crt_checked_in_del_btn_ = -1;
+        crt_checked_out_add_btn_ = -1;
+        crt_checked_out_del_btn_ = -1;
+        update();
+        event->accept();
+        return;
+    }
+
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
@@ -282,61 +367,71 @@ void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
         }
     }
 
-    crt_hovered_in_add_btn_ = -1;
-    crt_hovered_in_del_btn_ = -1;
-    crt_hovered_out_add_btn_ = -1;
-    crt_hovered_out_del_btn_ = -1;
-    if (geometry_->components().enable_in_port_add_btn)
+    //只有动态端口是才校验其相关属性
+    if (!is_immutable_port_)
     {
-        for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
-        {
-            const auto& in_port = geometry_->components().in_ports[i];
-            if (in_port.port_add_btn_rect.contains(pos))
-            {
-                crt_hovered_in_add_btn_ = (int)i;
-                update();
-                return;
-            }
-        }
-        if (geometry_->components().enable_in_port_del_btn)
+        is_immutable_port_ = false;
+        crt_hovered_in_add_btn_ = -1;
+        crt_hovered_in_del_btn_ = -1;
+        crt_hovered_out_add_btn_ = -1;
+        crt_hovered_out_del_btn_ = -1;
+        if (geometry_->components().enable_in_port_add_btn)
         {
             for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
             {
                 const auto& in_port = geometry_->components().in_ports[i];
-                if (in_port.port_del_btn_rect.contains(pos))
+                if (in_port.port_add_btn_rect.contains(pos))
                 {
-                    crt_hovered_in_del_btn_ = (int)i;
+                    crt_hovered_in_add_btn_ = (int)i;
+                    is_hovered_port_btn_ = true;
                     update();
                     return;
                 }
             }
-        }
-    }
-    if (geometry_->components().enable_out_port_add_btn)
-    {
-        for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
-        {
-            const auto& out_port = geometry_->components().out_ports[i];
-            if (out_port.port_add_btn_rect.contains(pos))
+            if (geometry_->components().enable_in_port_del_btn)
             {
-                crt_hovered_out_add_btn_ = (int)i;
-                update();
-                return;
+                for (size_t i = 0; i < geometry_->components().in_ports.size(); ++i)
+                {
+                    const auto& in_port = geometry_->components().in_ports[i];
+                    if ((data_->inputs[i].port_state == PortStatus::Removable) && in_port.port_del_btn_rect.contains(pos))
+                    {
+                        crt_hovered_in_del_btn_ = (int)i;
+                        is_hovered_port_btn_ = true;
+                        update();
+                        return;
+                    }
+                }
             }
         }
-        if (geometry_->components().enable_out_port_del_btn)
+        if (geometry_->components().enable_out_port_add_btn)
         {
             for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
             {
                 const auto& out_port = geometry_->components().out_ports[i];
-                if (out_port.port_del_btn_rect.contains(pos))
+                if (out_port.port_add_btn_rect.contains(pos))
                 {
-                    crt_hovered_out_del_btn_ = (int)i;
+                    crt_hovered_out_add_btn_ = (int)i;
+                    is_hovered_port_btn_ = true;
                     update();
                     return;
                 }
             }
+            if (geometry_->components().enable_out_port_del_btn)
+            {
+                for (size_t i = 0; i < geometry_->components().out_ports.size(); ++i)
+                {
+                    const auto& out_port = geometry_->components().out_ports[i];
+                    if ((data_->outputs[i].port_state == PortStatus::Removable) && out_port.port_del_btn_rect.contains(pos))
+                    {
+                        crt_hovered_out_del_btn_ = (int)i;
+                        is_hovered_port_btn_ = true;
+                        update();
+                        return;
+                    }
+                }
+            }
         }
+        update();
     }
 
     //QGraphicsItem::hoverMoveEvent(event);
@@ -345,6 +440,7 @@ void NodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(z_value_);
     is_hovered_ = false;
+    is_hovered_port_btn_ = false;
     crt_hovered_in_add_btn_ = -1;
     crt_hovered_in_del_btn_ = -1;
     crt_hovered_out_add_btn_ = -1;

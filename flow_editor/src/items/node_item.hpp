@@ -53,10 +53,18 @@ private:
     bool is_hovered_ = false;
     bool is_hovered_btn_ = false;
     bool is_checked_btn_ = false;
+    //动态端口按钮状态
+    bool is_immutable_port_ = true; //是否为固定端口
+    bool is_hovered_port_btn_ = false;
     int crt_hovered_in_add_btn_ = -1;
     int crt_hovered_in_del_btn_ = -1;
     int crt_hovered_out_add_btn_ = -1;
     int crt_hovered_out_del_btn_ = -1;
+    bool is_checked_port_btn_ = false;
+    int crt_checked_in_add_btn_ = -1;
+    int crt_checked_in_del_btn_ = -1;
+    int crt_checked_out_add_btn_ = -1;
+    int crt_checked_out_del_btn_ = -1;
 };
 
 } //namespace fe
