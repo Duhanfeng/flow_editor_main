@@ -61,14 +61,6 @@ set(PROJECT_SOURCES
         src/items/painter/out_node_painter.hpp
         src/items/painter/out_node_painter.cxx
 )
-# 添加rcc
-if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    message(qt6)
-    qt_add_resources(PROJECT_SOURCES ${CMAKE_SOURCE_DIR}/data/rcc/font.qrc)
-else ()
-    message(qt5)
-    qt5_add_resources(PROJECT_SOURCES ${CMAKE_SOURCE_DIR}/data/rcc/font.qrc)
-endif ()
 
 # 将源代码添加到此项目的可执行文件。
 if (BUILD_RS_SHARED_LIBS)
